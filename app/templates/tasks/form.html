@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Taak bewerken' if task else 'Nieuwe taak' }} - Productivity Suite{% endblock %}
+{% block content %}
+<h2>{{ 'Taak bewerken' if task else 'Nieuwe taak' }}</h2>
+<form method="post" action="{{ '/tasks/' ~ task.id if task else '/tasks' }}" style="max-width:480px">
+  <div class="field">
+    <label for="title">Titel</label>
+    <input type="text" id="title" name="title" required value="{{ task.title if task else '' }}">
+  </div>
+  <div class="field">
+    <label for="description">Beschrijving (Markdown ondersteund: **vet**, *cursief*, lijsten, `code`, [links](url))</label>
+    <textarea id="description" name="description" rows="6">{{ task.description if task else '' }}</textarea>
+  </div>
+  {% if task and task.description %}
+  <div class="field">
+    <label>Voorbeeld</label>
+    <div class="markdown-preview">{{ task.description|markdown|safe }}</div>
+  </div>
+  {% endif %}
+  <div class="field">
+    <label for="deadline">Deadline</label>
+    <input type="date" id="deadline" name="deadline" value="{{ task.deadline.isoformat() if task and task.deadline else '' }}">
+  </div>
+  {% if task %}
+  <div class="field">
+    <label for="status_value">Status</label>
+    <select id="status_value" name="status_value">
+      {% for s in ["todo", "in_progress", "done"] %}
+      <option value="{{ s }}" {{ 'selected' if task.status.value == s }}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% endif %}
+  <div class="field">
+    <label for="tags">Tags (komma-gescheiden)</label>
+    <input type="text" id="tags" name="tags" value="{{ task.tags|map(attribute='name')|join(', ') if task else '' }}">
+  </div>
+  <button type="submit" class="btn">Opslaan</button>
+  <a href="/tasks" class="btn btn-secondary">Annuleren</a>
+</form>
+{% endblock %}

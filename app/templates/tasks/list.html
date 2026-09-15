@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Taken - Productivity Suite{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h2 style="margin:0">Taken{% if active_tag %} — tag: {{ active_tag }}{% endif %}</h2>
+  <a href="/tasks/new" class="btn">+ Nieuwe taak</a>
+</div>
+<table>
+  <thead>
+    <tr>
+      <th>Titel</th>
+      <th>Status</th>
+      <th>Deadline</th>
+      <th>Tags</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for task in tasks %}
+    <tr>
+      <td><a href="/tasks/{{ task.id }}/edit">{{ task.title }}</a></td>
+      <td>{{ task.status.value }}</td>
+      <td>
+        {% if task.deadline %}
+          {{ task.deadline.isoformat() }}
+          {% if task.deadline_overdue %}<span class="badge-danger">verlopen</span>
+          {% elif task.deadline_warning %}<span class="badge-warning">bijna deadline</span>{% endif %}
+        {% else %}—{% endif %}
+      </td>
+      <td>
+        {% for t in task.tags %}<a class="tag" href="/tasks?tag={{ t.name }}">{{ t.name }}</a>{% endfor %}
+      </td>
+      <td>
+        <form method="post" action="/tasks/{{ task.id }}/delete" onsubmit="return confirm('Taak verwijderen?')">
+          <button type="submit" class="btn btn-danger">Verwijder</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">Nog geen taken. Maak er één aan.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

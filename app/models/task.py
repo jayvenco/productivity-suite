@@ -1,0 +1,52 @@
+from __future__ import annotations
+
+import enum
+from datetime import date, datetime
+
+from sqlalchemy import Date, DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.sql import func
+
+from app.database import Base
+from app.models.tag import task_tags
+
+
+class TaskStatus(str, enum.Enum):
+    TODO = "todo"
+    IN_PROGRESS = "in_progress"
+    DONE = "done"
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[TaskStatus] = mapped_column(Enum(TaskStatus), default=TaskStatus.TODO)
+    deadline: Mapped[date | None] = mapped_column(Date, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    tags: Mapped[list["Tag"]] = relationship(  # noqa: F821
+        "Tag", secondary=task_tags, back_populates="tasks"
+    )
+    # pomodoro_sessions relationship wordt toegevoegd in Fase 2 samen met PomodoroSession model.
+
+    @property
+    def days_until_deadline(self) -> int | None:
+        if self.deadline is None:
+            return None
+        return (self.deadline - date.today()).days
+
+    @property
+    def deadline_warning(self) -> bool:
+        """True als de deadline binnen 3 dagen valt (en nog niet voorbij is)."""
+        days = self.days_until_deadline
+        return days is not None and 0 <= days <= 3
+
+    @property
+    def deadline_overdue(self) -> bool:
+        days = self.days_until_deadline
+        return days is not None and days < 0

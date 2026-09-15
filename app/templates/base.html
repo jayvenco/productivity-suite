@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="nl" data-theme="{{ user.theme if user else 'dracula' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Productivity Suite{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/themes/dracula.css">
+  <link rel="stylesheet" href="/static/css/themes/one-dark-pro.css">
+  <link rel="stylesheet" href="/static/css/themes/nord.css">
+  <link rel="stylesheet" href="/static/css/app.css">
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
+</head>
+<body>
+  {% if user %}
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">Productivity Suite</div>
+      <a href="/tasks" class="{{ 'active' if request.url.path.startswith('/tasks') }}">Taken</a>
+      <a href="/kanban" class="{{ 'active' if request.url.path.startswith('/kanban') }}">Kanban</a>
+      <a href="#" class="disabled" title="Komt in Fase 2">Kalender</a>
+      <a href="#" class="disabled" title="Komt in Fase 3">Notities</a>
+      <a href="#" class="disabled" title="Komt in Fase 3">Snippets</a>
+      <div class="spacer"></div>
+      <div class="theme-switcher">
+        {% for theme in ["dracula", "one-dark-pro", "nord"] %}
+        <form method="post" action="/settings/theme">
+          <input type="hidden" name="theme" value="{{ theme }}">
+          <input type="hidden" name="redirect_to" value="{{ request.url.path }}">
+          <button type="submit" class="theme-swatch-{{ theme }}" title="{{ theme }}"></button>
+        </form>
+        {% endfor %}
+      </div>
+      <form method="post" action="/logout">
+        <button type="submit" class="btn btn-secondary" style="width:100%">Uitloggen</button>
+      </form>
+    </aside>
+    <main class="main">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  {% else %}
+    {% block content_anon %}{% endblock %}
+  {% endif %}
+</body>
+</html>

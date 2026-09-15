@@ -1,0 +1,20 @@
+from __future__ import annotations
+
+from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
+
+from app.config import settings
+
+_serializer = URLSafeTimedSerializer(settings.secret_key, salt="ps-session")
+
+
+def create_session_token(user_id: int) -> str:
+    return _serializer.dumps({"user_id": user_id})
+
+
+def read_session_token(token: str) -> int | None:
+    """Geeft user_id terug, of None als het token ontbreekt/verlopen/ongeldig is."""
+    try:
+        data = _serializer.loads(token, max_age=settings.session_max_age_seconds)
+    except (BadSignature, SignatureExpired):
+        return None
+    return data.get("user_id")

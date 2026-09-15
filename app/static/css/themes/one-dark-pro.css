@@ -1,0 +1,14 @@
+:root[data-theme="one-dark-pro"] {
+  --bg: #282c34;
+  --bg-elevated: #2f333d;
+  --bg-hover: #383e4a;
+  --border: #3e4451;
+  --text: #abb2bf;
+  --text-muted: #7a828e;
+  --accent: #61afef;
+  --accent-text: #282c34;
+  --success: #98c379;
+  --warning: #e5c07b;
+  --danger: #e06c75;
+  --link: #56b6c2;
+}

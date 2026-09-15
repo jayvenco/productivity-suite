@@ -1,0 +1,14 @@
+:root[data-theme="nord"] {
+  --bg: #2e3440;
+  --bg-elevated: #3b4252;
+  --bg-hover: #434c5e;
+  --border: #4c566a;
+  --text: #eceff4;
+  --text-muted: #a3accb;
+  --accent: #88c0d0;
+  --accent-text: #2e3440;
+  --success: #a3be8c;
+  --warning: #ebcb8b;
+  --danger: #bf616a;
+  --link: #81a1c1;
+}
