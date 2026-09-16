@@ -15,6 +15,14 @@ from app.templating import templates
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
+_SORT_OPTIONS = {
+    "deadline": (Task.priority.desc(), Task.deadline.is_(None), Task.deadline, Task.created_at.desc()),
+    "title": (Task.title.asc(),),
+    "priority": (Task.priority.desc(), Task.title.asc()),
+    "status": (Task.status.asc(), Task.title.asc()),
+}
+_GEEN_TAG_LABEL = "Zonder tag"
+
 
 def _get_task_or_404(db: Session, task_id: int, user_id: int) -> Task:
     task = (
@@ -33,22 +41,46 @@ def list_tasks(
     request: Request,
     tag: str | None = None,
     status_filter: str | None = None,
+    sort: str = "deadline",
+    group_by: str = "none",
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
+    sort = sort if sort in _SORT_OPTIONS else "deadline"
+
     query = db.query(Task).options(selectinload(Task.tags)).filter(Task.user_id == user.id)
     if tag:
         query = query.filter(Task.tags.any(name=tag))
     if status_filter:
         query = query.filter(Task.status == status_filter)
-    tasks = query.order_by(
-        Task.priority.desc(), Task.deadline.is_(None), Task.deadline, Task.created_at.desc()
-    ).all()
+    tasks = query.order_by(*_SORT_OPTIONS[sort]).all()
+
+    groups: list[tuple[str, list[Task]]] | None = None
+    if group_by == "tag":
+        by_tag: dict[str, list[Task]] = {}
+        untagged: list[Task] = []
+        for task in tasks:
+            if not task.tags:
+                untagged.append(task)
+            for t in task.tags:
+                by_tag.setdefault(t.name, []).append(task)
+        groups = [(name, by_tag[name]) for name in sorted(by_tag)]
+        if untagged:
+            groups.append((_GEEN_TAG_LABEL, untagged))
 
     return templates.TemplateResponse(
         request,
         "tasks/list.html",
-        {"user": user, "tasks": tasks, "statuses": list(TaskStatus), "active_tag": tag},
+        {
+            "user": user,
+            "tasks": tasks,
+            "groups": groups,
+            "statuses": list(TaskStatus),
+            "active_tag": tag,
+            "active_status": status_filter,
+            "sort": sort,
+            "group_by": group_by,
+        },
     )
 
 

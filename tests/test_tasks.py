@@ -1,3 +1,4 @@
+import re
 from datetime import date, timedelta
 
 
@@ -42,3 +43,41 @@ def test_deadline_bar_color_present_for_near_deadline(logged_in_client):
     listing = logged_in_client.get("/tasks").text
     assert "deadline-bar" in listing
     assert "rgb(" in listing
+
+
+def test_sort_by_title(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Zebra", "description": "", "deadline": "", "tags": ""})
+    logged_in_client.post("/tasks", data={"title": "Aap", "description": "", "deadline": "", "tags": ""})
+
+    listing = logged_in_client.get("/tasks?sort=title").text
+    assert listing.index("Aap") < listing.index("Zebra")
+
+
+def test_group_by_tag_creates_group_headings(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Werktaak", "description": "", "deadline": "", "tags": "werk"}
+    )
+    logged_in_client.post(
+        "/tasks", data={"title": "Privetaak", "description": "", "deadline": "", "tags": "prive"}
+    )
+    logged_in_client.post(
+        "/tasks", data={"title": "Losse taak", "description": "", "deadline": "", "tags": ""}
+    )
+
+    listing = logged_in_client.get("/tasks?group_by=tag").text
+    assert "task-group-heading" in listing
+    assert "Werktaak" in listing
+    assert "Privetaak" in listing
+    assert "Zonder tag" in listing
+    assert "Losse taak" in listing
+
+
+def test_each_tag_gets_a_distinct_color(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Kleurtest", "description": "", "deadline": "", "tags": "alfa, beta"}
+    )
+    listing = logged_in_client.get("/tasks").text
+    assert "hsl(" in listing
+    # Twee verschillende tags -> minstens twee verschillende hue-waarden in de badges.
+    hues = set(re.findall(r"hsl\((\d+),", listing))
+    assert len(hues) >= 2

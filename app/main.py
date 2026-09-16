@@ -11,12 +11,14 @@ from app.models.user import User
 from app.routers import account, auth, kanban, pomodoro, settings as settings_router, tasks
 from app.services.migrate import run_lightweight_migrations
 from app.services.seed import seed_default_user_and_board
+from app.services.tags import backfill_tag_colors
 
 Base.metadata.create_all(bind=engine)
 run_lightweight_migrations(engine)
 
 with SessionLocal() as db:
     seed_default_user_and_board(db)
+    backfill_tag_colors(db)
 
 app = FastAPI(title=settings.app_name)
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "app" / "static")), name="static")

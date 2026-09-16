@@ -18,7 +18,11 @@ Gebouwd:
   krijgen (kleurenpicker, zichtbaar als gekleurde rand links op de kaart)
 - Checklists in kaartbeschrijvingen (`- [ ] item`) — aanklikbaar, direct persistent; een
   "+ Checklist-item"-knop voegt de syntax voor je toe
-- Gedeeld tag-systeem (taken + kanban-kaarten), filteren op tag
+- Gedeeld tag-systeem (taken + kanban-kaarten): elke tag krijgt automatisch een eigen,
+  stabiele kleur; filteren op tag, **sorteren** (deadline/titel/prioriteit/status) en
+  **groeperen op tag** (dat is hier ook het "project"-alternatief — er is geen apart
+  projectveld, tags dienen als project/categorie) op de takenlijst. Een taak met tags krijgt
+  een lichte kleurtint op de rij, gebaseerd op de eerste tag
 - Taken hebben een **prioriteitsvinkje** (★, sorteert bovenaan de takenlijst) en een dunne
   **deadline-gradiëntbalk** onder de deadline-datum (halve breedte van die cel) die geleidelijk
   van antraciet naar donkeroranje kleurt naarmate de deadline nadert of al verstreken is
@@ -94,7 +98,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    → controleer dat de "bijna deadline"-badge verschijnt op de takenlijst én in het
    "Komende deadlines"-widgetje in de sidebar.
 3. Taak bewerken en status wijzigen naar "done".
-4. Op een tag klikken in de takenlijst → filtert de lijst.
+4. Op een tag klikken in de takenlijst → filtert de lijst. Taken aanmaken met verschillende
+   tags → controleer dat elke tag een eigen kleur heeft en dat de taakrij een lichte tint van
+   die kleur krijgt. Sorteren op titel/prioriteit/status en groeperen op tag uitproberen.
 5. Naar Kanban gaan, een swimlane toevoegen (krijgt automatisch eigen Todo/In Progress/Done)
    en daar een eigen kolom aan toevoegen → controleer dat die kolom alleen in díe swimlane
    verschijnt. Een kaart aanmaken met een checklist (`- [ ] item`) → klik een checklist-item
@@ -129,6 +135,16 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   "+ Checklist-item"-knop bij de beschrijving voegt de `- [ ] `-syntax voor je toe (je hoeft
    'm niet zelf te typen), en de herkenning is tolerant voor ontbrekende spaties
   (`-[ ]item` werkt ook).
+- **Tag-kleuren**: elke tag krijgt bij aanmaak een stabiele `hsl(...)`-kleur, afgeleid van een
+  md5-hash van de naam (dus altijd dezelfde kleur voor dezelfde tagnaam, ook na een herstart —
+  Python's ingebouwde `hash()` is hiervoor niet bruikbaar want varieert per proces). Tags die
+  vóór deze functie zijn aangemaakt (met de oude vaste grijstint) worden bij het opstarten
+  eenmalig omgezet (`app/services/tags.py::backfill_tag_colors`). De rijtint in de takenlijst
+  gebruikt dezelfde tint als een transparante hsla-laag, zodat die in elk thema (licht of
+  donker) goed leesbaar blijft.
+- **Groeperen op tag**: een taak met meerdere tags verschijnt in elke bijbehorende groep
+  (geen kunstmatige keuze voor "de hoofdtag"); taken zonder tag komen in een aparte
+  "Zonder tag"-groep aan het eind.
 - **Pomodoro** bewaart alleen start-tijd + geplande duur per sessie; de countdown-ring wordt
   client-side berekend zodat een pagina-refresh niets verliest. Er is bewust geen pauzeknop
   (alleen start/stop) om de tijdsberekening simpel te houden.

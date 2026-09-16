@@ -1,8 +1,19 @@
 from __future__ import annotations
 
+import hashlib
+
 from sqlalchemy.orm import Session
 
 from app.models.tag import Tag
+
+
+def generate_tag_color(name: str) -> str:
+    """Geeft elke tagnaam een eigen, stabiele kleur (dezelfde naam -> altijd dezelfde
+    kleur, ook na een herstart). Gebaseerd op een hash i.p.v. Python's ingebouwde
+    hash() omdat die per proces varieert (hash-randomisatie)."""
+    digest = hashlib.md5(name.strip().lower().encode()).hexdigest()
+    hue = int(digest[:8], 16) % 360
+    return f"hsl({hue}, 65%, 50%)"
 
 
 def resolve_tags(db: Session, raw: str) -> list[Tag]:
@@ -14,9 +25,23 @@ def resolve_tags(db: Session, raw: str) -> list[Tag]:
     existing = db.query(Tag).filter(Tag.name.in_(names)).all()
     existing_names = {tag.name for tag in existing}
 
-    new_tags = [Tag(name=name) for name in names if name not in existing_names]
+    new_tags = [Tag(name=name, color=generate_tag_color(name)) for name in names if name not in existing_names]
     db.add_all(new_tags)
     if new_tags:
         db.flush()
 
     return existing + new_tags
+
+
+_OLD_DEFAULT_COLOR = "#6c7086"
+
+
+def backfill_tag_colors(db: Session) -> None:
+    """Eenmalige opschoning voor tags die zijn aangemaakt vóórdat elke tag een eigen
+    kleur kreeg -- geeft ze alsnog een stabiele, onderscheidende kleur."""
+    stale_tags = db.query(Tag).filter(Tag.color == _OLD_DEFAULT_COLOR).all()
+    if not stale_tags:
+        return
+    for tag in stale_tags:
+        tag.color = generate_tag_color(tag.name)
+    db.commit()

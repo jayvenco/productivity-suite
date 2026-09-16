@@ -202,6 +202,38 @@ th, td {
   margin-bottom: 12px;
 }
 
+.task-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.task-controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.task-controls select {
+  width: auto;
+}
+
+.task-group-heading {
+  margin: 18px 0 6px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.task-group-heading:first-of-type {
+  margin-top: 0;
+}
+
 .login-page {
   display: flex;
   align-items: center;

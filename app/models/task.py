@@ -74,6 +74,18 @@ class Task(Base):
         return f"rgb({r}, {g}, {b})"
 
     @property
+    def row_tint_style(self) -> str:
+        """Lichte tint van de kleur van de eerste tag, voor de achtergrond van de
+        taakrij in de takenlijst. Werkt in elk thema omdat het een transparante
+        hsla-laag is i.p.v. een vaste (licht/donker) kleur."""
+        if not self.tags:
+            return ""
+        hue = self.tags[0].hue
+        if hue is None:
+            return ""
+        return f"background-color: hsla({hue}, 60%, 50%, 0.08);"
+
+    @property
     def completed_work_sessions(self) -> list["PomodoroSession"]:  # noqa: F821
         from app.models.pomodoro import PomodoroPhase, PomodoroStatus
 

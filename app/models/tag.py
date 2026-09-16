@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import re
+
 from sqlalchemy import Column, ForeignKey, String, Table
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+_HSL_HUE_RE = re.compile(r"hsl\(\s*(\d+)")
 
 # Expliciete association-tabellen per taggable type (i.p.v. polymorfe FK) --
 # simpeler met SQLAlchemy en houdt referentiele integriteit per tabel.
@@ -29,7 +33,7 @@ class Tag(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(50), unique=True, index=True)
-    color: Mapped[str] = mapped_column(String(20), default="#6c7086")
+    color: Mapped[str] = mapped_column(String(30), default="#6c7086")
 
     tasks: Mapped[list["Task"]] = relationship(  # noqa: F821
         "Task", secondary=task_tags, back_populates="tags"
@@ -37,3 +41,17 @@ class Tag(Base):
     cards: Mapped[list["KanbanCard"]] = relationship(  # noqa: F821
         "KanbanCard", secondary=card_tags, back_populates="tags"
     )
+
+    @property
+    def hue(self) -> int | None:
+        """Tint (0-359) uit de opgeslagen 'hsl(H, S%, L%)'-kleur, of None als de
+        kleur niet in dat formaat staat (bv. een oude/handmatige hex-waarde)."""
+        match = _HSL_HUE_RE.match(self.color or "")
+        return int(match.group(1)) if match else None
+
+    @property
+    def badge_style(self) -> str:
+        """Stijl voor het tag-label zelf: een duidelijk gekleurde rand + lichte vulling."""
+        if self.hue is None:
+            return ""
+        return f"background-color: hsla({self.hue}, 60%, 50%, 0.25); border-color: hsl({self.hue}, 55%, 45%);"
