@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import re
 
-CHECKLIST_LINE = re.compile(r"^(\s*[-*]\s+)\[([ xX])\](\s+.*)$")
+# Soepel genoeg om ook "- [ ]item" (zonder spatie na de haak) of "-[ ] item"
+# (zonder spatie na het streepje) te herkennen -- niet iedereen typt de exacte
+# markdown-syntax foutloos.
+CHECKLIST_LINE = re.compile(r"^(\s*[-*]\s*)\[([ xX])\]\s*(.*)$")
 
 
 def toggle_checklist_line(description: str, line_index: int) -> str:
@@ -17,7 +20,7 @@ def toggle_checklist_line(description: str, line_index: int) -> str:
 
     prefix, mark, rest = match.groups()
     new_mark = " " if mark.lower() == "x" else "x"
-    lines[line_index] = f"{prefix}[{new_mark}]{rest}"
+    lines[line_index] = f"{prefix}[{new_mark}] {rest}"
     return "\n".join(lines)
 
 

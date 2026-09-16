@@ -26,6 +26,7 @@
             <form method="post" action="/kanban/cards/{{ card.id }}" class="card-edit-form" id="card-edit-{{ card.id }}" hidden>
               <input type="text" name="title" value="{{ card.title }}" required>
               <textarea name="description" rows="3">{{ card.description }}</textarea>
+              <button type="button" class="btn btn-secondary add-checklist-item-btn">+ Checklist-item</button>
               <input type="text" name="tags" placeholder="Tags (komma-gescheiden)" value="{{ card.tags|map(attribute='name')|join(', ') }}">
               <div class="card-color-row">
                 <input type="color" name="color" value="{{ card.color or '#6c7086' }}">
@@ -42,7 +43,8 @@
             <input type="hidden" name="column_id" value="{{ column.id }}">
             <input type="hidden" name="swimlane_id" value="{{ swimlane.id }}">
             <input type="text" name="title" placeholder="Titel" required>
-            <textarea name="description" placeholder="Beschrijving, checklist met - [ ] item" rows="2"></textarea>
+            <textarea name="description" placeholder="Beschrijving" rows="2"></textarea>
+            <button type="button" class="btn btn-secondary add-checklist-item-btn">+ Checklist-item</button>
             <input type="text" name="tags" placeholder="Tags (komma-gescheiden)">
             <button type="submit" class="btn">Toevoegen</button>
           </form>

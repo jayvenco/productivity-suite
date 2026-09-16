@@ -82,6 +82,22 @@ document.addEventListener("DOMContentLoaded", () => {
     if (form) form.hidden = !form.hidden;
   });
 
+  // "+ Checklist-item": voegt een lege "- [ ] "-regel toe aan de beschrijving,
+  // zodat je de markdown-syntax niet zelf hoeft te typen.
+  board.addEventListener("click", (event) => {
+    const button = event.target.closest(".add-checklist-item-btn");
+    if (!button) return;
+    event.preventDefault();
+
+    const textarea = button.closest("form").querySelector("textarea[name=description]");
+    if (!textarea) return;
+
+    const needsNewline = textarea.value.length > 0 && !textarea.value.endsWith("\n");
+    textarea.value += (needsNewline ? "\n" : "") + "- [ ] ";
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+  });
+
   function getDragAfterElement(container, y) {
     const cards = [...container.querySelectorAll(".kanban-card:not(.dragging)")];
     return cards.reduce(

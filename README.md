@@ -16,10 +16,11 @@ Gebouwd:
   tussen kolommen binnen een swimlane, kaarten los van taken
 - Kanban-kaarten zijn **bewerkbaar** (titel, beschrijving, tags) en kunnen een **accentkleur**
   krijgen (kleurenpicker, zichtbaar als gekleurde rand links op de kaart)
-- Checklists in kaartbeschrijvingen (`- [ ] item`) — aanklikbaar, direct persistent
+- Checklists in kaartbeschrijvingen (`- [ ] item`) — aanklikbaar, direct persistent; een
+  "+ Checklist-item"-knop voegt de syntax voor je toe
 - Gedeeld tag-systeem (taken + kanban-kaarten), filteren op tag
 - Taken hebben een **prioriteitsvinkje** (★, sorteert bovenaan de takenlijst) en een dunne
-  **deadline-gradiëntbalk** onder de deadline-datum (even breed als die cel) die geleidelijk
+  **deadline-gradiëntbalk** onder de deadline-datum (halve breedte van die cel) die geleidelijk
   van antraciet naar donkeroranje kleurt naarmate de deadline nadert of al verstreken is
 - **Pomodoro-timer** in de sidebar: instelbare werk-/pauze-duur, optioneel gekoppeld aan
   een taak, live aftellende ring-animatie, automatische overgang werk → pauze, geschiedenis
@@ -124,7 +125,10 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   onafhankelijk aan te passen.
 - **Checklists** op kanban-kaarten zijn gewoon markdown (`- [ ] item`) in de bestaande
   beschrijving — geen apart datamodel; een klik op de checkbox schakelt de regel in de
-  opgeslagen tekst om via een klein endpoint (`/kanban/cards/{id}/checklist-toggle`).
+  opgeslagen tekst om via een klein endpoint (`/kanban/cards/{id}/checklist-toggle`). Een
+  "+ Checklist-item"-knop bij de beschrijving voegt de `- [ ] `-syntax voor je toe (je hoeft
+   'm niet zelf te typen), en de herkenning is tolerant voor ontbrekende spaties
+  (`-[ ]item` werkt ook).
 - **Pomodoro** bewaart alleen start-tijd + geplande duur per sessie; de countdown-ring wordt
   client-side berekend zodat een pagina-refresh niets verliest. Er is bewust geen pauzeknop
   (alleen start/stop) om de tijdsberekening simpel te houden.
