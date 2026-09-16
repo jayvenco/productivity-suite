@@ -4,8 +4,8 @@ import tempfile
 import pytest
 
 _tmp_dir = tempfile.mkdtemp()
+os.environ["DATA_DIR"] = _tmp_dir
 os.environ["DATABASE_URL"] = f"sqlite:///{_tmp_dir}/test.db"
-os.environ["SECRET_KEY"] = "test-secret"
 os.environ["DEFAULT_USERNAME"] = "admin"
 os.environ["DEFAULT_PASSWORD"] = "testpass"
 

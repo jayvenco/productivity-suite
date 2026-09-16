@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Account - Productivity Suite{% endblock %}
+{% block content %}
+<h2>Account</h2>
+{% if error %}<div class="error">{{ error }}</div>{% endif %}
+{% if success %}<div class="field" style="color:var(--success)">{{ success }}</div>{% endif %}
+{% if user.using_default_password %}
+<div class="badge-warning" style="display:inline-block;margin-bottom:12px">
+  Je gebruikt nog het standaard-wachtwoord. Wijzig het hieronder.
+</div>
+{% endif %}
+<form method="post" action="/account" style="max-width:360px">
+  <div class="field">
+    <label for="current_password">Huidig wachtwoord</label>
+    <input type="password" id="current_password" name="current_password" required>
+  </div>
+  <div class="field">
+    <label for="new_username">Gebruikersnaam</label>
+    <input type="text" id="new_username" name="new_username" required value="{{ user.username }}">
+  </div>
+  <div class="field">
+    <label for="new_password">Nieuw wachtwoord (leeg laten om niet te wijzigen)</label>
+    <input type="password" id="new_password" name="new_password">
+  </div>
+  <div class="field">
+    <label for="new_password_confirm">Nieuw wachtwoord bevestigen</label>
+    <input type="password" id="new_password_confirm" name="new_password_confirm">
+  </div>
+  <button type="submit" class="btn">Opslaan</button>
+</form>
+{% endblock %}

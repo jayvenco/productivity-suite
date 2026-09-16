@@ -18,18 +18,25 @@ Nog niet gebouwd (latere fasen, zie build-prompt): Pomodoro-timer, kalenderweerg
 deadline-waarschuwing, swimlane-UI, notities-module, code snippets, resterende 7 thema's,
 CI/CD, backup/export-import, spraaknotities, LLM-koppeling.
 
+## Configuratie
+
+Geen `.env`-bestand of omgevingsvariabelen nodig. Bij de eerste start:
+- wordt een sessie-secret-key automatisch gegenereerd en opgeslagen in `data/.secret_key`
+  (blijft geldig na herstarts/updates, zolang het data-volume bewaard blijft);
+- wordt een seed-account aangemaakt: gebruikersnaam `admin`, wachtwoord `admin`.
+
+Na de eerste login toont de app een waarschuwing zolang je het standaardwachtwoord
+gebruikt. Wijzig gebruikersnaam/wachtwoord via de **Account**-pagina in de sidebar.
+
 ## Lokaal draaien
 
 Met Docker (aanbevolen):
 
 ```bash
-cp .env.example .env   # pas SECRET_KEY / DEFAULT_PASSWORD aan
 docker compose up --build
 ```
 
-App draait op http://localhost:8000. Standaard login: `admin` / wachtwoord uit `.env`
-(`changeme` als je niets instelt — verander dit meteen na de eerste keer inloggen via
-een toekomstige "wachtwoord wijzigen"-functie, die nog niet in Fase 1 zit).
+App draait op http://localhost:8000. Standaard login: `admin` / `admin`.
 
 Zonder Docker (lokale Python 3.12 venv):
 
@@ -37,6 +44,25 @@ Zonder Docker (lokale Python 3.12 venv):
 python3.12 -m venv .venv
 ./.venv/bin/pip install -r requirements-dev.txt
 ./.venv/bin/uvicorn app.main:app --reload
+```
+
+## Installeren op Unraid
+
+```bash
+bash scripts/install-unraid.sh
+```
+
+Draai dit via SSH op de Unraid-server (of als "User Script"). Het script:
+1. clonet/update de code naar `/mnt/user/appdata/productivity-suite/src`;
+2. bouwt de Docker image lokaal (`docker build`);
+3. start/herstart de container `productivity-suite` op poort 8000, met de data
+   persistent in `/mnt/user/appdata/productivity-suite/data`.
+
+Opnieuw draaien = updaten naar de laatste commit op `main` zonder dataverlies.
+Instelbaar via omgevingsvariabelen bij het aanroepen, bv. andere poort:
+
+```bash
+HOST_PORT=8080 bash scripts/install-unraid.sh
 ```
 
 ## Tests
@@ -47,7 +73,9 @@ python3.12 -m venv .venv
 
 ## Handmatig te testen (Fase 1)
 
-1. Inloggen met het seed-account (`admin` / `changeme` of je eigen `.env`-waarden).
+1. Inloggen met het seed-account (`admin` / `admin`) → controleer dat de
+   standaardwachtwoord-waarschuwing verschijnt, wijzig het wachtwoord via Account en
+   controleer dat de waarschuwing verdwijnt.
 2. Nieuwe taak aanmaken met titel, beschrijving (markdown), deadline binnen 3 dagen en tags
    → controleer dat de "bijna deadline"-badge verschijnt op de takenlijst.
 3. Taak bewerken en status wijzigen naar "done".

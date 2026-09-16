@@ -1,26 +1,48 @@
 from __future__ import annotations
 
+import os
+import secrets
 from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
-DATA_DIR.mkdir(exist_ok=True)
+# Overrideable via DATA_DIR env var (bv. door tests) -- productie/Docker gebruikt gewoon
+# de default, geen configuratie nodig.
+DATA_DIR = Path(os.environ.get("DATA_DIR", BASE_DIR / "data"))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+SECRET_KEY_FILE = DATA_DIR / ".secret_key"
+
+
+def _load_or_create_secret_key() -> str:
+    """Genereert bij de allereerste start een willekeurige secret key en bewaart die
+    in het data-volume, zodat er geen .env of omgevingsvariabele nodig is en sessies
+    geldig blijven na een container-herstart/update."""
+    if SECRET_KEY_FILE.exists():
+        return SECRET_KEY_FILE.read_text().strip()
+
+    key = secrets.token_hex(32)
+    SECRET_KEY_FILE.write_text(key)
+    SECRET_KEY_FILE.chmod(0o600)
+    return key
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    # Geen env_file: alle configuratie werkt met ingebouwde defaults zodat de app
+    # zonder .env of extra omgevingsvariabelen draait (handig voor bv. Unraid).
+    model_config = SettingsConfigDict()
 
     app_name: str = "Productivity Suite"
     database_url: str = f"sqlite:///{DATA_DIR / 'app.db'}"
-    secret_key: str = "change-me-in-production"
+    secret_key: str = ""  # wordt hieronder ingevuld vanuit _load_or_create_secret_key()
     session_cookie_name: str = "ps_session"
     session_max_age_seconds: int = 60 * 60 * 24 * 30  # 30 dagen
 
-    # Single-user auth: inloggegevens worden bij eerste start geseed als er nog geen user is.
+    # Single-user auth: seed-account met vaste standaard-inloggegevens. Wachtwoord
+    # wijzigen kan via de "Account"-pagina in de app zelf.
     default_username: str = "admin"
-    default_password: str = "changeme"
+    default_password: str = "admin"
 
     default_theme: str = "dracula"
 
@@ -29,3 +51,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+settings.secret_key = _load_or_create_secret_key()
