@@ -99,6 +99,30 @@ def create_card(
     return RedirectResponse("/kanban", status_code=303)
 
 
+@router.post("/cards/{card_id}")
+def update_card(
+    card_id: int,
+    title: str = Form(...),
+    description: str = Form(""),
+    tags: str = Form(""),
+    color: str = Form(""),
+    clear_color: bool = Form(False),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    board = _get_board_or_404(db, user.id)
+    card = db.get(KanbanCard, card_id)
+    if card is None or card.board_id != board.id:
+        raise HTTPException(status_code=404, detail="Kaart niet gevonden")
+
+    card.title = title.strip()
+    card.description = description
+    card.color = None if clear_color or not color else color
+    card.tags = resolve_tags(db, tags)
+    db.commit()
+    return RedirectResponse("/kanban", status_code=303)
+
+
 @router.post("/cards/{card_id}/move")
 def move_card(
     card_id: int,

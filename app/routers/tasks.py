@@ -41,7 +41,9 @@ def list_tasks(
         query = query.filter(Task.tags.any(name=tag))
     if status_filter:
         query = query.filter(Task.status == status_filter)
-    tasks = query.order_by(Task.deadline.is_(None), Task.deadline, Task.created_at.desc()).all()
+    tasks = query.order_by(
+        Task.priority.desc(), Task.deadline.is_(None), Task.deadline, Task.created_at.desc()
+    ).all()
 
     return templates.TemplateResponse(
         request,
@@ -84,6 +86,7 @@ def create_task(
     description: str = Form(""),
     deadline: str = Form(""),
     tags: str = Form(""),
+    priority: bool = Form(False),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -92,6 +95,7 @@ def create_task(
         title=title.strip(),
         description=description,
         deadline=date.fromisoformat(deadline) if deadline else None,
+        priority=priority,
     )
     task.tags = resolve_tags(db, tags)
     db.add(task)
@@ -113,6 +117,7 @@ def update_task(
     deadline: str = Form(""),
     status_value: str = Form(...),
     tags: str = Form(""),
+    priority: bool = Form(False),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -121,6 +126,7 @@ def update_task(
     task.description = description
     task.deadline = date.fromisoformat(deadline) if deadline else None
     task.status = TaskStatus(status_value)
+    task.priority = priority
     task.tags = resolve_tags(db, tags)
     db.commit()
     return RedirectResponse("/tasks", status_code=303)

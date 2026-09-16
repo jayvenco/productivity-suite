@@ -13,8 +13,13 @@ Gebouwd:
 - Sidebar-widget "Komende deadlines" (eerstvolgende 5 taken met deadline)
 - Kanban-bord met **swimlanes** (rijen) × kolommen (Todo/In Progress/Done), drag-and-drop
   tussen elke cel, kaarten los van taken
+- Kanban-kaarten zijn **bewerkbaar** (titel, beschrijving, tags) en kunnen een **accentkleur**
+  krijgen (kleurenpicker, zichtbaar als gekleurde rand links op de kaart)
 - Checklists in kaartbeschrijvingen (`- [ ] item`) — aanklikbaar, direct persistent
 - Gedeeld tag-systeem (taken + kanban-kaarten), filteren op tag
+- Taken hebben een **prioriteitsvinkje** (★, sorteert bovenaan de takenlijst) en een dunne
+  **deadline-gradiëntbalk** die geleidelijk van groen naar oranje/rood kleurt naarmate de
+  deadline nadert (of verstreken is)
 - **Pomodoro-timer** in de sidebar: instelbare werk-/pauze-duur, optioneel gekoppeld aan
   een taak, live aftellende ring-animatie, automatische overgang werk → pauze, geschiedenis
   zichtbaar op de taakpagina
@@ -90,7 +95,8 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 4. Op een tag klikken in de takenlijst → filtert de lijst.
 5. Naar Kanban gaan, een swimlane toevoegen en een kaart aanmaken met een checklist
    (`- [ ] item`) → klik een checklist-item aan en herlaad de pagina om te controleren dat
-   het aangevinkt blijft.
+   het aangevinkt blijft. Klik "Bewerken" op een kaart, geef 'm een titel/kleur/tags en
+   controleer dat de gekleurde rand verschijnt en blijft na herladen.
 6. Kaart verslepen naar een andere kolom/swimlane (drag-and-drop) → herlaad de pagina en
    controleer dat de cel-toewijzing bewaard is gebleven.
 7. Pomodoro-timer starten (kies eventueel een taak) → controleer de leeglopende ring, de
@@ -117,3 +123,10 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 - **Pomodoro** bewaart alleen start-tijd + geplande duur per sessie; de countdown-ring wordt
   client-side berekend zodat een pagina-refresh niets verliest. Er is bewust geen pauzeknop
   (alleen start/stop) om de tijdsberekening simpel te houden.
+- **Deadline-gradiëntbalk**: kleur wordt server-side berekend (`Task.urgency_color`) op basis
+  van een venster van 14 dagen — groen ver van de deadline, oranje dichtbij, rood bij een
+  verstreken deadline.
+- **Lichte, additive migraties** (`app/services/migrate.py`): nieuwe kolommen (zoals
+  `priority` en `color`) worden bij het opstarten toegevoegd aan een bestaande SQLite-database
+  als ze nog ontbreken, zodat een update op een al draaiende installatie (bv. Unraid) geen
+  data kwijtraakt. Geen Alembic voor deze schaal.

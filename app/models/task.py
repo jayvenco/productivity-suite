@@ -3,7 +3,7 @@ from __future__ import annotations
 import enum
 from datetime import date, datetime
 
-from sqlalchemy import Date, DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Enum, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -25,6 +25,7 @@ class Task(Base):
     title: Mapped[str] = mapped_column(String(200))
     description: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[TaskStatus] = mapped_column(Enum(TaskStatus), default=TaskStatus.TODO)
+    priority: Mapped[bool] = mapped_column(Boolean, default=False)
     deadline: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
@@ -52,6 +53,22 @@ class Task(Base):
     def deadline_overdue(self) -> bool:
         days = self.days_until_deadline
         return days is not None and days < 0
+
+    URGENCY_WINDOW_DAYS = 14
+
+    @property
+    def urgency_color(self) -> str | None:
+        """Kleur voor de dunne deadline-balk: groen ver van de deadline, geleidelijk
+        naar oranje richting de deadline, rood zodra de deadline voorbij is."""
+        days = self.days_until_deadline
+        if days is None:
+            return None
+        if days < 0:
+            return "hsl(0, 72%, 50%)"
+
+        fraction = max(0.0, min(1.0, (self.URGENCY_WINDOW_DAYS - days) / self.URGENCY_WINDOW_DAYS))
+        hue = 142 - fraction * 117  # 142 = groen, 25 = oranje
+        return f"hsl({hue:.0f}, 70%, 45%)"
 
     @property
     def completed_work_sessions(self) -> list["PomodoroSession"]:  # noqa: F821

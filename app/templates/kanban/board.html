@@ -15,15 +15,26 @@
   <div class="board-cell">
     <div class="card-list" data-column-id="{{ column.id }}" data-swimlane-id="{{ swimlane.id }}">
       {% for card in cards_by_cell.get((swimlane.id, column.id), []) %}
-      <div class="kanban-card" draggable="true" data-card-id="{{ card.id }}">
+      <div class="kanban-card" draggable="true" data-card-id="{{ card.id }}" {% if card.color %}style="border-left-color: {{ card.color }};"{% endif %}>
         <div class="card-title">{{ card.title }}</div>
         {% if card.description %}<div class="card-description">{{ card.description|checklist_html(card.id)|safe }}</div>{% endif %}
         {% for t in card.tags %}<span class="tag">{{ t.name }}</span>{% endfor %}
         <div class="card-actions">
+          <button type="button" class="card-edit-toggle" data-card-id="{{ card.id }}">Bewerken</button>
           <form method="post" action="/kanban/cards/{{ card.id }}/delete" onsubmit="return confirm('Kaart verwijderen?')">
             <button type="submit">Verwijder</button>
           </form>
         </div>
+        <form method="post" action="/kanban/cards/{{ card.id }}" class="card-edit-form" id="card-edit-{{ card.id }}" hidden>
+          <input type="text" name="title" value="{{ card.title }}" required>
+          <textarea name="description" rows="3">{{ card.description }}</textarea>
+          <input type="text" name="tags" placeholder="Tags (komma-gescheiden)" value="{{ card.tags|map(attribute='name')|join(', ') }}">
+          <div class="card-color-row">
+            <input type="color" name="color" value="{{ card.color or '#6c7086' }}">
+            <label><input type="checkbox" name="clear_color" value="true"> Geen kleur</label>
+          </div>
+          <button type="submit" class="btn">Opslaan</button>
+        </form>
       </div>
       {% endfor %}
     </div>

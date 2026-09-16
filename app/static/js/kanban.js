@@ -7,6 +7,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let draggedCard = null;
 
   board.addEventListener("dragstart", (event) => {
+    // Niet slepen als de gebruiker in het bewerk-formulier aan het typen/klikken is.
+    if (event.target.closest("input, textarea, button, select, label")) {
+      event.preventDefault();
+      return;
+    }
     const card = event.target.closest(".kanban-card");
     if (!card) return;
     draggedCard = card;
@@ -67,6 +72,14 @@ document.addEventListener("DOMContentLoaded", () => {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({ line_index: lineIndex }),
     });
+  });
+
+  // "Bewerken"-knop op een kaart klapt het edit-formulier open/dicht.
+  board.addEventListener("click", (event) => {
+    const toggle = event.target.closest(".card-edit-toggle");
+    if (!toggle) return;
+    const form = document.getElementById(`card-edit-${toggle.dataset.cardId}`);
+    if (form) form.hidden = !form.hidden;
   });
 
   function getDragAfterElement(container, y) {

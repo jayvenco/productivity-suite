@@ -163,6 +163,20 @@ th, td {
   margin-right: 4px;
 }
 
+.priority-star {
+  color: var(--warning);
+  margin-right: 2px;
+}
+
+.deadline-bar {
+  height: 3px;
+  border-radius: 2px;
+  margin-top: 5px;
+  max-width: 220px;
+  opacity: 0.9;
+  transition: background 0.3s ease;
+}
+
 .badge-warning {
   background: var(--warning);
   color: var(--bg);
@@ -296,6 +310,7 @@ th, td {
 .kanban-card {
   background: var(--bg);
   border: 1px solid var(--border);
+  border-left: 4px solid transparent;
   border-radius: 4px;
   padding: 6px 8px;
   cursor: grab;
@@ -330,6 +345,40 @@ th, td {
 
 .add-card-form input {
   margin-bottom: 4px;
+}
+
+.card-edit-form {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-edit-form[hidden] {
+  display: none;
+}
+
+.card-color-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.card-color-row input[type="color"] {
+  width: 32px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: none;
+}
+
+.card-color-row label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .markdown-preview {

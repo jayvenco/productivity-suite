@@ -18,7 +18,13 @@
   <tbody>
     {% for task in tasks %}
     <tr>
-      <td><a href="/tasks/{{ task.id }}/edit">{{ task.title }}</a></td>
+      <td>
+        <div>
+          {% if task.priority %}<span class="priority-star" title="Prioriteit">★</span>{% endif %}
+          <a href="/tasks/{{ task.id }}/edit">{{ task.title }}</a>
+        </div>
+        {% if task.urgency_color %}<div class="deadline-bar" style="background:{{ task.urgency_color }}"></div>{% endif %}
+      </td>
       <td>{{ task.status.value }}</td>
       <td>
         {% if task.deadline %}

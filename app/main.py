@@ -9,9 +9,11 @@ from app.config import BASE_DIR, settings
 from app.database import Base, SessionLocal, engine
 from app.models.user import User
 from app.routers import account, auth, kanban, pomodoro, settings as settings_router, tasks
+from app.services.migrate import run_lightweight_migrations
 from app.services.seed import seed_default_user_and_board
 
 Base.metadata.create_all(bind=engine)
+run_lightweight_migrations(engine)
 
 with SessionLocal() as db:
     seed_default_user_and_board(db)
