@@ -41,4 +41,4 @@ def test_deadline_bar_color_present_for_near_deadline(logged_in_client):
     )
     listing = logged_in_client.get("/tasks").text
     assert "deadline-bar" in listing
-    assert "hsl(" in listing
+    assert "rgb(" in listing

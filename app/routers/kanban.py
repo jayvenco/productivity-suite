@@ -9,6 +9,7 @@ from app.database import get_db
 from app.models.kanban import KanbanBoard, KanbanCard, KanbanColumn, KanbanSwimlane
 from app.models.user import User
 from app.services.checklist import toggle_checklist_line
+from app.services.seed import DEFAULT_COLUMNS
 from app.services.tags import resolve_tags
 from app.templating import templates
 
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/kanban", tags=["kanban"])
 def _get_board_or_404(db: Session, user_id: int) -> KanbanBoard:
     board = (
         db.query(KanbanBoard)
-        .options(selectinload(KanbanBoard.columns), selectinload(KanbanBoard.swimlanes))
+        .options(selectinload(KanbanBoard.swimlanes).selectinload(KanbanSwimlane.columns))
         .filter(KanbanBoard.user_id == user_id)
         .first()
     )
@@ -54,9 +55,37 @@ def create_swimlane(
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
+    """Elke swimlane krijgt haar eigen set standaardkolommen, die daarna onafhankelijk
+    van andere swimlanes aan te passen is (zie create_column)."""
     board = _get_board_or_404(db, user.id)
     position = len(board.swimlanes)
-    db.add(KanbanSwimlane(board_id=board.id, name=name.strip(), position=position))
+    swimlane = KanbanSwimlane(board_id=board.id, name=name.strip(), position=position)
+    db.add(swimlane)
+    db.flush()
+
+    for col_position, col_name in enumerate(DEFAULT_COLUMNS):
+        db.add(
+            KanbanColumn(board_id=board.id, swimlane_id=swimlane.id, name=col_name, position=col_position)
+        )
+
+    db.commit()
+    return RedirectResponse("/kanban", status_code=303)
+
+
+@router.post("/swimlanes/{swimlane_id}/columns")
+def create_column(
+    swimlane_id: int,
+    name: str = Form(...),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    board = _get_board_or_404(db, user.id)
+    swimlane = db.get(KanbanSwimlane, swimlane_id)
+    if swimlane is None or swimlane.board_id != board.id:
+        raise HTTPException(status_code=404, detail="Swimlane niet gevonden")
+
+    position = len(swimlane.columns)
+    db.add(KanbanColumn(board_id=board.id, swimlane_id=swimlane_id, name=name.strip(), position=position))
     db.commit()
     return RedirectResponse("/kanban", status_code=303)
 
@@ -72,12 +101,12 @@ def create_card(
     db: Session = Depends(get_db),
 ):
     board = _get_board_or_404(db, user.id)
-    column = db.get(KanbanColumn, column_id)
-    if column is None or column.board_id != board.id:
-        raise HTTPException(status_code=404, detail="Kolom niet gevonden")
     swimlane = db.get(KanbanSwimlane, swimlane_id)
     if swimlane is None or swimlane.board_id != board.id:
         raise HTTPException(status_code=404, detail="Swimlane niet gevonden")
+    column = db.get(KanbanColumn, column_id)
+    if column is None or column.swimlane_id != swimlane_id:
+        raise HTTPException(status_code=404, detail="Kolom niet gevonden")
 
     max_position = (
         db.query(KanbanCard)
@@ -138,12 +167,12 @@ def move_card(
     card = db.get(KanbanCard, card_id)
     if card is None or card.board_id != board.id:
         raise HTTPException(status_code=404, detail="Kaart niet gevonden")
-    column = db.get(KanbanColumn, column_id)
-    if column is None or column.board_id != board.id:
-        raise HTTPException(status_code=404, detail="Kolom niet gevonden")
     swimlane = db.get(KanbanSwimlane, swimlane_id)
     if swimlane is None or swimlane.board_id != board.id:
         raise HTTPException(status_code=404, detail="Swimlane niet gevonden")
+    column = db.get(KanbanColumn, column_id)
+    if column is None or column.swimlane_id != swimlane_id:
+        raise HTTPException(status_code=404, detail="Kolom niet gevonden")
 
     card.column_id = column_id
     card.swimlane_id = swimlane_id

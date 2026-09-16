@@ -1,7 +1,7 @@
 // Lichte drag-and-drop implementatie op basis van de native HTML5 Drag & Drop API --
 // geen extra library nodig. Kaarten kunnen tussen kolommen én swimlanes verslepen.
 document.addEventListener("DOMContentLoaded", () => {
-  const board = document.querySelector(".board-grid");
+  const board = document.querySelector(".board-swimlanes");
   if (!board) return;
 
   let draggedCard = null;

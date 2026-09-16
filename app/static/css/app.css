@@ -172,7 +172,7 @@ th, td {
   height: 3px;
   border-radius: 2px;
   margin-top: 5px;
-  max-width: 220px;
+  width: 100%;
   opacity: 0.9;
   transition: background 0.3s ease;
 }
@@ -239,38 +239,55 @@ th, td {
   margin-bottom: 10px;
 }
 
-.board-grid {
-  display: grid;
+.board-swimlanes {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.swimlane-heading {
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.board-row {
+  display: flex;
   gap: 10px;
-  align-items: start;
+  align-items: flex-start;
   overflow-x: auto;
   padding-bottom: 8px;
 }
 
-.board-grid-corner {
-  position: sticky;
-  left: 0;
-}
-
-.column-header-cell {
-  font-weight: 600;
-  padding: 6px 8px;
-  position: sticky;
-  top: 0;
-}
-
-.swimlane-label {
-  font-weight: 600;
-  color: var(--text-muted);
-  padding: 8px 8px 0 0;
-  writing-mode: horizontal-tb;
-}
-
-.board-cell {
+.column {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: 6px;
+  width: 240px;
+  flex-shrink: 0;
   padding: 8px;
+}
+
+.column-header {
+  font-weight: 600;
+  padding: 4px 4px 8px;
+}
+
+.add-column-form {
+  flex-shrink: 0;
+  align-self: flex-start;
+  background: var(--bg-elevated);
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  padding: 8px;
+}
+
+.add-column-form input {
+  margin-bottom: 4px;
+  width: 160px;
 }
 
 .add-swimlane-form {

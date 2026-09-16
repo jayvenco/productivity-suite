@@ -19,11 +19,8 @@
     {% for task in tasks %}
     <tr>
       <td>
-        <div>
-          {% if task.priority %}<span class="priority-star" title="Prioriteit">★</span>{% endif %}
-          <a href="/tasks/{{ task.id }}/edit">{{ task.title }}</a>
-        </div>
-        {% if task.urgency_color %}<div class="deadline-bar" style="background:{{ task.urgency_color }}"></div>{% endif %}
+        {% if task.priority %}<span class="priority-star" title="Prioriteit">★</span>{% endif %}
+        <a href="/tasks/{{ task.id }}/edit">{{ task.title }}</a>
       </td>
       <td>{{ task.status.value }}</td>
       <td>
@@ -32,6 +29,7 @@
           {% if task.deadline_overdue %}<span class="badge-danger">verlopen</span>
           {% elif task.deadline_warning %}<span class="badge-warning">bijna deadline</span>{% endif %}
         {% else %}—{% endif %}
+        {% if task.urgency_color %}<div class="deadline-bar" style="background:{{ task.urgency_color }}"></div>{% endif %}
       </td>
       <td>
         {% for t in task.tags %}<a class="tag" href="/tasks?tag={{ t.name }}">{{ t.name }}</a>{% endfor %}

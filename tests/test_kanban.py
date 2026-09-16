@@ -90,6 +90,54 @@ def test_edit_card_title_description_tags_and_color(logged_in_client):
     assert "belangrijk" in board_html_after
 
 
+def test_new_swimlane_gets_its_own_default_columns(logged_in_client):
+    before = logged_in_client.get("/kanban").text
+    todo_count_before = before.count(">Todo<")
+
+    logged_in_client.post("/kanban/swimlanes", data={"name": "Design"})
+
+    after = logged_in_client.get("/kanban").text
+    assert after.count(">Todo<") == todo_count_before + 1
+    assert "Design" in after
+
+
+def test_add_custom_column_to_swimlane(logged_in_client):
+    logged_in_client.post("/kanban/swimlanes", data={"name": "Marketing"})
+    board_html = logged_in_client.get("/kanban").text
+    match = re.search(r'swimlane-heading">Marketing<.*?data-swimlane-id="(\d+)"', board_html, re.S)
+    assert match, "Kon swimlane-id van Marketing niet vinden"
+    swimlane_id = match.group(1)
+
+    response = logged_in_client.post(
+        f"/kanban/swimlanes/{swimlane_id}/columns", data={"name": "Review"}, follow_redirects=False
+    )
+    assert response.status_code == 303
+
+    board_html_after = logged_in_client.get("/kanban").text
+    assert board_html_after.count(">Review<") == 1
+
+
+def test_cannot_create_card_with_column_from_other_swimlane(logged_in_client):
+    board_html = logged_in_client.get("/kanban").text
+    algemeen_column_id, _ = _first_ids(board_html)
+
+    logged_in_client.post("/kanban/swimlanes", data={"name": "Andere lane"})
+    board_html_after = logged_in_client.get("/kanban").text
+    match = re.search(r'swimlane-heading">Andere lane<.*?data-swimlane-id="(\d+)"', board_html_after, re.S)
+    other_swimlane_id = match.group(1)
+
+    response = logged_in_client.post(
+        "/kanban/cards",
+        data={
+            "column_id": algemeen_column_id,
+            "swimlane_id": other_swimlane_id,
+            "title": "Mag niet",
+            "description": "",
+        },
+    )
+    assert response.status_code == 404
+
+
 def test_clear_card_color(logged_in_client):
     board_html = logged_in_client.get("/kanban").text
     column_id, swimlane_id = _first_ids(board_html)

@@ -29,9 +29,11 @@ def seed_default_user_and_board(db: Session) -> None:
     db.add(board)
     db.flush()
 
-    for position, name in enumerate(DEFAULT_COLUMNS):
-        db.add(KanbanColumn(board_id=board.id, name=name, position=position))
+    swimlane = KanbanSwimlane(board_id=board.id, name=DEFAULT_SWIMLANE, position=0)
+    db.add(swimlane)
+    db.flush()
 
-    db.add(KanbanSwimlane(board_id=board.id, name=DEFAULT_SWIMLANE, position=0))
+    for position, name in enumerate(DEFAULT_COLUMNS):
+        db.add(KanbanColumn(board_id=board.id, swimlane_id=swimlane.id, name=name, position=position))
 
     db.commit()

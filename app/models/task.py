@@ -55,20 +55,23 @@ class Task(Base):
         return days is not None and days < 0
 
     URGENCY_WINDOW_DAYS = 14
+    _URGENCY_START_RGB = (63, 63, 70)  # antraciet
+    _URGENCY_END_RGB = (154, 52, 18)  # donkeroranje
 
     @property
     def urgency_color(self) -> str | None:
-        """Kleur voor de dunne deadline-balk: groen ver van de deadline, geleidelijk
-        naar oranje richting de deadline, rood zodra de deadline voorbij is."""
+        """Kleur voor de dunne deadline-balk: antraciet ver van de deadline, geleidelijk
+        naar donkeroranje naarmate de deadline nadert (en blijft donkeroranje als de
+        deadline al verstreken is)."""
         days = self.days_until_deadline
         if days is None:
             return None
-        if days < 0:
-            return "hsl(0, 72%, 50%)"
 
         fraction = max(0.0, min(1.0, (self.URGENCY_WINDOW_DAYS - days) / self.URGENCY_WINDOW_DAYS))
-        hue = 142 - fraction * 117  # 142 = groen, 25 = oranje
-        return f"hsl({hue:.0f}, 70%, 45%)"
+        r = round(self._URGENCY_START_RGB[0] + (self._URGENCY_END_RGB[0] - self._URGENCY_START_RGB[0]) * fraction)
+        g = round(self._URGENCY_START_RGB[1] + (self._URGENCY_END_RGB[1] - self._URGENCY_START_RGB[1]) * fraction)
+        b = round(self._URGENCY_START_RGB[2] + (self._URGENCY_END_RGB[2] - self._URGENCY_START_RGB[2]) * fraction)
+        return f"rgb({r}, {g}, {b})"
 
     @property
     def completed_work_sessions(self) -> list["PomodoroSession"]:  # noqa: F821

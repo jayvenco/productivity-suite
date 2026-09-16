@@ -17,32 +17,14 @@ class KanbanBoard(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     name: Mapped[str] = mapped_column(String(100))
 
-    columns: Mapped[list["KanbanColumn"]] = relationship(
-        back_populates="board", cascade="all, delete-orphan", order_by="KanbanColumn.position"
-    )
     swimlanes: Mapped[list["KanbanSwimlane"]] = relationship(
         back_populates="board", cascade="all, delete-orphan", order_by="KanbanSwimlane.position"
     )
 
 
-class KanbanColumn(Base):
-    """Een kolom = status (bv. Todo/In Progress/Done), aanpasbaar per bord."""
-
-    __tablename__ = "kanban_columns"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    board_id: Mapped[int] = mapped_column(ForeignKey("kanban_boards.id", ondelete="CASCADE"), index=True)
-    name: Mapped[str] = mapped_column(String(100))
-    position: Mapped[int] = mapped_column(Integer, default=0)
-
-    board: Mapped["KanbanBoard"] = relationship(back_populates="columns")
-    cards: Mapped[list["KanbanCard"]] = relationship(back_populates="column")
-
-
 class KanbanSwimlane(Base):
-    """Extra dimensie (bv. project/context). In Fase 1 heeft elk bord één 'Algemeen'
-    swimlane en toont de UI geen swimlane-indeling; het model bestaat al zodat
-    Fase 2 geen destructieve migratie nodig heeft."""
+    """Extra dimensie (bv. project/context). Elke swimlane heeft haar eigen kolommen --
+    zo kan de ene swimlane bv. Todo/Doing/Done gebruiken en een andere Backlog/Review/Live."""
 
     __tablename__ = "kanban_swimlanes"
 
@@ -52,7 +34,30 @@ class KanbanSwimlane(Base):
     position: Mapped[int] = mapped_column(Integer, default=0)
 
     board: Mapped["KanbanBoard"] = relationship(back_populates="swimlanes")
+    columns: Mapped[list["KanbanColumn"]] = relationship(
+        back_populates="swimlane", cascade="all, delete-orphan", order_by="KanbanColumn.position"
+    )
     cards: Mapped[list["KanbanCard"]] = relationship(back_populates="swimlane")
+
+
+class KanbanColumn(Base):
+    """Een kolom = status (bv. Todo/In Progress/Done), per swimlane aanpasbaar."""
+
+    __tablename__ = "kanban_columns"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    # board_id blijft staan zodat kaart/kolom-ownership in één keer te checken is
+    # zonder via de swimlane te hoeven joinen; wordt afgeleid van de swimlane bij aanmaak.
+    board_id: Mapped[int] = mapped_column(ForeignKey("kanban_boards.id", ondelete="CASCADE"), index=True)
+    swimlane_id: Mapped[int] = mapped_column(
+        ForeignKey("kanban_swimlanes.id", ondelete="CASCADE"), index=True, nullable=True
+    )
+    name: Mapped[str] = mapped_column(String(100))
+    position: Mapped[int] = mapped_column(Integer, default=0)
+
+    board: Mapped["KanbanBoard"] = relationship()
+    swimlane: Mapped["KanbanSwimlane"] = relationship(back_populates="columns")
+    cards: Mapped[list["KanbanCard"]] = relationship(back_populates="column")
 
 
 class KanbanCard(Base):

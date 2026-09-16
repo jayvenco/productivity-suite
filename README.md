@@ -11,15 +11,16 @@ Gebouwd:
 - Sessie-based auth (single-user, seed-account, wachtwoord wijzigen via Account-pagina)
 - Taken: CRUD, deadline, status, tags, markdown-beschrijving
 - Sidebar-widget "Komende deadlines" (eerstvolgende 5 taken met deadline)
-- Kanban-bord met **swimlanes** (rijen) × kolommen (Todo/In Progress/Done), drag-and-drop
-  tussen elke cel, kaarten los van taken
+- Kanban-bord met **swimlanes** (rijen); elke swimlane heeft haar **eigen kolommen**
+  (start met Todo/In Progress/Done, per swimlane onafhankelijk uit te breiden), drag-and-drop
+  tussen kolommen binnen een swimlane, kaarten los van taken
 - Kanban-kaarten zijn **bewerkbaar** (titel, beschrijving, tags) en kunnen een **accentkleur**
   krijgen (kleurenpicker, zichtbaar als gekleurde rand links op de kaart)
 - Checklists in kaartbeschrijvingen (`- [ ] item`) — aanklikbaar, direct persistent
 - Gedeeld tag-systeem (taken + kanban-kaarten), filteren op tag
 - Taken hebben een **prioriteitsvinkje** (★, sorteert bovenaan de takenlijst) en een dunne
-  **deadline-gradiëntbalk** die geleidelijk van groen naar oranje/rood kleurt naarmate de
-  deadline nadert (of verstreken is)
+  **deadline-gradiëntbalk** onder de deadline-datum (even breed als die cel) die geleidelijk
+  van antraciet naar donkeroranje kleurt naarmate de deadline nadert of al verstreken is
 - **Pomodoro-timer** in de sidebar: instelbare werk-/pauze-duur, optioneel gekoppeld aan
   een taak, live aftellende ring-animatie, automatische overgang werk → pauze, geschiedenis
   zichtbaar op de taakpagina
@@ -93,10 +94,12 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    "Komende deadlines"-widgetje in de sidebar.
 3. Taak bewerken en status wijzigen naar "done".
 4. Op een tag klikken in de takenlijst → filtert de lijst.
-5. Naar Kanban gaan, een swimlane toevoegen en een kaart aanmaken met een checklist
-   (`- [ ] item`) → klik een checklist-item aan en herlaad de pagina om te controleren dat
-   het aangevinkt blijft. Klik "Bewerken" op een kaart, geef 'm een titel/kleur/tags en
-   controleer dat de gekleurde rand verschijnt en blijft na herladen.
+5. Naar Kanban gaan, een swimlane toevoegen (krijgt automatisch eigen Todo/In Progress/Done)
+   en daar een eigen kolom aan toevoegen → controleer dat die kolom alleen in díe swimlane
+   verschijnt. Een kaart aanmaken met een checklist (`- [ ] item`) → klik een checklist-item
+   aan en herlaad de pagina om te controleren dat het aangevinkt blijft. Klik "Bewerken" op
+   een kaart, geef 'm een titel/kleur/tags en controleer dat de gekleurde rand verschijnt en
+   blijft na herladen.
 6. Kaart verslepen naar een andere kolom/swimlane (drag-and-drop) → herlaad de pagina en
    controleer dat de cel-toewijzing bewaard is gebleven.
 7. Pomodoro-timer starten (kies eventueel een taak) → controleer de leeglopende ring, de
@@ -115,8 +118,10 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 - **Auth**: Sessie-cookie met `itsdangerous`, wachtwoord-hashing via `passlib[bcrypt]`.
 - **Kanban-kaarten** zijn losse entiteiten (geen 1-op-1 met Taken) — een kaart kan optioneel
   naar een taak verwijzen, maar dat is geen vereiste.
-- **Swimlanes** zijn volledig verwerkt in de UI: het bord toont een grid van swimlane-rijen ×
-  kolommen, drag-and-drop werkt tussen elke cel.
+- **Swimlanes en kolommen**: `KanbanColumn` hangt aan een `KanbanSwimlane` (niet meer direct
+  aan het bord), zodat elke swimlane haar eigen kolommenset heeft. Een nieuwe swimlane krijgt
+  automatisch de standaardkolommen (Todo/In Progress/Done) mee als startpunt, daarna volledig
+  onafhankelijk aan te passen.
 - **Checklists** op kanban-kaarten zijn gewoon markdown (`- [ ] item`) in de bestaande
   beschrijving — geen apart datamodel; een klik op de checkbox schakelt de regel in de
   opgeslagen tekst om via een klein endpoint (`/kanban/cards/{id}/checklist-toggle`).
@@ -124,9 +129,12 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   client-side berekend zodat een pagina-refresh niets verliest. Er is bewust geen pauzeknop
   (alleen start/stop) om de tijdsberekening simpel te houden.
 - **Deadline-gradiëntbalk**: kleur wordt server-side berekend (`Task.urgency_color`) op basis
-  van een venster van 14 dagen — groen ver van de deadline, oranje dichtbij, rood bij een
-  verstreken deadline.
+  van een venster van 14 dagen — antraciet (`rgb(63,63,70)`) ver van de deadline, lineair naar
+  donkeroranje (`rgb(154,52,18)`) op de deadline zelf, en blijft donkeroranje bij een
+  verstreken deadline (geen aparte roodstand).
 - **Lichte, additive migraties** (`app/services/migrate.py`): nieuwe kolommen (zoals
-  `priority` en `color`) worden bij het opstarten toegevoegd aan een bestaande SQLite-database
-  als ze nog ontbreken, zodat een update op een al draaiende installatie (bv. Unraid) geen
-  data kwijtraakt. Geen Alembic voor deze schaal.
+  `priority`, `color` en `kanban_columns.swimlane_id`) worden bij het opstarten toegevoegd aan
+  een bestaande SQLite-database als ze nog ontbreken. Bij de overstap naar per-swimlane
+  kolommen worden bestaande kolommen automatisch aan de (eerste) swimlane van hun bord
+  gekoppeld, zodat een update op een al draaiende installatie (bv. Unraid) geen data
+  kwijtraakt. Geen Alembic voor deze schaal.
