@@ -1,0 +1,14 @@
+:root[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-elevated: #f5f5f4;
+  --bg-hover: #ebe9e6;
+  --border: #ddd9d3;
+  --text: #292524;
+  --text-muted: #78716c;
+  --accent: #ea580c;
+  --accent-text: #ffffff;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --link: #c2410c;
+}

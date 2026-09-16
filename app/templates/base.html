@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="/static/css/themes/dracula.css">
   <link rel="stylesheet" href="/static/css/themes/one-dark-pro.css">
   <link rel="stylesheet" href="/static/css/themes/nord.css">
+  <link rel="stylesheet" href="/static/css/themes/light.css">
   <link rel="stylesheet" href="/static/css/app.css">
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
@@ -16,14 +17,45 @@
   <div class="layout">
     <aside class="sidebar">
       <div class="brand">Productivity Suite</div>
+
+      <div class="deadlines-widget" id="deadlines-widget">
+        <div class="sidebar-heading">Komende deadlines</div>
+        <ul class="deadlines-list" id="deadlines-list">
+          <li class="deadlines-empty">Laden...</li>
+        </ul>
+      </div>
+
+      <div class="pomodoro-widget" id="pomodoro-widget">
+        <svg class="pomodoro-ring" viewBox="0 0 60 60">
+          <circle class="pomodoro-ring-bg" cx="30" cy="30" r="26"></circle>
+          <circle class="pomodoro-ring-progress" id="pomodoro-ring-progress" cx="30" cy="30" r="26"></circle>
+        </svg>
+        <div class="pomodoro-time" id="pomodoro-time">25:00</div>
+        <div class="pomodoro-phase" id="pomodoro-phase">Pomodoro</div>
+
+        <div class="pomodoro-controls" id="pomodoro-idle-controls">
+          <select id="pomodoro-task">
+            <option value="">Geen taak</option>
+          </select>
+          <div class="pomodoro-minutes-row">
+            <input type="number" id="pomodoro-work-minutes" min="1" max="180" value="25" title="Werk (minuten)">
+            <input type="number" id="pomodoro-break-minutes" min="1" max="60" value="5" title="Pauze (minuten)">
+          </div>
+          <button type="button" class="btn" id="pomodoro-start-btn" style="width:100%">Start</button>
+        </div>
+
+        <div class="pomodoro-controls" id="pomodoro-active-controls" hidden>
+          <button type="button" class="btn btn-danger" id="pomodoro-stop-btn" style="width:100%">Stop</button>
+        </div>
+      </div>
+
       <a href="/tasks" class="{{ 'active' if request.url.path.startswith('/tasks') }}">Taken</a>
       <a href="/kanban" class="{{ 'active' if request.url.path.startswith('/kanban') }}">Kanban</a>
-      <a href="#" class="disabled" title="Komt in Fase 2">Kalender</a>
-      <a href="#" class="disabled" title="Komt in Fase 3">Notities</a>
-      <a href="#" class="disabled" title="Komt in Fase 3">Snippets</a>
+      <span class="nav-disabled" title="Komt in een latere fase">Notities <em>binnenkort</em></span>
+      <span class="nav-disabled" title="Komt in een latere fase">Snippets <em>binnenkort</em></span>
       <div class="spacer"></div>
       <div class="theme-switcher">
-        {% for theme in ["dracula", "one-dark-pro", "nord"] %}
+        {% for theme in ["dracula", "one-dark-pro", "nord", "light"] %}
         <form method="post" action="/settings/theme">
           <input type="hidden" name="theme" value="{{ theme }}">
           <input type="hidden" name="redirect_to" value="{{ request.url.path }}">
@@ -47,6 +79,8 @@
       {% block content %}{% endblock %}
     </main>
   </div>
+  <script src="/static/js/pomodoro.js"></script>
+  <script src="/static/js/deadlines.js"></script>
   {% else %}
     {% block content_anon %}{% endblock %}
   {% endif %}

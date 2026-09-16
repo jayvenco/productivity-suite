@@ -2,18 +2,22 @@
 {% block title %}Kanban - Productivity Suite{% endblock %}
 {% block content %}
 <h2>{{ board.name }}</h2>
-<div class="board">
+
+<div class="board-grid" style="grid-template-columns: 140px repeat({{ board.columns|length }}, 260px);">
+  <div class="board-grid-corner"></div>
   {% for column in board.columns %}
-  <div class="column">
-    <div class="column-header">
-      <span>{{ column.name }}</span>
-      <span>{{ cards_by_column.get(column.id, [])|length }}</span>
-    </div>
-    <div class="card-list" data-column-id="{{ column.id }}">
-      {% for card in cards_by_column.get(column.id, []) %}
+  <div class="column-header-cell">{{ column.name }}</div>
+  {% endfor %}
+
+  {% for swimlane in board.swimlanes %}
+  <div class="swimlane-label">{{ swimlane.name }}</div>
+  {% for column in board.columns %}
+  <div class="board-cell">
+    <div class="card-list" data-column-id="{{ column.id }}" data-swimlane-id="{{ swimlane.id }}">
+      {% for card in cards_by_cell.get((swimlane.id, column.id), []) %}
       <div class="kanban-card" draggable="true" data-card-id="{{ card.id }}">
         <div class="card-title">{{ card.title }}</div>
-        {% if card.description %}<div class="card-description">{{ card.description|markdown|safe }}</div>{% endif %}
+        {% if card.description %}<div class="card-description">{{ card.description|checklist_html(card.id)|safe }}</div>{% endif %}
         {% for t in card.tags %}<span class="tag">{{ t.name }}</span>{% endfor %}
         <div class="card-actions">
           <form method="post" action="/kanban/cards/{{ card.id }}/delete" onsubmit="return confirm('Kaart verwijderen?')">
@@ -27,13 +31,25 @@
       <summary>+ Kaart toevoegen</summary>
       <form method="post" action="/kanban/cards">
         <input type="hidden" name="column_id" value="{{ column.id }}">
+        <input type="hidden" name="swimlane_id" value="{{ swimlane.id }}">
         <input type="text" name="title" placeholder="Titel" required>
+        <textarea name="description" placeholder="Beschrijving, checklist met - [ ] item" rows="2"></textarea>
         <input type="text" name="tags" placeholder="Tags (komma-gescheiden)">
         <button type="submit" class="btn">Toevoegen</button>
       </form>
     </details>
   </div>
   {% endfor %}
+  {% endfor %}
 </div>
+
+<details class="add-swimlane-form">
+  <summary>+ Swimlane toevoegen</summary>
+  <form method="post" action="/kanban/swimlanes">
+    <input type="text" name="name" placeholder="Naam (bv. project/context)" required>
+    <button type="submit" class="btn">Toevoegen</button>
+  </form>
+</details>
+
 <script src="/static/js/kanban.js"></script>
 {% endblock %}

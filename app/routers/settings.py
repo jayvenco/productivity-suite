@@ -10,7 +10,7 @@ from app.models.user import User
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
-AVAILABLE_THEMES = ["dracula", "one-dark-pro", "nord"]
+AVAILABLE_THEMES = ["dracula", "one-dark-pro", "nord", "light"]
 
 
 @router.post("/theme")

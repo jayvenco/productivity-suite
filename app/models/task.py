@@ -32,7 +32,9 @@ class Task(Base):
     tags: Mapped[list["Tag"]] = relationship(  # noqa: F821
         "Tag", secondary=task_tags, back_populates="tasks"
     )
-    # pomodoro_sessions relationship wordt toegevoegd in Fase 2 samen met PomodoroSession model.
+    pomodoro_sessions: Mapped[list["PomodoroSession"]] = relationship(  # noqa: F821
+        "PomodoroSession", back_populates="task"
+    )
 
     @property
     def days_until_deadline(self) -> int | None:
@@ -50,3 +52,17 @@ class Task(Base):
     def deadline_overdue(self) -> bool:
         days = self.days_until_deadline
         return days is not None and days < 0
+
+    @property
+    def completed_work_sessions(self) -> list["PomodoroSession"]:  # noqa: F821
+        from app.models.pomodoro import PomodoroPhase, PomodoroStatus
+
+        return [
+            s
+            for s in self.pomodoro_sessions
+            if s.phase == PomodoroPhase.WORK and s.status == PomodoroStatus.COMPLETED
+        ]
+
+    @property
+    def total_focus_minutes(self) -> int:
+        return sum(s.planned_minutes for s in self.completed_work_sessions)

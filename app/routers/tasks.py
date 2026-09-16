@@ -50,6 +50,28 @@ def list_tasks(
     )
 
 
+@router.get("/upcoming")
+def upcoming_deadlines(user: User = Depends(require_user), db: Session = Depends(get_db)):
+    """Kleine JSON-feed voor het deadline-widgetje in de sidebar (komende 5 deadlines)."""
+    tasks = (
+        db.query(Task)
+        .filter(Task.user_id == user.id, Task.deadline.isnot(None), Task.status != TaskStatus.DONE)
+        .order_by(Task.deadline)
+        .limit(5)
+        .all()
+    )
+    return [
+        {
+            "id": t.id,
+            "title": t.title,
+            "deadline": t.deadline.isoformat(),
+            "overdue": t.deadline_overdue,
+            "warning": t.deadline_warning,
+        }
+        for t in tasks
+    ]
+
+
 @router.get("/new")
 def new_task_form(request: Request, user: User = Depends(require_user)):
     return templates.TemplateResponse(request, "tasks/form.html", {"user": user, "task": None})

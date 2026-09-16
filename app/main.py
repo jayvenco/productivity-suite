@@ -8,7 +8,7 @@ from app.auth.dependencies import get_current_user
 from app.config import BASE_DIR, settings
 from app.database import Base, SessionLocal, engine
 from app.models.user import User
-from app.routers import account, auth, kanban, settings as settings_router, tasks
+from app.routers import account, auth, kanban, pomodoro, settings as settings_router, tasks
 from app.services.seed import seed_default_user_and_board
 
 Base.metadata.create_all(bind=engine)
@@ -23,6 +23,7 @@ app.include_router(auth.router)
 app.include_router(account.router)
 app.include_router(tasks.router)
 app.include_router(kanban.router)
+app.include_router(pomodoro.router)
 app.include_router(settings_router.router)
 
 

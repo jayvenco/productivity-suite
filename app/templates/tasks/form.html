@@ -38,4 +38,18 @@
   <button type="submit" class="btn">Opslaan</button>
   <a href="/tasks" class="btn btn-secondary">Annuleren</a>
 </form>
+
+{% if task %}
+<div class="field" style="max-width:480px;margin-top:20px">
+  <label>Pomodoro-historie</label>
+  <div class="markdown-preview">
+    {% set sessions = task.completed_work_sessions %}
+    {% if sessions %}
+      {{ sessions|length }} voltooide sessie(s), {{ task.total_focus_minutes }} minuten focustijd.
+    {% else %}
+      Nog geen voltooide pomodoro-sessies voor deze taak.
+    {% endif %}
+  </div>
+</div>
+{% endif %}
 {% endblock %}

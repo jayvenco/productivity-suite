@@ -8,6 +8,7 @@ from app.auth.dependencies import require_user
 from app.database import get_db
 from app.models.kanban import KanbanBoard, KanbanCard, KanbanColumn, KanbanSwimlane
 from app.models.user import User
+from app.services.checklist import toggle_checklist_line
 from app.services.tags import resolve_tags
 from app.templating import templates
 
@@ -36,20 +37,34 @@ def board_view(request: Request, user: User = Depends(require_user), db: Session
         .order_by(KanbanCard.position)
         .all()
     )
-    cards_by_column: dict[int, list[KanbanCard]] = {col.id: [] for col in board.columns}
+    cards_by_cell: dict[tuple[int, int], list[KanbanCard]] = {}
     for card in cards:
-        cards_by_column.setdefault(card.column_id, []).append(card)
+        cards_by_cell.setdefault((card.swimlane_id, card.column_id), []).append(card)
 
     return templates.TemplateResponse(
         request,
         "kanban/board.html",
-        {"user": user, "board": board, "cards_by_column": cards_by_column},
+        {"user": user, "board": board, "cards_by_cell": cards_by_cell},
     )
+
+
+@router.post("/swimlanes")
+def create_swimlane(
+    name: str = Form(...),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    board = _get_board_or_404(db, user.id)
+    position = len(board.swimlanes)
+    db.add(KanbanSwimlane(board_id=board.id, name=name.strip(), position=position))
+    db.commit()
+    return RedirectResponse("/kanban", status_code=303)
 
 
 @router.post("/cards")
 def create_card(
     column_id: int = Form(...),
+    swimlane_id: int = Form(...),
     title: str = Form(...),
     description: str = Form(""),
     tags: str = Form(""),
@@ -60,16 +75,20 @@ def create_card(
     column = db.get(KanbanColumn, column_id)
     if column is None or column.board_id != board.id:
         raise HTTPException(status_code=404, detail="Kolom niet gevonden")
+    swimlane = db.get(KanbanSwimlane, swimlane_id)
+    if swimlane is None or swimlane.board_id != board.id:
+        raise HTTPException(status_code=404, detail="Swimlane niet gevonden")
 
-    swimlane = db.query(KanbanSwimlane).filter(KanbanSwimlane.board_id == board.id).first()
     max_position = (
-        db.query(KanbanCard).filter(KanbanCard.column_id == column_id).count()
+        db.query(KanbanCard)
+        .filter(KanbanCard.column_id == column_id, KanbanCard.swimlane_id == swimlane_id)
+        .count()
     )
 
     card = KanbanCard(
         board_id=board.id,
         column_id=column_id,
-        swimlane_id=swimlane.id,
+        swimlane_id=swimlane_id,
         title=title.strip(),
         description=description,
         position=max_position,
@@ -84,11 +103,13 @@ def create_card(
 def move_card(
     card_id: int,
     column_id: int = Form(...),
+    swimlane_id: int = Form(...),
     position: int = Form(...),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
-    """Endpoint voor drag-and-drop: verplaatst een kaart naar een (mogelijk andere) kolom/positie."""
+    """Endpoint voor drag-and-drop: verplaatst een kaart naar een (mogelijk andere) cel
+    (kolom x swimlane) en positie."""
     board = _get_board_or_404(db, user.id)
     card = db.get(KanbanCard, card_id)
     if card is None or card.board_id != board.id:
@@ -96,9 +117,31 @@ def move_card(
     column = db.get(KanbanColumn, column_id)
     if column is None or column.board_id != board.id:
         raise HTTPException(status_code=404, detail="Kolom niet gevonden")
+    swimlane = db.get(KanbanSwimlane, swimlane_id)
+    if swimlane is None or swimlane.board_id != board.id:
+        raise HTTPException(status_code=404, detail="Swimlane niet gevonden")
 
     card.column_id = column_id
+    card.swimlane_id = swimlane_id
     card.position = position
+    db.commit()
+    return {"ok": True}
+
+
+@router.post("/cards/{card_id}/checklist-toggle")
+def toggle_checklist(
+    card_id: int,
+    line_index: int = Form(...),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Vinkt een regel '- [ ] ...' / '- [x] ...' in de kaartbeschrijving aan/uit."""
+    board = _get_board_or_404(db, user.id)
+    card = db.get(KanbanCard, card_id)
+    if card is None or card.board_id != board.id:
+        raise HTTPException(status_code=404, detail="Kaart niet gevonden")
+
+    card.description = toggle_checklist_line(card.description, line_index)
     db.commit()
     return {"ok": True}
 

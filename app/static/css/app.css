@@ -21,7 +21,7 @@ a {
 }
 
 .sidebar {
-  width: 200px;
+  width: 220px;
   flex-shrink: 0;
   background: var(--bg-elevated);
   border-right: 1px solid var(--border);
@@ -29,6 +29,29 @@ a {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow-y: auto;
+}
+
+.sidebar-heading {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding: 0 8px;
+  margin-bottom: 4px;
+}
+
+.nav-disabled {
+  display: block;
+  padding: 6px 8px;
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.nav-disabled em {
+  font-style: normal;
+  font-size: 10px;
+  opacity: 0.7;
 }
 
 .sidebar .brand {
@@ -79,6 +102,7 @@ a {
 .theme-swatch-dracula { background: #bd93f9; }
 .theme-swatch-one-dark-pro { background: #61afef; }
 .theme-swatch-nord { background: #88c0d0; }
+.theme-swatch-light { background: #ea580c; border-color: #ddd9d3; }
 
 button, input, select, textarea {
   font-family: inherit;
@@ -201,26 +225,65 @@ th, td {
   margin-bottom: 10px;
 }
 
-.board {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
+.board-grid {
+  display: grid;
+  gap: 10px;
+  align-items: start;
+  overflow-x: auto;
+  padding-bottom: 8px;
 }
 
-.column {
+.board-grid-corner {
+  position: sticky;
+  left: 0;
+}
+
+.column-header-cell {
+  font-weight: 600;
+  padding: 6px 8px;
+  position: sticky;
+  top: 0;
+}
+
+.swimlane-label {
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 8px 8px 0 0;
+  writing-mode: horizontal-tb;
+}
+
+.board-cell {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: 6px;
-  width: 260px;
-  flex-shrink: 0;
   padding: 8px;
 }
 
-.column-header {
-  font-weight: 600;
-  padding: 4px 4px 8px;
+.add-swimlane-form {
+  margin-top: 14px;
+}
+
+.add-swimlane-form input {
+  margin-bottom: 4px;
+  max-width: 260px;
+}
+
+.checklist-item {
   display: flex;
-  justify-content: space-between;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  margin: 2px 0;
+}
+
+.checklist-item input {
+  margin-top: 3px;
+}
+
+.checklist-item.done span {
+  text-decoration: line-through;
+  color: var(--text-muted);
 }
 
 .card-list {
@@ -288,4 +351,121 @@ th, td {
 
 .markdown-preview :last-child {
   margin-bottom: 0;
+}
+
+/* ---- Deadlines-widget (sidebar) ---- */
+
+.deadlines-widget {
+  margin-bottom: 10px;
+}
+
+.deadlines-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.deadlines-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+
+.deadlines-item a {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.deadlines-date {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.deadlines-empty {
+  padding: 3px 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  list-style: none;
+}
+
+/* ---- Pomodoro-widget (sidebar) ---- */
+
+.pomodoro-widget {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 8px;
+  margin-bottom: 10px;
+}
+
+.pomodoro-ring {
+  width: 72px;
+  height: 72px;
+  transform: rotate(-90deg);
+}
+
+.pomodoro-ring-bg {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 4;
+}
+
+.pomodoro-ring-progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.pomodoro-widget.pomodoro-break .pomodoro-ring-progress {
+  stroke: var(--success);
+}
+
+.pomodoro-time {
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.pomodoro-phase {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.pomodoro-controls {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pomodoro-controls[hidden] {
+  display: none;
+}
+
+.pomodoro-minutes-row {
+  display: flex;
+  gap: 4px;
+}
+
+.pomodoro-minutes-row input {
+  width: 50%;
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.pomodoro-controls select {
+  padding: 4px 6px;
 }
