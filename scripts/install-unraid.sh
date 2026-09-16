@@ -19,7 +19,7 @@ set -euo pipefail
 REPO_URL="${REPO_URL:-https://github.com/jayvenco/productivity-suite.git}"
 INSTALL_DIR="${INSTALL_DIR:-/mnt/user/appdata/productivity-suite}"
 CONTAINER_NAME="${CONTAINER_NAME:-productivity-suite}"
-HOST_PORT="${HOST_PORT:-8000}"
+HOST_PORT="${HOST_PORT:-8887}"
 IMAGE_TAG="${IMAGE_TAG:-productivity-suite:latest}"
 # -----------------------------------------------------------------------------
 

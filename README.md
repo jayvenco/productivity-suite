@@ -55,14 +55,15 @@ bash scripts/install-unraid.sh
 Draai dit via SSH op de Unraid-server (of als "User Script"). Het script:
 1. clonet/update de code naar `/mnt/user/appdata/productivity-suite/src`;
 2. bouwt de Docker image lokaal (`docker build`);
-3. start/herstart de container `productivity-suite` op poort 8000, met de data
-   persistent in `/mnt/user/appdata/productivity-suite/data`.
+3. start/herstart de container `productivity-suite` op poort **8887** (standaard, want
+   8000 is op Unraid vaak al bezet), met de data persistent in
+   `/mnt/user/appdata/productivity-suite/data`.
 
 Opnieuw draaien = updaten naar de laatste commit op `main` zonder dataverlies.
-Instelbaar via omgevingsvariabelen bij het aanroepen, bv. andere poort:
+Instelbaar via omgevingsvariabelen bij het aanroepen, bv. een andere poort:
 
 ```bash
-HOST_PORT=8080 bash scripts/install-unraid.sh
+HOST_PORT=9000 bash scripts/install-unraid.sh
 ```
 
 ## Tests
