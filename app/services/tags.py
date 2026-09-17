@@ -1,15 +1,16 @@
 from __future__ import annotations
 
+import random
+
 from sqlalchemy.orm import Session
 
 from app.models.tag import Tag
-from app.services.colors import stable_hue
 
 
-def generate_tag_color(name: str) -> str:
-    """Geeft elke tagnaam een eigen, stabiele kleur (dezelfde naam -> altijd dezelfde
-    kleur, ook na een herstart)."""
-    return f"hsl({stable_hue(name)}, 65%, 50%)"
+def generate_tag_color() -> str:
+    """Geeft een nieuwe tag een eigen, willekeurige kleur. Wordt eenmalig bij aanmaak
+    bepaald en opgeslagen op de Tag, dus blijft daarna stabiel voor die tag."""
+    return f"hsl({random.randint(0, 359)}, 65%, 50%)"
 
 
 def resolve_tags(db: Session, raw: str) -> list[Tag]:
@@ -21,7 +22,7 @@ def resolve_tags(db: Session, raw: str) -> list[Tag]:
     existing = db.query(Tag).filter(Tag.name.in_(names)).all()
     existing_names = {tag.name for tag in existing}
 
-    new_tags = [Tag(name=name, color=generate_tag_color(name)) for name in names if name not in existing_names]
+    new_tags = [Tag(name=name, color=generate_tag_color()) for name in names if name not in existing_names]
     db.add_all(new_tags)
     if new_tags:
         db.flush()
@@ -39,5 +40,5 @@ def backfill_tag_colors(db: Session) -> None:
     if not stale_tags:
         return
     for tag in stale_tags:
-        tag.color = generate_tag_color(tag.name)
+        tag.color = generate_tag_color()
     db.commit()

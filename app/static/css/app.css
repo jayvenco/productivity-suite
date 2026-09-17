@@ -486,28 +486,56 @@ th, td {
 
 /* ---- Notities ---- */
 
-.note-editor {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  max-width: 1000px;
+.rich-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
 }
 
-.note-editor textarea {
+.rich-toolbar button,
+.rich-toolbar select {
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  width: auto;
+}
+
+.rich-toolbar button:hover {
+  background: var(--bg-hover);
+}
+
+.rich-editor {
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  min-height: 220px;
+}
+
+.rich-editor:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.rich-editor h2, .rich-editor h3 {
+  margin-top: 0.4em;
+}
+
+.rich-editor p:first-child, .rich-editor h2:first-child, .rich-editor h3:first-child {
+  margin-top: 0;
+}
+
+.rich-editor code {
+  background: var(--bg);
+  border-radius: 3px;
+  padding: 1px 4px;
   font-family: ui-monospace, "SF Mono", Consolas, monospace;
-  font-size: 13px;
-}
-
-.note-editor .markdown-preview {
-  height: 100%;
-  min-height: 200px;
-  overflow-y: auto;
-}
-
-@media (max-width: 800px) {
-  .note-editor {
-    grid-template-columns: 1fr;
-  }
 }
 
 .notes-grid {
@@ -546,6 +574,12 @@ th, td {
 
 .note-card-preview :first-child {
   margin-top: 0;
+}
+
+.note-card-preview code {
+  background: var(--bg);
+  border-radius: 3px;
+  padding: 1px 4px;
 }
 
 .note-card-tags {

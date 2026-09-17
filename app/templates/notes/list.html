@@ -12,7 +12,7 @@
   {% for note in notes %}
   <div class="note-card" style="{{ note.row_tint_style }}">
     <a href="/notes/{{ note.id }}/edit" class="note-card-title">{{ note.title }}</a>
-    <div class="note-card-preview">{{ note.content|markdown|safe }}</div>
+    <div class="note-card-preview">{{ note.content|safe }}</div>
     <div class="note-card-tags">
       {% for t in note.tags %}<a class="tag" style="{{ t.badge_style }}" href="/notes?tag={{ t.name }}">{{ t.name }}</a>{% endfor %}
     </div>

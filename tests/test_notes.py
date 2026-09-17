@@ -10,7 +10,11 @@ def test_notes_requires_login(client):
 def test_create_and_list_note(logged_in_client):
     response = logged_in_client.post(
         "/notes",
-        data={"title": "Vergaderverslag", "content": "# Kop\n\nEen **belangrijk** punt.", "tags": "werk, meeting"},
+        data={
+            "title": "Vergaderverslag",
+            "content": "<h2>Kop</h2><p>Een <strong>belangrijk</strong> punt.</p>",
+            "tags": "werk, meeting",
+        },
         follow_redirects=False,
     )
     assert response.status_code == 303
@@ -19,13 +23,26 @@ def test_create_and_list_note(logged_in_client):
     assert listing.status_code == 200
     assert "Vergaderverslag" in listing.text
     assert "werk" in listing.text
-    # Markdown moet gerenderd zijn (niet als ruwe tekst getoond worden).
     assert "<strong>belangrijk</strong>" in listing.text
-    assert "**belangrijk**" not in listing.text
+
+
+def test_note_html_is_sanitized(logged_in_client):
+    logged_in_client.post(
+        "/notes",
+        data={
+            "title": "Gevaarlijke notitie",
+            "content": "<p>Hallo</p><script>alert('x')</script><img src=x onerror=alert(1)>",
+            "tags": "",
+        },
+    )
+    listing = logged_in_client.get("/notes").text
+    assert "<script>" not in listing
+    assert "onerror" not in listing
+    assert "Hallo" in listing
 
 
 def test_edit_note(logged_in_client):
-    logged_in_client.post("/notes", data={"title": "Origineel", "content": "tekst", "tags": ""})
+    logged_in_client.post("/notes", data={"title": "Origineel", "content": "<p>tekst</p>", "tags": ""})
     listing = logged_in_client.get("/notes").text
     match = re.search(r'/notes/(\d+)/edit"[^>]*>Origineel<', listing)
     assert match, "Notitie niet gevonden"
@@ -33,7 +50,7 @@ def test_edit_note(logged_in_client):
 
     update = logged_in_client.post(
         f"/notes/{note_id}",
-        data={"title": "Bijgewerkt", "content": "nieuwe tekst", "tags": "belangrijk"},
+        data={"title": "Bijgewerkt", "content": "<p>nieuwe tekst</p>", "tags": "belangrijk"},
         follow_redirects=False,
     )
     assert update.status_code == 303
@@ -64,15 +81,3 @@ def test_filter_notes_by_tag(logged_in_client):
     filtered = logged_in_client.get("/notes?tag=werk").text
     assert "Werknotitie" in filtered
     assert "Privenotitie" not in filtered
-
-
-def test_preview_endpoint_renders_markdown(logged_in_client):
-    response = logged_in_client.post("/notes/preview", data={"content": "**vet** en *cursief*"})
-    assert response.status_code == 200
-    assert "<strong>vet</strong>" in response.text
-    assert "<em>cursief</em>" in response.text
-
-
-def test_preview_requires_login(client):
-    response = client.post("/notes/preview", data={"content": "test"}, follow_redirects=False)
-    assert response.status_code == 303

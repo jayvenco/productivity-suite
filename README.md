@@ -35,10 +35,10 @@ Gebouwd:
   een taak, live aftellende ring-animatie, automatische overgang werk → pauze, geschiedenis
   zichtbaar op de taakpagina
 - 4 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten)
-- **Notities**: markdown-inhoud met **live preview** naast de editor (geen zware
-  WYSIWYG-editor of JS-markdown-library nodig — de preview wordt server-side gerenderd via
-  een klein debounced fetch-verzoek naar dezelfde renderer die ook bij opslaan gebruikt
-  wordt), taggable met hetzelfde gedeelde tag-systeem (kleuren, filteren) als taken/kanban
+- **Notities**: lichte rich-text editor met knoppenbalk (vet, cursief, koppen, opsommingen,
+  genummerde lijsten, links, code) — geen markdown-syntax typen nodig, wat je ziet is wat er
+  opgeslagen wordt. Inhoud is HTML, server-side gesanitized (`bleach`) tegen XSS. Taggable met
+  hetzelfde gedeelde tag-systeem (kleuren, filteren) als taken/kanban
 
 Nog niet gebouwd: volledige kalenderweergave (maand/week), code snippets (link in de sidebar
 toont "binnenkort"), CI/CD, backup/export-import, spraaknotities, LLM-koppeling.
@@ -125,9 +125,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    Controleer op de taakpagina dat voltooide werk-sessies meetellen in de Pomodoro-historie.
 8. Thema wisselen via de kleurenbolletjes in de sidebar (incl. het lichte thema) → voorkeur
    blijft na herladen/opnieuw inloggen behouden.
-9. Naar Notities gaan, een notitie aanmaken met markdown (koppen, **vet**, lijsten) en tags →
-   controleer dat de preview live meeverandert terwijl je typt, en dat de kaart in de
-   lijstweergave de gerenderde markdown en gekleurde tags toont. Filteren op tag uitproberen.
+9. Naar Notities gaan, een notitie aanmaken: tekst selecteren en vet/cursief maken via de
+   knoppenbalk, een kop toepassen, een lijst en een link toevoegen, plus tags → controleer dat
+   de kaart in de lijstweergave de opmaak en gekleurde tags toont (elke tag een andere, bij
+   aanmaak willekeurig gekozen kleur), en dat de kaart een lichte tint krijgt op basis van de
+   eerste tag. Filteren op tag uitproberen.
 10. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
 
 ## Architectuur
@@ -149,15 +151,18 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   "+ Checklist-item"-knop bij de beschrijving voegt de `- [ ] `-syntax voor je toe (je hoeft
    'm niet zelf te typen), en de herkenning is tolerant voor ontbrekende spaties
   (`-[ ]item` werkt ook).
-- **Kleuren op naam**: `app/services/colors.py::stable_hue()` levert één gedeelde, stabiele
-  hash-gebaseerde kleurtint (0-359) die zowel tags (`generate_tag_color`, opgeslagen op de
-  `Tag`) als kanban-swimlanes (`KanbanSwimlane.hue`, puur berekend — geen los kleurveld nodig
-  voor swimlanes) gebruiken. Dezelfde naam geeft altijd dezelfde kleur, ook na een herstart —
-  Python's ingebouwde `hash()` is hiervoor niet bruikbaar want varieert per proces. Tags die
-  vóór deze functie zijn aangemaakt (met de oude vaste grijstint) worden bij het opstarten
-  eenmalig omgezet (`app/services/tags.py::backfill_tag_colors`). Rijtinten en kolomaccenten
-  gebruiken telkens een transparante hsla-laag i.p.v. een vaste licht/donker kleur, zodat ze
-  in elk thema goed leesbaar blijven.
+- **Tag-kleuren zijn willekeurig**: elke nieuwe tag krijgt bij aanmaak een echt willekeurige
+  `hsl(...)`-tint (`app/services/tags.py::generate_tag_color`), eenmalig bepaald en opgeslagen
+  op de `Tag` zelf — dus stabiel voor die tag daarna, maar niet voorspelbaar uit de naam. Tags
+  die vóór deze functie zijn aangemaakt (met de oude vaste grijstint) worden bij het opstarten
+  eenmalig omgezet (`backfill_tag_colors`).
+- **Swimlane-kleuren blijven wél naam-gebaseerd**: `app/services/colors.py::stable_hue()`
+  levert een hash-gebaseerde kleurtint puur berekend uit de swimlane-naam (geen los kleurveld
+  nodig) — bewust anders dan tags, want swimlane-namen zijn vaste categorieën (bv. "Werk"),
+  waar je wilt dat dezelfde naam altijd dezelfde kleur teruggeeft (bv. na het per ongeluk
+  verwijderen en opnieuw aanmaken van een swimlane).
+- Rijtinten en kolomaccenten gebruiken telkens een transparante hsla-laag i.p.v. een vaste
+  licht/donker kleur, zodat ze in elk thema goed leesbaar blijven.
 - **Groeperen op tag**: een taak met meerdere tags verschijnt in elke bijbehorende groep
   (geen kunstmatige keuze voor "de hoofdtag"); taken zonder tag komen in een aparte
   "Zonder tag"-groep aan het eind.
@@ -170,11 +175,12 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   sortering/groepering/filters worden als hidden fields meegestuurd zodat de redirect
   terugkomt op exact dezelfde weergave i.p.v. terug te vallen op de ongefilterde lijst
   (dezelfde aanpak is ook toegepast op de verwijder-knop).
-- **Notities-live-preview**: `POST /notes/preview` rendert markdown server-side (dezelfde
-  `render_markdown()` als bij het opslaan) en wordt debounced (250ms) aangeroepen vanuit
-  `app/static/js/notes.js` bij elke wijziging in de textarea. Geen client-side markdown-parser
-  nodig, en preview/opgeslagen resultaat kunnen nooit uit sync raken omdat het dezelfde
-  renderer is.
+- **Notities-editor**: een `contenteditable`-div met een knoppenbalk die
+  `document.execCommand` gebruikt (vet, cursief, koppen, lijsten, links, inline code) —
+  bewust geen externe editor-library, wat je ziet tijdens het typen is exact de opgeslagen
+  HTML. Vóór het opslaan wordt de HTML server-side gesanitized (`app/services/richtext.py`,
+  via `bleach`) tegen een vaste tag/attribuut-whitelist, want de inhoud wordt met `|safe`
+  gerenderd en `contenteditable` kan in theorie geplakte HTML van buitenaf bevatten.
 - **Pomodoro** bewaart alleen start-tijd + geplande duur per sessie; de countdown-ring wordt
   client-side berekend zodat een pagina-refresh niets verliest. Er is bewust geen pauzeknop
   (alleen start/stop) om de tijdsberekening simpel te houden.

@@ -1,22 +1,49 @@
-// Live markdown-preview: rendert server-side (dezelfde renderer als bij het opslaan)
-// via een klein debounced fetch-verzoek, zodat er geen aparte markdown-parser in
-// de browser nodig is.
+// Lichte rich-text editor op basis van contenteditable + document.execCommand --
+// geen zware WYSIWYG-library nodig voor een basis tools set (vet, cursief, koppen,
+// lijsten, links, code). De opgeslagen inhoud is HTML, geen markdown.
 document.addEventListener("DOMContentLoaded", () => {
-  const textarea = document.getElementById("content");
-  const preview = document.getElementById("note-preview");
-  if (!textarea || !preview) return;
+  const editor = document.getElementById("note-editor");
+  const toolbar = document.getElementById("rich-toolbar");
+  const form = document.getElementById("note-form");
+  const hiddenContent = document.getElementById("content");
+  if (!editor || !toolbar || !form) return;
 
-  let debounceTimer = null;
+  toolbar.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-cmd]");
+    if (!button) return;
+    event.preventDefault();
+    editor.focus();
 
-  textarea.addEventListener("input", () => {
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(async () => {
-      const response = await fetch("/notes/preview", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ content: textarea.value }),
-      });
-      preview.innerHTML = await response.text();
-    }, 250);
+    const cmd = button.dataset.cmd;
+    if (cmd === "createLink") {
+      const url = window.prompt("Link-URL:", "https://");
+      if (url) document.execCommand("createLink", false, url);
+    } else if (cmd === "code") {
+      wrapSelectionInCode();
+    } else {
+      document.execCommand(cmd, false, null);
+    }
+  });
+
+  toolbar.querySelector("select[data-cmd='formatBlock']").addEventListener("change", (event) => {
+    editor.focus();
+    document.execCommand("formatBlock", false, event.target.value);
+  });
+
+  function wrapSelectionInCode() {
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    if (range.collapsed) return;
+
+    const code = document.createElement("code");
+    code.textContent = range.toString();
+    range.deleteContents();
+    range.insertNode(code);
+    selection.removeAllRanges();
+  }
+
+  form.addEventListener("submit", () => {
+    hiddenContent.value = editor.innerHTML;
   });
 });

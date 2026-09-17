@@ -2,24 +2,33 @@
 {% block title %}{{ 'Notitie bewerken' if note else 'Nieuwe notitie' }} - Productivity Suite{% endblock %}
 {% block content %}
 <h2>{{ 'Notitie bewerken' if note else 'Nieuwe notitie' }}</h2>
-<form method="post" action="{{ '/notes/' ~ note.id if note else '/notes' }}">
-  <div class="field" style="max-width:600px">
+<form method="post" action="{{ '/notes/' ~ note.id if note else '/notes' }}" id="note-form">
+  <div class="field" style="max-width:700px">
     <label for="title">Titel</label>
     <input type="text" id="title" name="title" required value="{{ note.title if note else '' }}">
   </div>
 
-  <div class="note-editor">
-    <div class="field">
-      <label for="content">Inhoud (Markdown: **vet**, *cursief*, lijsten, # headers, `code`, [links](url))</label>
-      <textarea id="content" name="content" rows="16">{{ note.content if note else '' }}</textarea>
+  <div class="field" style="max-width:700px">
+    <label>Inhoud</label>
+    <div class="rich-toolbar" id="rich-toolbar">
+      <button type="button" data-cmd="bold" title="Vet"><b>V</b></button>
+      <button type="button" data-cmd="italic" title="Cursief"><i>C</i></button>
+      <select data-cmd="formatBlock" title="Kop">
+        <option value="p">Normale tekst</option>
+        <option value="h2">Kop 1</option>
+        <option value="h3">Kop 2</option>
+      </select>
+      <button type="button" data-cmd="insertUnorderedList" title="Opsomming">• Lijst</button>
+      <button type="button" data-cmd="insertOrderedList" title="Genummerde lijst">1. Lijst</button>
+      <button type="button" data-cmd="createLink" title="Link invoegen">Link</button>
+      <button type="button" data-cmd="code" title="Code">&lt;/&gt;</button>
+      <button type="button" data-cmd="removeFormat" title="Opmaak wissen">Wissen</button>
     </div>
-    <div class="field">
-      <label>Voorbeeld</label>
-      <div id="note-preview" class="markdown-preview">{{ note.content|markdown|safe if note else '' }}</div>
-    </div>
+    <div id="note-editor" class="rich-editor" contenteditable="true">{{ note.content|safe if note else '' }}</div>
+    <textarea name="content" id="content" hidden></textarea>
   </div>
 
-  <div class="field" style="max-width:600px">
+  <div class="field" style="max-width:700px">
     <label for="tags">Tags (komma-gescheiden)</label>
     <input type="text" id="tags" name="tags" value="{{ note.tags|map(attribute='name')|join(', ') if note else '' }}">
   </div>
