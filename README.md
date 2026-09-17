@@ -12,8 +12,10 @@ Gebouwd:
 - Taken: CRUD, deadline, status, tags, markdown-beschrijving
 - Sidebar-widget "Komende deadlines" (eerstvolgende 5 taken met deadline)
 - Kanban-bord met **swimlanes** (rijen); elke swimlane heeft haar **eigen kolommen**
-  (start met Todo/In Progress/Done, per swimlane onafhankelijk uit te breiden), drag-and-drop
-  tussen kolommen binnen een swimlane, kaarten los van taken
+  (start met Todo/In Progress/Done, per swimlane onafhankelijk uit te breiden) én een eigen,
+  automatisch toegewezen **accentkleur** op haar kolommen (net als tags — direct herkenbaar
+  welke kolom bij welke swimlane hoort), drag-and-drop tussen kolommen binnen een swimlane,
+  kaarten los van taken
 - Kanban-kaarten zijn **bewerkbaar** (titel, beschrijving, tags) en kunnen een **accentkleur**
   krijgen (kleurenpicker, zichtbaar als gekleurde rand links op de kaart)
 - Checklists in kaartbeschrijvingen (`- [ ] item`) — aanklikbaar, direct persistent; een
@@ -141,13 +143,15 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   "+ Checklist-item"-knop bij de beschrijving voegt de `- [ ] `-syntax voor je toe (je hoeft
    'm niet zelf te typen), en de herkenning is tolerant voor ontbrekende spaties
   (`-[ ]item` werkt ook).
-- **Tag-kleuren**: elke tag krijgt bij aanmaak een stabiele `hsl(...)`-kleur, afgeleid van een
-  md5-hash van de naam (dus altijd dezelfde kleur voor dezelfde tagnaam, ook na een herstart —
-  Python's ingebouwde `hash()` is hiervoor niet bruikbaar want varieert per proces). Tags die
+- **Kleuren op naam**: `app/services/colors.py::stable_hue()` levert één gedeelde, stabiele
+  hash-gebaseerde kleurtint (0-359) die zowel tags (`generate_tag_color`, opgeslagen op de
+  `Tag`) als kanban-swimlanes (`KanbanSwimlane.hue`, puur berekend — geen los kleurveld nodig
+  voor swimlanes) gebruiken. Dezelfde naam geeft altijd dezelfde kleur, ook na een herstart —
+  Python's ingebouwde `hash()` is hiervoor niet bruikbaar want varieert per proces. Tags die
   vóór deze functie zijn aangemaakt (met de oude vaste grijstint) worden bij het opstarten
-  eenmalig omgezet (`app/services/tags.py::backfill_tag_colors`). De rijtint in de takenlijst
-  gebruikt dezelfde tint als een transparante hsla-laag, zodat die in elk thema (licht of
-  donker) goed leesbaar blijft.
+  eenmalig omgezet (`app/services/tags.py::backfill_tag_colors`). Rijtinten en kolomaccenten
+  gebruiken telkens een transparante hsla-laag i.p.v. een vaste licht/donker kleur, zodat ze
+  in elk thema goed leesbaar blijven.
 - **Groeperen op tag**: een taak met meerdere tags verschijnt in elke bijbehorende groep
   (geen kunstmatige keuze voor "de hoofdtag"); taken zonder tag komen in een aparte
   "Zonder tag"-groep aan het eind.

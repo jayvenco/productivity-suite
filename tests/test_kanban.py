@@ -16,6 +16,18 @@ def _card_id_for_title(html: str, title: str) -> str:
     return match.group(1)
 
 
+def test_new_swimlane_gets_distinct_column_color(logged_in_client):
+    board_html = logged_in_client.get("/kanban").text
+    algemeen_hue = re.search(r"border-top: 3px solid hsl\((\d+),", board_html).group(1)
+
+    logged_in_client.post("/kanban/swimlanes", data={"name": "Kleurentest lane"})
+    board_html_after = logged_in_client.get("/kanban").text
+
+    hues = re.findall(r"border-top: 3px solid hsl\((\d+),", board_html_after)
+    assert len(set(hues)) >= 2, "Nieuwe swimlane heeft geen andere kolomkleur gekregen"
+    assert algemeen_hue in hues
+
+
 def test_board_has_seeded_columns_and_swimlane(logged_in_client):
     response = logged_in_client.get("/kanban")
     assert response.status_code == 200
@@ -104,7 +116,7 @@ def test_new_swimlane_gets_its_own_default_columns(logged_in_client):
 def test_add_custom_column_to_swimlane(logged_in_client):
     logged_in_client.post("/kanban/swimlanes", data={"name": "Marketing"})
     board_html = logged_in_client.get("/kanban").text
-    match = re.search(r'swimlane-heading">Marketing<.*?data-swimlane-id="(\d+)"', board_html, re.S)
+    match = re.search(r'swimlane-heading"[^>]*>Marketing<.*?data-swimlane-id="(\d+)"', board_html, re.S)
     assert match, "Kon swimlane-id van Marketing niet vinden"
     swimlane_id = match.group(1)
 
@@ -123,7 +135,7 @@ def test_cannot_create_card_with_column_from_other_swimlane(logged_in_client):
 
     logged_in_client.post("/kanban/swimlanes", data={"name": "Andere lane"})
     board_html_after = logged_in_client.get("/kanban").text
-    match = re.search(r'swimlane-heading">Andere lane<.*?data-swimlane-id="(\d+)"', board_html_after, re.S)
+    match = re.search(r'swimlane-heading"[^>]*>Andere lane<.*?data-swimlane-id="(\d+)"', board_html_after, re.S)
     other_swimlane_id = match.group(1)
 
     response = logged_in_client.post(

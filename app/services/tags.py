@@ -1,19 +1,15 @@
 from __future__ import annotations
 
-import hashlib
-
 from sqlalchemy.orm import Session
 
 from app.models.tag import Tag
+from app.services.colors import stable_hue
 
 
 def generate_tag_color(name: str) -> str:
     """Geeft elke tagnaam een eigen, stabiele kleur (dezelfde naam -> altijd dezelfde
-    kleur, ook na een herstart). Gebaseerd op een hash i.p.v. Python's ingebouwde
-    hash() omdat die per proces varieert (hash-randomisatie)."""
-    digest = hashlib.md5(name.strip().lower().encode()).hexdigest()
-    hue = int(digest[:8], 16) % 360
-    return f"hsl({hue}, 65%, 50%)"
+    kleur, ook na een herstart)."""
+    return f"hsl({stable_hue(name)}, 65%, 50%)"
 
 
 def resolve_tags(db: Session, raw: str) -> list[Tag]:

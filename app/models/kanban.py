@@ -8,6 +8,7 @@ from sqlalchemy.sql import func
 
 from app.database import Base
 from app.models.tag import card_tags
+from app.services.colors import stable_hue
 
 
 class KanbanBoard(Base):
@@ -38,6 +39,23 @@ class KanbanSwimlane(Base):
         back_populates="swimlane", cascade="all, delete-orphan", order_by="KanbanColumn.position"
     )
     cards: Mapped[list["KanbanCard"]] = relationship(back_populates="swimlane")
+
+    @property
+    def hue(self) -> int:
+        """Stabiele tint per swimlane (op naam), zodat elke swimlane een herkenbare,
+        eigen kolomkleur heeft -- geen los kleurveld nodig, puur van de naam afgeleid."""
+        return stable_hue(self.name)
+
+    @property
+    def heading_style(self) -> str:
+        return f"border-left: 3px solid hsl({self.hue}, 55%, 50%);"
+
+    @property
+    def column_style(self) -> str:
+        return (
+            f"background-color: hsla({self.hue}, 60%, 50%, 0.07); "
+            f"border-top: 3px solid hsl({self.hue}, 55%, 50%);"
+        )
 
 
 class KanbanColumn(Base):

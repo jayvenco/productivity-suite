@@ -6,10 +6,10 @@
 <div class="board-swimlanes">
   {% for swimlane in board.swimlanes %}
   <section class="swimlane-block">
-    <div class="swimlane-heading">{{ swimlane.name }}</div>
+    <div class="swimlane-heading" style="{{ swimlane.heading_style }}">{{ swimlane.name }}</div>
     <div class="board-row">
       {% for column in swimlane.columns %}
-      <div class="column">
+      <div class="column" style="{{ swimlane.column_style }}">
         <div class="column-header">{{ column.name }}</div>
         <div class="card-list" data-column-id="{{ column.id }}" data-swimlane-id="{{ swimlane.id }}">
           {% for card in cards_by_cell.get((swimlane.id, column.id), []) %}

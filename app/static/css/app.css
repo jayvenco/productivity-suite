@@ -316,6 +316,7 @@ th, td {
   font-size: 12px;
   letter-spacing: 0.04em;
   margin-bottom: 6px;
+  padding-left: 8px;
 }
 
 .board-row {
