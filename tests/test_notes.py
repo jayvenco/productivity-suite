@@ -81,3 +81,52 @@ def test_filter_notes_by_tag(logged_in_client):
     filtered = logged_in_client.get("/notes?tag=werk").text
     assert "Werknotitie" in filtered
     assert "Privenotitie" not in filtered
+
+
+def _note_ids_for_titles(html: str, titles: list[str]) -> list[str]:
+    ids = []
+    for title in titles:
+        match = re.search(rf'/notes/(\d+)/edit"[^>]*>{re.escape(title)}<', html)
+        assert match, f"Notitie met titel {title!r} niet gevonden"
+        ids.append(match.group(1))
+    return ids
+
+
+def test_bulk_delete_notes(logged_in_client):
+    logged_in_client.post("/notes", data={"title": "Bulk een", "content": "", "tags": ""})
+    logged_in_client.post("/notes", data={"title": "Bulk twee", "content": "", "tags": ""})
+    logged_in_client.post("/notes", data={"title": "Blijft staan", "content": "", "tags": ""})
+
+    listing = logged_in_client.get("/notes").text
+    ids = _note_ids_for_titles(listing, ["Bulk een", "Bulk twee"])
+
+    response = logged_in_client.post(
+        "/notes/bulk-delete", data={"note_ids": ids}, follow_redirects=False
+    )
+    assert response.status_code == 303
+
+    listing_after = logged_in_client.get("/notes").text
+    assert "Bulk een" not in listing_after
+    assert "Bulk twee" not in listing_after
+    assert "Blijft staan" in listing_after
+
+
+def test_bulk_tag_notes(logged_in_client):
+    logged_in_client.post("/notes", data={"title": "Bulktag een", "content": "", "tags": ""})
+    logged_in_client.post("/notes", data={"title": "Bulktag twee", "content": "", "tags": "bestaand"})
+
+    listing = logged_in_client.get("/notes").text
+    ids = _note_ids_for_titles(listing, ["Bulktag een", "Bulktag twee"])
+
+    response = logged_in_client.post(
+        "/notes/bulk-tag", data={"note_ids": ids, "tag": "gedeeld"}, follow_redirects=False
+    )
+    assert response.status_code == 303
+
+    filtered = logged_in_client.get("/notes?tag=gedeeld").text
+    assert "Bulktag een" in filtered
+    assert "Bulktag twee" in filtered
+
+    # Bestaande tag van de tweede notitie moet behouden blijven.
+    listing_after = logged_in_client.get("/notes").text
+    assert "bestaand" in listing_after

@@ -8,17 +8,33 @@
 
 {% if active_tag %}<a href="/notes" class="btn btn-secondary" style="margin-bottom:12px;display:inline-block">Tag-filter wissen</a>{% endif %}
 
-<div class="notes-grid">
-  {% for note in notes %}
-  <div class="note-card" style="{{ note.row_tint_style }}">
-    <a href="/notes/{{ note.id }}/edit" class="note-card-title">{{ note.title }}</a>
-    <div class="note-card-preview">{{ note.content|safe }}</div>
-    <div class="note-card-tags">
-      {% for t in note.tags %}<a class="tag" style="{{ t.badge_style }}" href="/notes?tag={{ t.name }}">{{ t.name }}</a>{% endfor %}
-    </div>
+<form method="post" id="notes-bulk-form">
+  {% if active_tag %}<input type="hidden" name="tag_filter" value="{{ active_tag }}">{% endif %}
+
+  <div class="notes-bulk-bar" id="notes-bulk-bar" hidden>
+    <span id="notes-bulk-count">0 geselecteerd</span>
+    <input type="text" name="tag" placeholder="Tag toevoegen aan selectie">
+    <button type="submit" formaction="/notes/bulk-tag" class="btn btn-secondary">Tag toevoegen</button>
+    <button type="submit" formaction="/notes/bulk-delete" class="btn btn-danger" onclick="return confirm('Geselecteerde notities verwijderen?')">Verwijderen</button>
   </div>
-  {% else %}
-  <p>Nog geen notities. Maak er één aan.</p>
-  {% endfor %}
-</div>
+
+  <div class="notes-grid">
+    {% for note in notes %}
+    <div class="note-card" data-href="/notes/{{ note.id }}/edit" style="{{ note.row_tint_style }}">
+      <div class="note-card-header">
+        <input type="checkbox" class="note-select" name="note_ids" value="{{ note.id }}">
+        <a href="/notes/{{ note.id }}/edit" class="note-card-title">{{ note.title }}</a>
+      </div>
+      <div class="note-card-preview">{{ note.content|safe }}</div>
+      <div class="note-card-tags">
+        {% for t in note.tags %}<a class="tag" style="{{ t.badge_style }}" href="/notes?tag={{ t.name }}">{{ t.name }}</a>{% endfor %}
+      </div>
+    </div>
+    {% else %}
+    <p>Nog geen notities. Maak er één aan.</p>
+    {% endfor %}
+  </div>
+</form>
+
+<script src="/static/js/notes-list.js"></script>
 {% endblock %}

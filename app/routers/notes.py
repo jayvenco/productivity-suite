@@ -44,6 +44,43 @@ def list_notes(
     )
 
 
+def _redirect_to_list(tag_filter: str | None) -> RedirectResponse:
+    return RedirectResponse(f"/notes?tag={tag_filter}" if tag_filter else "/notes", status_code=303)
+
+
+@router.post("/bulk-delete")
+async def bulk_delete_notes(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    form = await request.form()
+    note_ids = [int(v) for v in form.getlist("note_ids")]
+    if note_ids:
+        db.query(Note).filter(Note.id.in_(note_ids), Note.user_id == user.id).delete(synchronize_session=False)
+        db.commit()
+    return _redirect_to_list(form.get("tag_filter") or None)
+
+
+@router.post("/bulk-tag")
+async def bulk_tag_notes(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    """Voegt een tag toe aan alle geselecteerde notities (bestaande tags blijven staan)."""
+    form = await request.form()
+    note_ids = [int(v) for v in form.getlist("note_ids")]
+    tag_name = (form.get("tag") or "").strip()
+
+    if note_ids and tag_name:
+        notes = (
+            db.query(Note)
+            .options(selectinload(Note.tags))
+            .filter(Note.id.in_(note_ids), Note.user_id == user.id)
+            .all()
+        )
+        new_tags = resolve_tags(db, tag_name)
+        for note in notes:
+            for t in new_tags:
+                if t not in note.tags:
+                    note.tags.append(t)
+        db.commit()
+    return _redirect_to_list(form.get("tag_filter") or None)
+
+
 @router.get("/new")
 def new_note_form(request: Request, user: User = Depends(require_user)):
     return templates.TemplateResponse(request, "notes/form.html", {"user": user, "note": None})

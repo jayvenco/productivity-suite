@@ -38,7 +38,10 @@ Gebouwd:
 - **Notities**: lichte rich-text editor met knoppenbalk (vet, cursief, koppen, opsommingen,
   genummerde lijsten, links, code) — geen markdown-syntax typen nodig, wat je ziet is wat er
   opgeslagen wordt. Inhoud is HTML, server-side gesanitized (`bleach`) tegen XSS. Taggable met
-  hetzelfde gedeelde tag-systeem (kleuren, filteren) als taken/kanban
+  hetzelfde gedeelde tag-systeem (kleuren, filteren) als taken/kanban. De hele kaart in de
+  lijstweergave is klikbaar om te bewerken, en een **selectievak per notitie** maakt
+  bulk-acties mogelijk: meerdere notities in één keer verwijderen of er samen een tag aan
+  toevoegen
 
 Nog niet gebouwd: volledige kalenderweergave (maand/week), code snippets (link in de sidebar
 toont "binnenkort"), CI/CD, backup/export-import, spraaknotities, LLM-koppeling.
@@ -129,7 +132,10 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    knoppenbalk, een kop toepassen, een lijst en een link toevoegen, plus tags → controleer dat
    de kaart in de lijstweergave de opmaak en gekleurde tags toont (elke tag een andere, bij
    aanmaak willekeurig gekozen kleur), en dat de kaart een lichte tint krijgt op basis van de
-   eerste tag. Filteren op tag uitproberen.
+   eerste tag. Filteren op tag uitproberen. Klik ergens op een kaart (niet alleen de titel) →
+   opent de bewerkpagina. Vink twee notities aan via het selectievakje → de bulk-balk
+   verschijnt bovenaan; voeg een tag toe aan de selectie en controleer dat beide notities 'm
+   krijgen zonder bestaande tags te verliezen, en test daarna bulk-verwijderen.
 10. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
 
 ## Architectuur
@@ -181,6 +187,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   HTML. Vóór het opslaan wordt de HTML server-side gesanitized (`app/services/richtext.py`,
   via `bleach`) tegen een vaste tag/attribuut-whitelist, want de inhoud wordt met `|safe`
   gerenderd en `contenteditable` kan in theorie geplakte HTML van buitenaf bevatten.
+- **Notities-lijst — klikbare kaart + bulk-acties**: de hele kaart is klikbaar (via
+  `app/static/js/notes-list.js`, dat klikken op checkbox/tags/links doorlaat maar de rest
+  doorstuurt naar de bewerkpagina). Eén `<form>` omvat de hele grid plus de bulk-actiebalk;
+  elke checkbox heet `note_ids` zodat de browser bij versturen automatisch alle aangevinkte
+  id's meestuurt — geen JS nodig om een verborgen veld te synchroniseren. De twee
+  submit-knoppen sturen naar een andere `formaction` (`/notes/bulk-delete` resp.
+  `/notes/bulk-tag`) met dezelfde geselecteerde id's.
 - **Pomodoro** bewaart alleen start-tijd + geplande duur per sessie; de countdown-ring wordt
   client-side berekend zodat een pagina-refresh niets verliest. Er is bewust geen pauzeknop
   (alleen start/stop) om de tijdsberekening simpel te houden.
