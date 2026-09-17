@@ -1,7 +1,22 @@
 {% extends "base.html" %}
 {% block title %}Kanban - Productivity Suite{% endblock %}
+
+{% macro md_toolbar() %}
+<div class="md-toolbar">
+  <button type="button" data-md="bold" title="Vet"><b>V</b></button>
+  <button type="button" data-md="italic" title="Cursief"><i>C</i></button>
+  <button type="button" data-md="heading" title="Kop">Kop</button>
+  <button type="button" data-md="bullet" title="Opsomming">• Lijst</button>
+  <button type="button" data-md="link" title="Link invoegen">Link</button>
+  <button type="button" data-md="code" title="Code">&lt;/&gt;</button>
+  <button type="button" class="add-checklist-item-btn" title="Checklist-item toevoegen">☑ Item</button>
+</div>
+{% endmacro %}
+
 {% block content %}
 <h2>{{ board.name }}</h2>
+
+<div class="kanban-modal-backdrop" id="kanban-modal-backdrop" hidden></div>
 
 <div class="board-swimlanes">
   {% for swimlane in board.swimlanes %}
@@ -23,16 +38,22 @@
                 <button type="submit">Verwijder</button>
               </form>
             </div>
-            <form method="post" action="/kanban/cards/{{ card.id }}" class="card-edit-form" id="card-edit-{{ card.id }}" hidden>
+            <form method="post" action="/kanban/cards/{{ card.id }}" class="card-edit-form kanban-modal" id="card-edit-{{ card.id }}" hidden>
+              <h3 class="kanban-modal-title">Kaart bewerken</h3>
               <input type="text" name="title" value="{{ card.title }}" required>
-              <textarea name="description" rows="3">{{ card.description }}</textarea>
-              <button type="button" class="btn btn-secondary add-checklist-item-btn">+ Checklist-item</button>
+              <div class="md-editor">
+                {{ md_toolbar() }}
+                <textarea name="description" class="md-textarea" rows="10">{{ card.description }}</textarea>
+              </div>
               <input type="text" name="tags" placeholder="Tags (komma-gescheiden)" value="{{ card.tags|map(attribute='name')|join(', ') }}">
               <div class="card-color-row">
                 <input type="color" name="color" value="{{ card.color or '#6c7086' }}">
                 <label><input type="checkbox" name="clear_color" value="true"> Geen kleur</label>
               </div>
-              <button type="submit" class="btn">Opslaan</button>
+              <div class="kanban-modal-actions">
+                <button type="submit" class="btn">Opslaan</button>
+                <button type="button" class="btn btn-secondary card-edit-cancel">Annuleren</button>
+              </div>
             </form>
           </div>
           {% endfor %}
@@ -43,8 +64,10 @@
             <input type="hidden" name="column_id" value="{{ column.id }}">
             <input type="hidden" name="swimlane_id" value="{{ swimlane.id }}">
             <input type="text" name="title" placeholder="Titel" required>
-            <textarea name="description" placeholder="Beschrijving" rows="2"></textarea>
-            <button type="button" class="btn btn-secondary add-checklist-item-btn">+ Checklist-item</button>
+            <div class="md-editor">
+              {{ md_toolbar() }}
+              <textarea name="description" class="md-textarea" placeholder="Beschrijving" rows="4"></textarea>
+            </div>
             <input type="text" name="tags" placeholder="Tags (komma-gescheiden)">
             <button type="submit" class="btn">Toevoegen</button>
           </form>
@@ -72,4 +95,5 @@
 </details>
 
 <script src="/static/js/kanban.js"></script>
+<script src="/static/js/markdown-toolbar.js"></script>
 {% endblock %}

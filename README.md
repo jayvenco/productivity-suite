@@ -17,9 +17,12 @@ Gebouwd:
   welke kolom bij welke swimlane hoort), drag-and-drop tussen kolommen binnen een swimlane,
   kaarten los van taken
 - Kanban-kaarten zijn **bewerkbaar** (titel, beschrijving, tags) en kunnen een **accentkleur**
-  krijgen (kleurenpicker, zichtbaar als gekleurde rand links op de kaart)
+  krijgen (kleurenpicker, zichtbaar als gekleurde rand links op de kaart). Bewerken opent een
+  **grotere, gecentreerde modal** (i.p.v. inline in de smalle kolom) met een **opmaak-werkbalk**
+  (vet, cursief, kop, opsomming, code, en een link-knop die een URL + linktekst vraagt en er
+  een klikbare markdown-link van maakt)
 - Checklists in kaartbeschrijvingen (`- [ ] item`) — aanklikbaar, direct persistent; een
-  "+ Checklist-item"-knop voegt de syntax voor je toe
+  "☑ Item"-knop op de werkbalk voegt de syntax voor je toe
 - Gedeeld tag-systeem (taken + kanban-kaarten): elke tag krijgt automatisch een eigen,
   stabiele kleur; filteren op tag, **sorteren** (deadline/titel/prioriteit/status) en
   **groeperen op tag** (dat is hier ook het "project"-alternatief — er is geen apart
@@ -48,8 +51,10 @@ Gebouwd:
   toevoegen
 - **Code snippets** (ByteStash-stijl): een snippet kan **meerdere bestanden** bevatten (bv.
   `main.py` + `requirements.txt` bij elkaar), elk met een eigen taal voor **syntax
-  highlighting** (highlight.js). Doorzoekbaar op titel én op code-inhoud, taggable met
-  hetzelfde gedeelde tag-systeem
+  highlighting** (highlight.js). Kaarten staan in de lijst **standaard ingeklapt** (alleen
+  titel, tags en bestandsnamen) — klik erop om de code te tonen, net als notities. Eén
+  zoekveld doorzoekt titel, tag én code-inhoud tegelijk, taggable met hetzelfde gedeelde
+  tag-systeem
 
 Nog niet gebouwd: volledige kalenderweergave (maand/week), CI/CD, backup/export-import,
 spraaknotities, LLM-koppeling.
@@ -127,8 +132,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    en daar een eigen kolom aan toevoegen → controleer dat die kolom alleen in díe swimlane
    verschijnt. Een kaart aanmaken met een checklist (`- [ ] item`) → klik een checklist-item
    aan en herlaad de pagina om te controleren dat het aangevinkt blijft. Klik "Bewerken" op
-   een kaart, geef 'm een titel/kleur/tags en controleer dat de gekleurde rand verschijnt en
-   blijft na herladen.
+   een kaart → een grotere, gecentreerde modal opent met een opmaak-werkbalk. Selecteer tekst
+   en klik Vet/Cursief, en probeer de Link-knop (vraagt om een URL) → controleer na opslaan
+   dat de kaart een klikbare link toont. Geef de kaart ook een titel/kleur/tags en controleer
+   dat de gekleurde rand verschijnt en blijft na herladen. Klik op de achtergrond (backdrop)
+   of "Annuleren" om de modal te sluiten zonder op te slaan.
 6. Kaart verslepen naar een andere kolom/swimlane (drag-and-drop) → herlaad de pagina en
    controleer dat de cel-toewijzing bewaard is gebleven.
 7. Klik op "Pomodoro" in de sidebar → het zwevende paneel opent rechtsonder. Sleep het paneel
@@ -150,10 +158,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    krijgen zonder bestaande tags te verliezen, en test daarna bulk-verwijderen.
 10. Naar Snippets gaan, een snippet aanmaken met titel + tags, en via "+ Bestand toevoegen"
     een tweede bestand met een andere taal toevoegen (bv. `main.py` als python en
-    `requirements.txt` als plaintext) → controleer dat beide bestanden apart met syntax
-    highlighting getoond worden in de lijst. Zoek op een woord dat alleen in de code van één
-    snippet voorkomt (niet in de titel) → alleen die snippet verschijnt. Filteren op tag
-    uitproberen.
+    `requirements.txt` als plaintext) → controleer dat de kaart in de lijst standaard
+    ingeklapt staat (alleen titel/tags/bestandsnamen); klik erop om de code met syntax
+    highlighting te tonen, en nogmaals om weer in te klappen. Zoek op een woord dat alleen in
+    de tag van één snippet voorkomt en daarna op een woord dat alleen in de titel voorkomt →
+    beide vinden de juiste snippet. Filteren op tag uitproberen.
 11. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
 
 ## Architectuur
@@ -234,7 +243,22 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   kloont het laatste bestand-blok i.p.v. de talenlijst te dupliceren in JS, en maakt de kloon
   leeg. Minstens één bestand blijft altijd staan.
 - **Snippets — syntax highlighting**: highlight.js via CDN, alleen geladen op de lijstpagina.
-  Zoeken (`?q=`) filtert op titel ÓF code-inhoud (`Snippet.files.any(SnippetFile.content.ilike(...))`).
+  Zoeken (`?q=`) filtert op titel, tag-naam ÓF code-inhoud in één keer
+  (`Snippet.tags.any(Tag.name.ilike(...))` / `Snippet.files.any(SnippetFile.content.ilike(...))`).
+- **Snippets — standaard ingeklapt**: de code (`.snippet-files`) staat standaard `hidden`; een
+  klik op de titel (`app/static/js/snippets-list.js`) toont/verbergt 'm. `hljs.highlightAll()`
+  verwerkt de code-blokken sowieso bij het laden, ook terwijl ze verborgen zijn — highlight.js
+  werkt op de DOM, niet op wat er zichtbaar is.
+- **Kanban-kaart bewerken als modal**: `.card-edit-form.kanban-modal` gebruikt
+  `position: fixed` + een losse backdrop-div, dus geen JS-herstructurering nodig — alleen CSS
+  om de bestaande, per-kaart formulieren gecentreerd en groter te tonen i.p.v. inline in de
+  smalle kolom.
+- **Kanban-kaart — markdown-werkbalk i.p.v. rich text**: bewust een aparte aanpak dan de
+  notitie-editor (die is `contenteditable` + HTML). Kanban-kaarten gebruiken nog steeds platte,
+  regel-gebaseerde markdown omdat de checklist-functie (`- [ ] item`) daarop leunt; een
+  contenteditable-editor zou die regel-gebaseerde herkenning breken. De werkbalk
+  (`app/static/js/markdown-toolbar.js`) manipuleert daarom de tekst in een gewone `<textarea>`
+  (selectie omwikkelen, regels prefixen, markdown-links invoegen) i.p.v. `execCommand`.
 - **Deadline-gradiëntbalk**: kleur wordt server-side berekend (`Task.urgency_color`) op basis
   van een venster van 14 dagen — antraciet (`rgb(63,63,70)`) ver van de deadline, lineair naar
   donkeroranje (`rgb(154,52,18)`) op de deadline zelf, en blijft donkeroranje bij een

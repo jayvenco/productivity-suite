@@ -46,9 +46,14 @@ def test_create_snippet_with_multiple_files(logged_in_client):
 
 
 def _snippet_id_for_title(html: str, title: str) -> str:
-    match = re.search(rf'/snippets/(\d+)/edit"[^>]*>{re.escape(title)}<', html)
-    assert match, f"Snippet met titel {title!r} niet gevonden"
-    return match.group(1)
+    """Zoekt het data-snippet-id horend bij deze titel. Zoekt terug vanaf de titel
+    naar de dichtstbijzijnde voorgaande data-snippet-id, i.p.v. voorwaarts (dat zou
+    per ongeluk het id van een eerdere kaart kunnen pakken als er meerdere zijn)."""
+    marker = f'snippet-card-title-text">{title}<'
+    idx = html.index(marker)
+    matches = list(re.finditer(r'data-snippet-id="(\d+)"', html[:idx]))
+    assert matches, f"Snippet met titel {title!r} niet gevonden"
+    return matches[-1].group(1)
 
 
 def test_edit_snippet(logged_in_client):
@@ -129,3 +134,50 @@ def test_search_snippets_by_content(logged_in_client):
     results = logged_in_client.get("/snippets?q=unique_needle_function").text
     assert "Zoekbare snippet" in results
     assert "Andere snippet" not in results
+
+
+def test_search_snippets_by_title(logged_in_client):
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "Uniek titelwoord", "tags": "", "filename": ["a.py"], "language": ["python"], "content": [""]},
+    )
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "Iets anders", "tags": "", "filename": ["b.py"], "language": ["python"], "content": [""]},
+    )
+
+    results = logged_in_client.get("/snippets?q=Uniek titelwoord").text
+    assert "Uniek titelwoord" in results
+    assert "Iets anders" not in results
+
+
+def test_search_snippets_by_tag(logged_in_client):
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "Getagde snippet", "tags": "zeldzametag", "filename": ["a.py"], "language": ["python"], "content": [""]},
+    )
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "Ongetagde snippet", "tags": "", "filename": ["b.py"], "language": ["python"], "content": [""]},
+    )
+
+    results = logged_in_client.get("/snippets?q=zeldzametag").text
+    assert "Getagde snippet" in results
+    assert "Ongetagde snippet" not in results
+
+
+def test_collapsed_snippet_ui_present(logged_in_client):
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "Inklaptest", "tags": "", "filename": ["a.py"], "language": ["python"], "content": ["x = 1"]},
+    )
+    listing = logged_in_client.get("/snippets").text
+    snippet_id = _snippet_id_for_title(listing, "Inklaptest")
+
+    # De code-inhoud moet standaard verborgen zijn (achter een hidden container).
+    files_marker = f'id="snippet-files-{snippet_id}"'
+    assert files_marker in listing
+    files_start = listing.index(files_marker)
+    # De 'hidden'-attribuut moet vlak vóór de afsluitende '>' van deze div staan.
+    div_end = listing.index(">", files_start)
+    assert "hidden" in listing[files_start:div_end]

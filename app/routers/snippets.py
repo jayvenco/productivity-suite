@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.auth.dependencies import require_user
 from app.database import get_db
 from app.models.snippet import Snippet, SnippetFile
+from app.models.tag import Tag
 from app.models.user import User
 from app.services.tags import resolve_tags
 from app.templating import templates
@@ -68,7 +69,13 @@ def list_snippets(
         query = query.filter(Snippet.tags.any(name=tag))
     if q:
         like = f"%{q}%"
-        query = query.filter(or_(Snippet.title.ilike(like), Snippet.files.any(SnippetFile.content.ilike(like))))
+        query = query.filter(
+            or_(
+                Snippet.title.ilike(like),
+                Snippet.tags.any(Tag.name.ilike(like)),
+                Snippet.files.any(SnippetFile.content.ilike(like)),
+            )
+        )
 
     snippets = query.order_by(Snippet.updated_at.desc()).all()
     return templates.TemplateResponse(

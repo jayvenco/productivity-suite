@@ -433,11 +433,53 @@ th, td {
   margin-top: 6px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .card-edit-form[hidden] {
   display: none;
+}
+
+/* De open kaart-editor toont als een gecentreerde, grotere modal i.p.v. inline
+   in de smalle kolom -- er is dan simpelweg meer ruimte voor de werkbalk en tekst. */
+.kanban-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 900;
+}
+
+.kanban-modal-backdrop[hidden] {
+  display: none;
+}
+
+.card-edit-form.kanban-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 560px;
+  max-width: 92vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  padding: 16px 18px;
+  z-index: 901;
+  cursor: default;
+}
+
+.kanban-modal-title {
+  margin: 0 0 4px;
+  font-size: 15px;
+}
+
+.kanban-modal-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
 }
 
 .card-color-row {
@@ -461,6 +503,38 @@ th, td {
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.md-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.md-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.md-toolbar button {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 12px;
+  width: auto;
+}
+
+.md-toolbar button:hover {
+  background: var(--bg-hover);
+}
+
+.md-textarea {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 13px;
 }
 
 .markdown-preview {
@@ -649,16 +723,42 @@ th, td {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
 }
 
-.snippet-card-title {
-  font-weight: 600;
+.snippet-card-header-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.snippet-toggle {
+  background: none;
+  border: none;
   color: var(--text);
-  text-decoration: none;
-  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  text-align: left;
+  min-width: 0;
 }
 
-.snippet-card-title:hover {
+.snippet-toggle-arrow {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.snippet-card-title-text {
+  font-weight: 600;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snippet-toggle:hover .snippet-card-title-text {
   text-decoration: underline;
 }
 
@@ -667,6 +767,16 @@ th, td {
   flex-wrap: wrap;
   gap: 4px;
   margin: 6px 0;
+}
+
+.snippet-file-badge {
+  background: none;
+  color: var(--text-muted);
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+}
+
+.snippet-files[hidden] {
+  display: none;
 }
 
 .snippet-file {

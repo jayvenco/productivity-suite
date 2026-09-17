@@ -7,8 +7,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let draggedCard = null;
 
   board.addEventListener("dragstart", (event) => {
-    // Niet slepen als de gebruiker in het bewerk-formulier aan het typen/klikken is.
-    if (event.target.closest("input, textarea, button, select, label")) {
+    // Niet slepen als de gebruiker in het bewerk-formulier (of de modal eromheen)
+    // aan het typen/klikken is.
+    if (event.target.closest("input, textarea, button, select, label, .card-edit-form")) {
       event.preventDefault();
       return;
     }
@@ -74,12 +75,35 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // "Bewerken"-knop op een kaart klapt het edit-formulier open/dicht.
+  // "Bewerken"-knop op een kaart opent het bewerk-formulier als modal (met backdrop).
+  const backdrop = document.getElementById("kanban-modal-backdrop");
+
+  function openCardEditModal(form) {
+    form.hidden = false;
+    backdrop.hidden = false;
+  }
+
+  function closeCardEditModal(form) {
+    form.hidden = true;
+    backdrop.hidden = true;
+  }
+
   board.addEventListener("click", (event) => {
     const toggle = event.target.closest(".card-edit-toggle");
     if (!toggle) return;
     const form = document.getElementById(`card-edit-${toggle.dataset.cardId}`);
-    if (form) form.hidden = !form.hidden;
+    if (form) openCardEditModal(form);
+  });
+
+  board.addEventListener("click", (event) => {
+    const cancelBtn = event.target.closest(".card-edit-cancel");
+    if (!cancelBtn) return;
+    closeCardEditModal(cancelBtn.closest(".card-edit-form"));
+  });
+
+  backdrop.addEventListener("click", () => {
+    const openForm = document.querySelector(".card-edit-form:not([hidden])");
+    if (openForm) closeCardEditModal(openForm);
   });
 
   // "+ Checklist-item": voegt een lege "- [ ] "-regel toe aan de beschrijving,

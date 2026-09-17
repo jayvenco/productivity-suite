@@ -9,7 +9,7 @@
 
 <form method="get" action="/snippets" class="task-controls">
   {% if active_tag %}<input type="hidden" name="tag" value="{{ active_tag }}">{% endif %}
-  <input type="text" name="q" placeholder="Zoeken in titel of code..." value="{{ q }}" style="max-width:280px">
+  <input type="text" name="q" placeholder="Zoeken op titel of tag..." value="{{ q }}" style="max-width:280px">
   <button type="submit" class="btn btn-secondary">Zoeken</button>
   {% if active_tag or q %}<a href="/snippets" class="btn btn-secondary">Filters wissen</a>{% endif %}
 </form>
@@ -18,20 +18,29 @@
   {% for snippet in snippets %}
   <div class="snippet-card" style="{{ snippet.row_tint_style }}">
     <div class="snippet-card-header">
-      <a href="/snippets/{{ snippet.id }}/edit" class="snippet-card-title">{{ snippet.title }}</a>
-      <form method="post" action="/snippets/{{ snippet.id }}/delete" onsubmit="return confirm('Snippet verwijderen?')">
-        <button type="submit" class="btn btn-danger">Verwijder</button>
-      </form>
+      <button type="button" class="snippet-toggle" data-snippet-id="{{ snippet.id }}">
+        <span class="snippet-toggle-arrow">▸</span>
+        <span class="snippet-card-title-text">{{ snippet.title }}</span>
+      </button>
+      <div class="snippet-card-header-actions">
+        <a href="/snippets/{{ snippet.id }}/edit" class="btn btn-secondary">Bewerken</a>
+        <form method="post" action="/snippets/{{ snippet.id }}/delete" onsubmit="return confirm('Snippet verwijderen?')">
+          <button type="submit" class="btn btn-danger">Verwijder</button>
+        </form>
+      </div>
     </div>
     <div class="snippet-card-tags">
       {% for t in snippet.tags %}<a class="tag" style="{{ t.badge_style }}" href="/snippets?tag={{ t.name }}">{{ t.name }}</a>{% endfor %}
+      {% for file in snippet.files %}<span class="tag snippet-file-badge">{{ file.filename }}</span>{% endfor %}
     </div>
-    {% for file in snippet.files %}
-    <div class="snippet-file">
-      <div class="snippet-file-name">{{ file.filename }} <span class="snippet-file-lang">{{ file.language }}</span></div>
-      <pre><code class="language-{{ file.language }}">{{ file.content }}</code></pre>
+    <div class="snippet-files" id="snippet-files-{{ snippet.id }}" hidden>
+      {% for file in snippet.files %}
+      <div class="snippet-file">
+        <div class="snippet-file-name">{{ file.filename }} <span class="snippet-file-lang">{{ file.language }}</span></div>
+        <pre><code class="language-{{ file.language }}">{{ file.content }}</code></pre>
+      </div>
+      {% endfor %}
     </div>
-    {% endfor %}
   </div>
   {% else %}
   <p>Nog geen snippets. Maak er één aan.</p>
@@ -40,4 +49,5 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>hljs.highlightAll();</script>
+<script src="/static/js/snippets-list.js"></script>
 {% endblock %}
