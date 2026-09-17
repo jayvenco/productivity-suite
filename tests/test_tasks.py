@@ -81,3 +81,53 @@ def test_each_tag_gets_a_distinct_color(logged_in_client):
     # Twee verschillende tags -> minstens twee verschillende hue-waarden in de badges.
     hues = set(re.findall(r"hsl\((\d+),", listing))
     assert len(hues) >= 2
+
+
+def _task_id_for_title(html: str, title: str) -> str:
+    match = re.search(rf'/tasks/(\d+)/edit">{re.escape(title)}</a>', html)
+    assert match, f"Taak met titel {title!r} niet gevonden"
+    return match.group(1)
+
+
+def test_toggle_done_marks_task_done_and_back(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Snel afvinken", "description": "", "deadline": "", "tags": ""})
+    listing = logged_in_client.get("/tasks").text
+    task_id = _task_id_for_title(listing, "Snel afvinken")
+
+    response = logged_in_client.post(f"/tasks/{task_id}/toggle-done", follow_redirects=False)
+    assert response.status_code == 303
+
+    after_done = logged_in_client.get("/tasks").text
+    assert "task-row-done" in after_done
+
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+    after_reopen = logged_in_client.get("/tasks").text
+    assert "task-row-done" not in after_reopen
+
+
+def test_toggle_done_preserves_sort_and_group_by(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Behoud filter", "description": "", "deadline": "", "tags": "werk"}
+    )
+    listing = logged_in_client.get("/tasks?sort=title&group_by=tag").text
+    task_id = _task_id_for_title(listing, "Behoud filter")
+
+    response = logged_in_client.post(
+        f"/tasks/{task_id}/toggle-done",
+        data={"sort": "title", "group_by": "tag"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    location = response.headers["location"]
+    assert "sort=title" in location
+    assert "group_by=tag" in location
+
+    # Terugzetten voor eventuele volgende tests in deze module.
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+
+
+def test_tables_use_fixed_layout_for_stable_alignment(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Uitlijning", "description": "", "deadline": "", "tags": "werk"})
+    listing = logged_in_client.get("/tasks?status_filter=todo").text
+    assert "tasks-table" in listing
+    assert 'col class="col-title"' in listing

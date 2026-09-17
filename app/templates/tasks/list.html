@@ -1,8 +1,17 @@
 {% extends "base.html" %}
 {% block title %}Taken - Productivity Suite{% endblock %}
 
-{% macro task_row(task) %}
-<tr style="{{ task.row_tint_style }}">
+{% macro task_row(task, sort, group_by, active_tag, active_status) %}
+<tr style="{{ task.row_tint_style }}" class="{{ 'task-row-done' if task.status.value == 'done' }}">
+  <td class="task-done-cell">
+    <form method="post" action="/tasks/{{ task.id }}/toggle-done">
+      <input type="hidden" name="sort" value="{{ sort }}">
+      <input type="hidden" name="group_by" value="{{ group_by }}">
+      {% if active_tag %}<input type="hidden" name="tag" value="{{ active_tag }}">{% endif %}
+      {% if active_status %}<input type="hidden" name="status_filter" value="{{ active_status }}">{% endif %}
+      <input type="checkbox" onchange="this.form.submit()" title="Taak afronden" {{ 'checked' if task.status.value == 'done' }}>
+    </form>
+  </td>
   <td>
     {% if task.priority %}<span class="priority-star" title="Prioriteit">★</span>{% endif %}
     <a href="/tasks/{{ task.id }}/edit">{{ task.title }}</a>
@@ -21,10 +30,35 @@
   </td>
   <td>
     <form method="post" action="/tasks/{{ task.id }}/delete" onsubmit="return confirm('Taak verwijderen?')">
+      <input type="hidden" name="sort" value="{{ sort }}">
+      <input type="hidden" name="group_by" value="{{ group_by }}">
+      {% if active_tag %}<input type="hidden" name="tag" value="{{ active_tag }}">{% endif %}
+      {% if active_status %}<input type="hidden" name="status_filter" value="{{ active_status }}">{% endif %}
       <button type="submit" class="btn btn-danger">Verwijder</button>
     </form>
   </td>
 </tr>
+{% endmacro %}
+
+{% macro table_head() %}
+<colgroup>
+  <col class="col-done">
+  <col class="col-title">
+  <col class="col-status">
+  <col class="col-deadline">
+  <col class="col-tags">
+  <col class="col-actions">
+</colgroup>
+<thead>
+  <tr>
+    <th></th>
+    <th>Titel</th>
+    <th>Status</th>
+    <th>Deadline</th>
+    <th>Tags</th>
+    <th></th>
+  </tr>
+</thead>
 {% endmacro %}
 
 {% block content %}
@@ -56,36 +90,20 @@
 {% if groups is not none %}
   {% for group_name, group_tasks in groups %}
   <h3 class="task-group-heading">{{ group_name }}</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Titel</th>
-        <th>Status</th>
-        <th>Deadline</th>
-        <th>Tags</th>
-        <th></th>
-      </tr>
-    </thead>
+  <table class="tasks-table">
+    {{ table_head() }}
     <tbody>
-      {% for task in group_tasks %}{{ task_row(task) }}{% endfor %}
+      {% for task in group_tasks %}{{ task_row(task, sort, group_by, active_tag, active_status) }}{% endfor %}
     </tbody>
   </table>
   {% endfor %}
 {% else %}
-<table>
-  <thead>
-    <tr>
-      <th>Titel</th>
-      <th>Status</th>
-      <th>Deadline</th>
-      <th>Tags</th>
-      <th></th>
-    </tr>
-  </thead>
+<table class="tasks-table">
+  {{ table_head() }}
   <tbody>
-    {% for task in tasks %}{{ task_row(task) }}
+    {% for task in tasks %}{{ task_row(task, sort, group_by, active_tag, active_status) }}
     {% else %}
-    <tr><td colspan="5">Nog geen taken. Maak er één aan.</td></tr>
+    <tr><td colspan="6">Nog geen taken. Maak er één aan.</td></tr>
     {% endfor %}
   </tbody>
 </table>

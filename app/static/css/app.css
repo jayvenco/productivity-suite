@@ -153,6 +153,38 @@ th, td {
   border-bottom: 1px solid var(--border);
 }
 
+/* Vaste kolombreedtes i.p.v. browser auto-sizing: anders lijnen kolommen niet uit
+   tussen filters/groepen, omdat elke <table> anders zijn breedtes berekent op basis
+   van alleen zijn eigen inhoud (bv. de langste titel in die ene groep). */
+.tasks-table {
+  table-layout: fixed;
+}
+
+.tasks-table col.col-done { width: 32px; }
+.tasks-table col.col-title { width: 32%; }
+.tasks-table col.col-status { width: 12%; }
+.tasks-table col.col-deadline { width: 20%; }
+.tasks-table col.col-tags { width: 26%; }
+.tasks-table col.col-actions { width: 90px; }
+
+.tasks-table td {
+  overflow-wrap: break-word;
+}
+
+.task-done-cell {
+  text-align: center;
+}
+
+.task-done-cell input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+}
+
+.task-row-done a {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
 .tag {
   display: inline-block;
   background: var(--bg-hover);

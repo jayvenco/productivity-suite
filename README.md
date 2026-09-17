@@ -23,9 +23,12 @@ Gebouwd:
   **groeperen op tag** (dat is hier ook het "project"-alternatief — er is geen apart
   projectveld, tags dienen als project/categorie) op de takenlijst. Een taak met tags krijgt
   een lichte kleurtint op de rij, gebaseerd op de eerste tag
-- Taken hebben een **prioriteitsvinkje** (★, sorteert bovenaan de takenlijst) en een dunne
+- Taken hebben een **prioriteitsvinkje** (★, sorteert bovenaan de takenlijst), een
+  **snel-afvink-vinkje** (zet de taak direct op "done", of terug naar "todo") en een dunne
   **deadline-gradiëntbalk** onder de deadline-datum (halve breedte van die cel) die geleidelijk
   van antraciet naar donkeroranje kleurt naarmate de deadline nadert of al verstreken is
+- Takenlijst-tabellen hebben **vaste kolombreedtes**, zodat ze uitlijnen ongeacht filter,
+  sortering of groepering
 - **Pomodoro-timer** in de sidebar: instelbare werk-/pauze-duur, optioneel gekoppeld aan
   een taak, live aftellende ring-animatie, automatische overgang werk → pauze, geschiedenis
   zichtbaar op de taakpagina
@@ -97,10 +100,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 2. Nieuwe taak aanmaken met titel, beschrijving (markdown), deadline binnen 3 dagen en tags
    → controleer dat de "bijna deadline"-badge verschijnt op de takenlijst én in het
    "Komende deadlines"-widgetje in de sidebar.
-3. Taak bewerken en status wijzigen naar "done".
+3. Taak bewerken en status wijzigen naar "done". Op de takenlijst het snel-afvink-vinkje
+   gebruiken → status wisselt direct tussen "todo" en "done", en de huidige
+   sortering/groepering/filter blijft daarbij behouden (ook na filteren op status/tag).
 4. Op een tag klikken in de takenlijst → filtert de lijst. Taken aanmaken met verschillende
    tags → controleer dat elke tag een eigen kleur heeft en dat de taakrij een lichte tint van
-   die kleur krijgt. Sorteren op titel/prioriteit/status en groeperen op tag uitproberen.
+   die kleur krijgt. Sorteren op titel/prioriteit/status en groeperen op tag uitproberen, en
+   controleren dat de kolommen precies uitlijnen tussen groepen/filters.
 5. Naar Kanban gaan, een swimlane toevoegen (krijgt automatisch eigen Todo/In Progress/Done)
    en daar een eigen kolom aan toevoegen → controleer dat die kolom alleen in díe swimlane
    verschijnt. Een kaart aanmaken met een checklist (`- [ ] item`) → klik een checklist-item
@@ -145,6 +151,15 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 - **Groeperen op tag**: een taak met meerdere tags verschijnt in elke bijbehorende groep
   (geen kunstmatige keuze voor "de hoofdtag"); taken zonder tag komen in een aparte
   "Zonder tag"-groep aan het eind.
+- **Vaste kolombreedtes** (`.tasks-table { table-layout: fixed }` + `<colgroup>`): zonder dit
+  berekent de browser de kolombreedtes per `<table>` op basis van alleen de inhoud van díe
+  tabel, wat de kolommen liet verspringen tussen filters en tussen groepen (elke groep is een
+  eigen `<table>`). Nu staat elke kolombreedte vast, ongeacht wat erin staat.
+- **Snel-afvink-vinkje**: een losse `POST /tasks/{id}/toggle-done` die alleen de status
+  wisselt tussen `todo` en `done` (i.p.v. het hele bewerk-formulier te doorlopen). De huidige
+  sortering/groepering/filters worden als hidden fields meegestuurd zodat de redirect
+  terugkomt op exact dezelfde weergave i.p.v. terug te vallen op de ongefilterde lijst
+  (dezelfde aanpak is ook toegepast op de verwijder-knop).
 - **Pomodoro** bewaart alleen start-tijd + geplande duur per sessie; de countdown-ring wordt
   client-side berekend zodat een pagina-refresh niets verliest. Er is bewust geen pauzeknop
   (alleen start/stop) om de tijdsberekening simpel te houden.

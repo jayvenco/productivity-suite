@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import date
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
@@ -22,6 +23,22 @@ _SORT_OPTIONS = {
     "status": (Task.status.asc(), Task.title.asc()),
 }
 _GEEN_TAG_LABEL = "Zonder tag"
+
+
+def _redirect_to_list(
+    sort: str = "deadline",
+    group_by: str = "none",
+    tag: str | None = None,
+    status_filter: str | None = None,
+) -> RedirectResponse:
+    """Stuurt terug naar de takenlijst met dezelfde sortering/groepering/filters,
+    zodat een snelle actie (afvinken, verwijderen) de huidige weergave niet reset."""
+    params = {"sort": sort, "group_by": group_by}
+    if tag:
+        params["tag"] = tag
+    if status_filter:
+        params["status_filter"] = status_filter
+    return RedirectResponse(f"/tasks?{urlencode(params)}", status_code=303)
 
 
 def _get_task_or_404(db: Session, task_id: int, user_id: int) -> Task:
@@ -164,9 +181,34 @@ def update_task(
     return RedirectResponse("/tasks", status_code=303)
 
 
+@router.post("/{task_id}/toggle-done")
+def toggle_done(
+    task_id: int,
+    sort: str = Form("deadline"),
+    group_by: str = Form("none"),
+    tag: str = Form(""),
+    status_filter: str = Form(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Snel-afvink-knop: zet de taak op 'done', of terug naar 'todo' als 'm al klaar was."""
+    task = _get_task_or_404(db, task_id, user.id)
+    task.status = TaskStatus.TODO if task.status == TaskStatus.DONE else TaskStatus.DONE
+    db.commit()
+    return _redirect_to_list(sort, group_by, tag or None, status_filter or None)
+
+
 @router.post("/{task_id}/delete")
-def delete_task(task_id: int, user: User = Depends(require_user), db: Session = Depends(get_db)):
+def delete_task(
+    task_id: int,
+    sort: str = Form("deadline"),
+    group_by: str = Form("none"),
+    tag: str = Form(""),
+    status_filter: str = Form(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
     task = _get_task_or_404(db, task_id, user.id)
     db.delete(task)
     db.commit()
-    return RedirectResponse("/tasks", status_code=303)
+    return _redirect_to_list(sort, group_by, tag or None, status_filter or None)
