@@ -1,4 +1,5 @@
 from app.models.kanban import KanbanBoard, KanbanCard, KanbanColumn, KanbanSwimlane
+from app.models.note import Note
 from app.models.pomodoro import PomodoroSession
 from app.models.tag import Tag
 from app.models.task import Task
@@ -13,4 +14,5 @@ __all__ = [
     "KanbanSwimlane",
     "KanbanCard",
     "PomodoroSession",
+    "Note",
 ]

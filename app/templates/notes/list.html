@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Notities - Productivity Suite{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h2 style="margin:0">Notities{% if active_tag %} — tag: {{ active_tag }}{% endif %}</h2>
+  <a href="/notes/new" class="btn">+ Nieuwe notitie</a>
+</div>
+
+{% if active_tag %}<a href="/notes" class="btn btn-secondary" style="margin-bottom:12px;display:inline-block">Tag-filter wissen</a>{% endif %}
+
+<div class="notes-grid">
+  {% for note in notes %}
+  <div class="note-card" style="{{ note.row_tint_style }}">
+    <a href="/notes/{{ note.id }}/edit" class="note-card-title">{{ note.title }}</a>
+    <div class="note-card-preview">{{ note.content|markdown|safe }}</div>
+    <div class="note-card-tags">
+      {% for t in note.tags %}<a class="tag" style="{{ t.badge_style }}" href="/notes?tag={{ t.name }}">{{ t.name }}</a>{% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <p>Nog geen notities. Maak er één aan.</p>
+  {% endfor %}
+</div>
+{% endblock %}

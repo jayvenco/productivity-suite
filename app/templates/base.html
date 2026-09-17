@@ -51,7 +51,7 @@
 
       <a href="/tasks" class="{{ 'active' if request.url.path.startswith('/tasks') }}">Taken</a>
       <a href="/kanban" class="{{ 'active' if request.url.path.startswith('/kanban') }}">Kanban</a>
-      <span class="nav-disabled" title="Komt in een latere fase">Notities <em>binnenkort</em></span>
+      <a href="/notes" class="{{ 'active' if request.url.path.startswith('/notes') }}">Notities</a>
       <span class="nav-disabled" title="Komt in een latere fase">Snippets <em>binnenkort</em></span>
       <div class="spacer"></div>
       <div class="theme-switcher">

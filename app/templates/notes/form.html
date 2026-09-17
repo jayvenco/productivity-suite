@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Notitie bewerken' if note else 'Nieuwe notitie' }} - Productivity Suite{% endblock %}
+{% block content %}
+<h2>{{ 'Notitie bewerken' if note else 'Nieuwe notitie' }}</h2>
+<form method="post" action="{{ '/notes/' ~ note.id if note else '/notes' }}">
+  <div class="field" style="max-width:600px">
+    <label for="title">Titel</label>
+    <input type="text" id="title" name="title" required value="{{ note.title if note else '' }}">
+  </div>
+
+  <div class="note-editor">
+    <div class="field">
+      <label for="content">Inhoud (Markdown: **vet**, *cursief*, lijsten, # headers, `code`, [links](url))</label>
+      <textarea id="content" name="content" rows="16">{{ note.content if note else '' }}</textarea>
+    </div>
+    <div class="field">
+      <label>Voorbeeld</label>
+      <div id="note-preview" class="markdown-preview">{{ note.content|markdown|safe if note else '' }}</div>
+    </div>
+  </div>
+
+  <div class="field" style="max-width:600px">
+    <label for="tags">Tags (komma-gescheiden)</label>
+    <input type="text" id="tags" name="tags" value="{{ note.tags|map(attribute='name')|join(', ') if note else '' }}">
+  </div>
+
+  <button type="submit" class="btn">Opslaan</button>
+  <a href="/notes" class="btn btn-secondary">Annuleren</a>
+</form>
+
+{% if note %}
+<form method="post" action="/notes/{{ note.id }}/delete" onsubmit="return confirm('Notitie verwijderen?')" style="display:inline-block;margin-top:8px">
+  <button type="submit" class="btn btn-danger">Verwijderen</button>
+</form>
+{% endif %}
+
+<script src="/static/js/notes.js"></script>
+{% endblock %}

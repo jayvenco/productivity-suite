@@ -25,7 +25,14 @@ card_tags = Table(
     Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
 )
 
-# Fase 3 voegt note_tags en snippet_tags toe zodra de Note/Snippet modellen bestaan.
+note_tags = Table(
+    "note_tags",
+    Base.metadata,
+    Column("note_id", ForeignKey("notes.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
+)
+
+# Fase 3 voegt snippet_tags toe zodra het Snippet-model bestaat.
 
 
 class Tag(Base):
@@ -40,6 +47,9 @@ class Tag(Base):
     )
     cards: Mapped[list["KanbanCard"]] = relationship(  # noqa: F821
         "KanbanCard", secondary=card_tags, back_populates="tags"
+    )
+    notes: Mapped[list["Note"]] = relationship(  # noqa: F821
+        "Note", secondary=note_tags, back_populates="tags"
     )
 
     @property

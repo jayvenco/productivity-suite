@@ -35,10 +35,13 @@ Gebouwd:
   een taak, live aftellende ring-animatie, automatische overgang werk → pauze, geschiedenis
   zichtbaar op de taakpagina
 - 4 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten)
+- **Notities**: markdown-inhoud met **live preview** naast de editor (geen zware
+  WYSIWYG-editor of JS-markdown-library nodig — de preview wordt server-side gerenderd via
+  een klein debounced fetch-verzoek naar dezelfde renderer die ook bij opslaan gebruikt
+  wordt), taggable met hetzelfde gedeelde tag-systeem (kleuren, filteren) als taken/kanban
 
-Nog niet gebouwd: volledige kalenderweergave (maand/week), notities-module, code snippets
-(links in de sidebar tonen "binnenkort"), CI/CD, backup/export-import, spraaknotities,
-LLM-koppeling.
+Nog niet gebouwd: volledige kalenderweergave (maand/week), code snippets (link in de sidebar
+toont "binnenkort"), CI/CD, backup/export-import, spraaknotities, LLM-koppeling.
 
 ## Configuratie
 
@@ -122,7 +125,10 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    Controleer op de taakpagina dat voltooide werk-sessies meetellen in de Pomodoro-historie.
 8. Thema wisselen via de kleurenbolletjes in de sidebar (incl. het lichte thema) → voorkeur
    blijft na herladen/opnieuw inloggen behouden.
-9. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
+9. Naar Notities gaan, een notitie aanmaken met markdown (koppen, **vet**, lijsten) en tags →
+   controleer dat de preview live meeverandert terwijl je typt, en dat de kaart in de
+   lijstweergave de gerenderde markdown en gekleurde tags toont. Filteren op tag uitproberen.
+10. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
 
 ## Architectuur
 
@@ -164,6 +170,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   sortering/groepering/filters worden als hidden fields meegestuurd zodat de redirect
   terugkomt op exact dezelfde weergave i.p.v. terug te vallen op de ongefilterde lijst
   (dezelfde aanpak is ook toegepast op de verwijder-knop).
+- **Notities-live-preview**: `POST /notes/preview` rendert markdown server-side (dezelfde
+  `render_markdown()` als bij het opslaan) en wordt debounced (250ms) aangeroepen vanuit
+  `app/static/js/notes.js` bij elke wijziging in de textarea. Geen client-side markdown-parser
+  nodig, en preview/opgeslagen resultaat kunnen nooit uit sync raken omdat het dezelfde
+  renderer is.
 - **Pomodoro** bewaart alleen start-tijd + geplande duur per sessie; de countdown-ring wordt
   client-side berekend zodat een pagina-refresh niets verliest. Er is bewust geen pauzeknop
   (alleen start/stop) om de tijdsberekening simpel te houden.

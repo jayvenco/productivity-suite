@@ -484,6 +484,76 @@ th, td {
   margin-bottom: 0;
 }
 
+/* ---- Notities ---- */
+
+.note-editor {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  max-width: 1000px;
+}
+
+.note-editor textarea {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 13px;
+}
+
+.note-editor .markdown-preview {
+  height: 100%;
+  min-height: 200px;
+  overflow-y: auto;
+}
+
+@media (max-width: 800px) {
+  .note-editor {
+    grid-template-columns: 1fr;
+  }
+}
+
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.note-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.note-card-title {
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.note-card-title:hover {
+  text-decoration: underline;
+}
+
+.note-card-preview {
+  font-size: 12px;
+  color: var(--text-muted);
+  max-height: 80px;
+  overflow: hidden;
+  position: relative;
+}
+
+.note-card-preview :first-child {
+  margin-top: 0;
+}
+
+.note-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
 /* ---- Deadlines-widget (sidebar) ---- */
 
 .deadlines-widget {
