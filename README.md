@@ -31,8 +31,12 @@ Gebouwd:
   van antraciet naar donkeroranje kleurt naarmate de deadline nadert of al verstreken is
 - Takenlijst-tabellen hebben **vaste kolombreedtes**, zodat ze uitlijnen ongeacht filter,
   sortering of groepering
-- **Pomodoro-timer** in de sidebar: instelbare werk-/pauze-duur, optioneel gekoppeld aan
-  een taak, live aftellende ring-animatie, automatische overgang werk → pauze, geschiedenis
+- **Pomodoro-timer** als "Pomodoro"-menu-item in de sidebar i.p.v. een permanent zichtbaar
+  blok: klik erop om een **zwevend, verplaatsbaar, semi-transparant paneel** rechtsonder in
+  beeld te openen (instelbare werk-/pauze-duur, optioneel gekoppeld aan een taak, live
+  aftellende ring-animatie, automatische overgang werk → pauze). Het paneel blijft op zijn
+  plek zolang je door de app navigeert, en verschijnt automatisch weer als er al een sessie
+  loopt; sluiten via het kruisje stopt de timer niet, verbergt 'm alleen. Geschiedenis
   zichtbaar op de taakpagina
 - 4 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten)
 - **Notities**: lichte rich-text editor met knoppenbalk (vet, cursief, koppen, opsommingen,
@@ -123,9 +127,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    blijft na herladen.
 6. Kaart verslepen naar een andere kolom/swimlane (drag-and-drop) → herlaad de pagina en
    controleer dat de cel-toewijzing bewaard is gebleven.
-7. Pomodoro-timer starten (kies eventueel een taak) → controleer de leeglopende ring, de
-   automatische overgang naar de pauze-fase, en dat een refresh de lopende timer niet reset.
-   Controleer op de taakpagina dat voltooide werk-sessies meetellen in de Pomodoro-historie.
+7. Klik op "Pomodoro" in de sidebar → het zwevende paneel opent rechtsonder. Sleep het paneel
+   aan de titelbalk naar een andere plek. Start een timer (kies eventueel een taak) →
+   controleer de leeglopende ring, de automatische overgang naar de pauze-fase, en dat
+   navigeren naar een andere pagina het paneel op dezelfde plek en met de lopende timer laat
+   staan. Sluit het paneel via het kruisje en open het opnieuw via het menu → de timer loopt
+   gewoon door. Controleer op de taakpagina dat voltooide werk-sessies meetellen in de
+   Pomodoro-historie.
 8. Thema wisselen via de kleurenbolletjes in de sidebar (incl. het lichte thema) → voorkeur
    blijft na herladen/opnieuw inloggen behouden.
 9. Naar Notities gaan, een notitie aanmaken: tekst selecteren en vet/cursief maken via de
@@ -197,6 +205,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 - **Pomodoro** bewaart alleen start-tijd + geplande duur per sessie; de countdown-ring wordt
   client-side berekend zodat een pagina-refresh niets verliest. Er is bewust geen pauzeknop
   (alleen start/stop) om de tijdsberekening simpel te houden.
+- **Pomodoro-paneel als losse overlay**: `#pomodoro-float` staat buiten de `.layout`-div in
+  `base.html` (fixed positioning t.o.v. het venster, niet t.o.v. de sidebar) en is standaard
+  `hidden`. De "Pomodoro"-knop in de sidebar toggelt de zichtbaarheid; bij het laden van een
+  pagina wordt het paneel automatisch getoond als er al een sessie loopt. Slepen gebeurt via
+  `mousedown`/`mousemove`/`mouseup` op de titelbalk, geklemd binnen het viewport, met de
+  positie bewaard in `localStorage` (per-browser gemak, geen server-state) zodat 'm na een
+  refresh op dezelfde plek terugkomt.
 - **Deadline-gradiëntbalk**: kleur wordt server-side berekend (`Task.urgency_color`) op basis
   van een venster van 14 dagen — antraciet (`rgb(63,63,70)`) ver van de deadline, lineair naar
   donkeroranje (`rgb(154,52,18)`) op de deadline zelf, en blijft donkeroranje bij een

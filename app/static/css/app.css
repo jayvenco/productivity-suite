@@ -670,17 +670,78 @@ th, td {
   list-style: none;
 }
 
-/* ---- Pomodoro-widget (sidebar) ---- */
+/* ---- Pomodoro: menu-knop + zwevend, verplaatsbaar paneel ---- */
 
-.pomodoro-widget {
+#pomodoro-menu-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 6px 8px;
+  border-radius: 4px;
+  color: var(--text);
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+#pomodoro-menu-btn:hover,
+#pomodoro-menu-btn.active {
+  background: var(--bg-hover);
+}
+
+.pomodoro-float {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 190px;
+  background: rgba(20, 20, 25, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
+  color: #f5f5f5;
+  z-index: 1000;
+  padding: 8px 10px 10px;
+  user-select: none;
+}
+
+.pomodoro-float[hidden] {
+  display: none;
+}
+
+.pomodoro-float-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+  cursor: grab;
+  margin-bottom: 6px;
+}
+
+.pomodoro-float-header:active {
+  cursor: grabbing;
+}
+
+.pomodoro-float-close {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+.pomodoro-float-body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 8px;
-  margin-bottom: 10px;
 }
 
 .pomodoro-ring {
@@ -691,20 +752,20 @@ th, td {
 
 .pomodoro-ring-bg {
   fill: none;
-  stroke: var(--border);
+  stroke: rgba(255, 255, 255, 0.2);
   stroke-width: 4;
 }
 
 .pomodoro-ring-progress {
   fill: none;
-  stroke: var(--accent);
+  stroke: #bd93f9;
   stroke-width: 4;
   stroke-linecap: round;
   transition: stroke-dashoffset 1s linear;
 }
 
-.pomodoro-widget.pomodoro-break .pomodoro-ring-progress {
-  stroke: var(--success);
+.pomodoro-float.pomodoro-break .pomodoro-ring-progress {
+  stroke: #50fa7b;
 }
 
 .pomodoro-time {
@@ -715,7 +776,7 @@ th, td {
 
 .pomodoro-phase {
   font-size: 11px;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.65);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin-bottom: 6px;
@@ -745,4 +806,9 @@ th, td {
 
 .pomodoro-controls select {
   padding: 4px 6px;
+}
+
+.pomodoro-float select,
+.pomodoro-float input {
+  color: #111;
 }

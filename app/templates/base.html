@@ -25,33 +25,10 @@
         </ul>
       </div>
 
-      <div class="pomodoro-widget" id="pomodoro-widget">
-        <svg class="pomodoro-ring" viewBox="0 0 60 60">
-          <circle class="pomodoro-ring-bg" cx="30" cy="30" r="26"></circle>
-          <circle class="pomodoro-ring-progress" id="pomodoro-ring-progress" cx="30" cy="30" r="26"></circle>
-        </svg>
-        <div class="pomodoro-time" id="pomodoro-time">25:00</div>
-        <div class="pomodoro-phase" id="pomodoro-phase">Pomodoro</div>
-
-        <div class="pomodoro-controls" id="pomodoro-idle-controls">
-          <select id="pomodoro-task">
-            <option value="">Geen taak</option>
-          </select>
-          <div class="pomodoro-minutes-row">
-            <input type="number" id="pomodoro-work-minutes" min="1" max="180" value="25" title="Werk (minuten)">
-            <input type="number" id="pomodoro-break-minutes" min="1" max="60" value="5" title="Pauze (minuten)">
-          </div>
-          <button type="button" class="btn" id="pomodoro-start-btn" style="width:100%">Start</button>
-        </div>
-
-        <div class="pomodoro-controls" id="pomodoro-active-controls" hidden>
-          <button type="button" class="btn btn-danger" id="pomodoro-stop-btn" style="width:100%">Stop</button>
-        </div>
-      </div>
-
       <a href="/tasks" class="{{ 'active' if request.url.path.startswith('/tasks') }}">Taken</a>
       <a href="/kanban" class="{{ 'active' if request.url.path.startswith('/kanban') }}">Kanban</a>
       <a href="/notes" class="{{ 'active' if request.url.path.startswith('/notes') }}">Notities</a>
+      <button type="button" id="pomodoro-menu-btn">Pomodoro</button>
       <span class="nav-disabled" title="Komt in een latere fase">Snippets <em>binnenkort</em></span>
       <div class="spacer"></div>
       <div class="theme-switcher">
@@ -79,6 +56,37 @@
       {% block content %}{% endblock %}
     </main>
   </div>
+
+  <div class="pomodoro-float" id="pomodoro-float" hidden>
+    <div class="pomodoro-float-header" id="pomodoro-drag-handle">
+      <span>Pomodoro</span>
+      <button type="button" id="pomodoro-close-btn" class="pomodoro-float-close" title="Verbergen">×</button>
+    </div>
+    <div class="pomodoro-float-body">
+      <svg class="pomodoro-ring" viewBox="0 0 60 60">
+        <circle class="pomodoro-ring-bg" cx="30" cy="30" r="26"></circle>
+        <circle class="pomodoro-ring-progress" id="pomodoro-ring-progress" cx="30" cy="30" r="26"></circle>
+      </svg>
+      <div class="pomodoro-time" id="pomodoro-time">25:00</div>
+      <div class="pomodoro-phase" id="pomodoro-phase">Pomodoro</div>
+
+      <div class="pomodoro-controls" id="pomodoro-idle-controls">
+        <select id="pomodoro-task">
+          <option value="">Geen taak</option>
+        </select>
+        <div class="pomodoro-minutes-row">
+          <input type="number" id="pomodoro-work-minutes" min="1" max="180" value="25" title="Werk (minuten)">
+          <input type="number" id="pomodoro-break-minutes" min="1" max="60" value="5" title="Pauze (minuten)">
+        </div>
+        <button type="button" class="btn" id="pomodoro-start-btn" style="width:100%">Start</button>
+      </div>
+
+      <div class="pomodoro-controls" id="pomodoro-active-controls" hidden>
+        <button type="button" class="btn btn-danger" id="pomodoro-stop-btn" style="width:100%">Stop</button>
+      </div>
+    </div>
+  </div>
+
   <script src="/static/js/pomodoro.js"></script>
   <script src="/static/js/deadlines.js"></script>
   {% else %}

@@ -1,12 +1,18 @@
-// Pomodoro-widget in de sidebar: server bewaart alleen start-tijd + geplande duur,
-// de countdown-ring wordt hier client-side berekend zodat een refresh niets verliest.
+// Zwevend, verplaatsbaar Pomodoro-paneel (rechtsonder in beeld) i.p.v. een vast
+// blok in de sidebar. De server bewaart alleen start-tijd + geplande duur, de
+// countdown-ring wordt hier client-side berekend zodat een refresh niets verliest.
+// Het paneel blijft verborgen totdat je op "Pomodoro" in het menu klikt, of
+// automatisch zichtbaar als er al een sessie loopt (bv. na het wisselen van pagina).
 document.addEventListener("DOMContentLoaded", () => {
-  const widget = document.getElementById("pomodoro-widget");
-  if (!widget) return;
+  const float = document.getElementById("pomodoro-float");
+  const menuBtn = document.getElementById("pomodoro-menu-btn");
+  if (!float || !menuBtn) return;
 
   const RADIUS = 26;
   const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
+  const dragHandle = document.getElementById("pomodoro-drag-handle");
+  const closeBtn = document.getElementById("pomodoro-close-btn");
   const ring = document.getElementById("pomodoro-ring-progress");
   const timeLabel = document.getElementById("pomodoro-time");
   const phaseLabel = document.getElementById("pomodoro-phase");
@@ -25,8 +31,20 @@ document.addEventListener("DOMContentLoaded", () => {
   let intervalId = null;
 
   restoreSavedMinutes();
+  restoreFloatPosition();
+  setupDragging();
   loadTasks();
   loadState();
+
+  menuBtn.addEventListener("click", () => {
+    float.hidden = !float.hidden;
+    menuBtn.classList.toggle("active", !float.hidden);
+  });
+
+  closeBtn.addEventListener("click", () => {
+    float.hidden = true;
+    menuBtn.classList.remove("active");
+  });
 
   startBtn.addEventListener("click", () => {
     const minutes = parseInt(workMinutesInput.value, 10) || 25;
@@ -52,6 +70,8 @@ document.addEventListener("DOMContentLoaded", () => {
       currentSession = data.active;
       showActive();
       startTicking();
+      float.hidden = false;
+      menuBtn.classList.add("active");
     } else {
       showIdle();
     }
@@ -134,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
     idleControls.hidden = true;
     activeControls.hidden = false;
     phaseLabel.textContent = currentSession.phase === "work" ? "Focus" : "Pauze";
-    widget.classList.toggle("pomodoro-break", currentSession.phase === "break");
+    float.classList.toggle("pomodoro-break", currentSession.phase === "break");
   }
 
   function saveMinutes() {
@@ -154,6 +174,66 @@ document.addEventListener("DOMContentLoaded", () => {
       if (savedBreak) breakMinutesInput.value = savedBreak;
     } catch (err) {
       // Geen probleem, defaults blijven staan.
+    }
+  }
+
+  // ---- Verplaatsbaarheid ----
+
+  function setupDragging() {
+    let dragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    dragHandle.addEventListener("mousedown", (event) => {
+      dragging = true;
+      const rect = float.getBoundingClientRect();
+      offsetX = event.clientX - rect.left;
+      offsetY = event.clientY - rect.top;
+      float.style.right = "auto";
+      float.style.bottom = "auto";
+      float.style.left = `${rect.left}px`;
+      float.style.top = `${rect.top}px`;
+      event.preventDefault();
+    });
+
+    document.addEventListener("mousemove", (event) => {
+      if (!dragging) return;
+      const maxLeft = window.innerWidth - float.offsetWidth;
+      const maxTop = window.innerHeight - float.offsetHeight;
+      const left = Math.max(0, Math.min(maxLeft, event.clientX - offsetX));
+      const top = Math.max(0, Math.min(maxTop, event.clientY - offsetY));
+      float.style.left = `${left}px`;
+      float.style.top = `${top}px`;
+    });
+
+    document.addEventListener("mouseup", () => {
+      if (!dragging) return;
+      dragging = false;
+      saveFloatPosition();
+    });
+  }
+
+  function saveFloatPosition() {
+    try {
+      localStorage.setItem("pomodoro-float-left", float.style.left);
+      localStorage.setItem("pomodoro-float-top", float.style.top);
+    } catch (err) {
+      // Geen probleem, paneel start dan gewoon weer rechtsonder.
+    }
+  }
+
+  function restoreFloatPosition() {
+    try {
+      const left = localStorage.getItem("pomodoro-float-left");
+      const top = localStorage.getItem("pomodoro-float-top");
+      if (left && top) {
+        float.style.left = left;
+        float.style.top = top;
+        float.style.right = "auto";
+        float.style.bottom = "auto";
+      }
+    } catch (err) {
+      // Geen probleem, paneel start dan gewoon weer rechtsonder.
     }
   }
 });
