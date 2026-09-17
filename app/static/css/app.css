@@ -695,16 +695,16 @@ th, td {
   position: fixed;
   right: 20px;
   bottom: 20px;
-  width: 190px;
-  background: rgba(20, 20, 25, 0.72);
+  width: 380px;
+  background: rgba(20, 20, 25, 0.55);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 10px;
+  border-radius: 16px;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
   color: #f5f5f5;
   z-index: 1000;
-  padding: 8px 10px 10px;
+  padding: 16px 20px 20px;
   user-select: none;
 }
 
@@ -716,12 +716,12 @@ th, td {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 11px;
+  font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   opacity: 0.75;
   cursor: grab;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 .pomodoro-float-header:active {
@@ -732,10 +732,10 @@ th, td {
   background: none;
   border: none;
   color: inherit;
-  font-size: 16px;
+  font-size: 26px;
   line-height: 1;
   cursor: pointer;
-  padding: 0 2px;
+  padding: 0 4px;
 }
 
 .pomodoro-float-body {
@@ -745,8 +745,8 @@ th, td {
 }
 
 .pomodoro-ring {
-  width: 72px;
-  height: 72px;
+  width: 144px;
+  height: 144px;
   transform: rotate(-90deg);
 }
 
@@ -769,24 +769,24 @@ th, td {
 }
 
 .pomodoro-time {
-  font-size: 18px;
+  font-size: 32px;
   font-weight: 600;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 .pomodoro-phase {
-  font-size: 11px;
+  font-size: 14px;
   color: rgba(255, 255, 255, 0.65);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  margin-bottom: 6px;
+  margin-bottom: 10px;
 }
 
 .pomodoro-controls {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .pomodoro-controls[hidden] {
@@ -795,20 +795,27 @@ th, td {
 
 .pomodoro-minutes-row {
   display: flex;
-  gap: 4px;
+  gap: 8px;
 }
 
 .pomodoro-minutes-row input {
   width: 50%;
-  padding: 4px 6px;
+  padding: 8px 10px;
   text-align: center;
+  font-size: 15px;
 }
 
 .pomodoro-controls select {
-  padding: 4px 6px;
+  padding: 8px 10px;
+  font-size: 15px;
 }
 
 .pomodoro-float select,
 .pomodoro-float input {
   color: #111;
+}
+
+.pomodoro-float .btn {
+  padding: 10px 12px;
+  font-size: 15px;
 }
