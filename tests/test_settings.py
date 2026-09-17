@@ -51,3 +51,16 @@ def test_account_page_lists_appearance_options(logged_in_client):
     assert "Weergave" in page
     assert "Inter" in page
     assert "Compact" in page
+    assert "Hack" in page
+
+
+def test_set_appearance_accepts_monospace_font(logged_in_client):
+    response = logged_in_client.post(
+        "/settings/appearance",
+        data={"font_family": "hack", "font_size": "14", "density": "comfortable", "redirect_to": "/tasks"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+    page = logged_in_client.get("/tasks").text
+    assert 'data-font="hack"' in page

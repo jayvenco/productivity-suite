@@ -45,8 +45,9 @@ Gebouwd:
   achtergrond met signaalgroen accent en het lettertype van nexmail — Space Grotesk voor
   koppen, IBM Plex Sans voor lopende tekst)
 - **Weergave-instellingen** (Account → Weergave): los van het thema kiesbaar **lettertype**
-  (10 opties — systeemstandaard of Inter/Roboto/Open Sans/Lato/Poppins/Nunito/Source Sans 3/
-  Merriweather/Fira Sans), **lettergrootte** (13–18px) en **compactheid** (comfortabel/compact,
+  (14 opties — systeemstandaard, de leesletters Inter/Roboto/Open Sans/Lato/Poppins/Nunito/
+  Source Sans 3/Merriweather/Fira Sans, en de monospace/code-letters Hack/JetBrains Mono/
+  Fira Code/Consolas), **lettergrootte** (13–18px) en **compactheid** (comfortabel/compact,
   verkleint de ruimte tussen tekst en elementen door de sidebar, tabellen, kaarten en formulieren)
 - Kanban-**swimlanes zijn in-/uitklapbaar**: klik op de swimlane-titel om de rij te verbergen.
   Status wordt per bord onthouden in `localStorage` (client-side, geen serverstate nodig voor
@@ -300,6 +301,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   `[data-density="compact"]`-blok met gerichte, kleinere padding/margin/gap-waarden voor de
   belangrijkste plekken (sidebar, tabellen, kaarten, formulieren) — geen volledige
   spacing-schaal, want dat had elke losse padding/margin in het bestand moeten aanraken.
+- **Monospace-lettertypes (Hack/JetBrains Mono/Fira Code/Consolas)**: Hack staat niet in de
+  Google Fonts-catalogus en wordt daarom zelf meegeleverd als `@font-face` in `app.css`
+  (`.woff2`-bestanden onder `app/static/fonts/hack/`, MIT-licentie — zie `LICENSE.md` in die
+  map). JetBrains Mono en Fira Code komen wél van Google Fonts, samen met de andere
+  lettertypes in dezelfde `<link>` in `base.html`. Consolas is Microsoft-eigendom en kan niet
+  meegeleverd worden — die keuze doet dus alleen iets als het lettertype al lokaal op het
+  systeem van de bezoeker staat, anders valt de browser terug op de generieke `monospace`.
 - **Swimlanes in-/uitklappen**: puur client-side (`app/static/js/kanban.js`), status per
   swimlane-id opgeslagen in `localStorage` onder een sleutel per bord-id — geen migratie of
   databaseveld nodig voor een enkele gebruiker. Hetzelfde `[hidden]`-i.c.m.-`display:flex`

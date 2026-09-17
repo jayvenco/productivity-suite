@@ -25,6 +25,10 @@ AVAILABLE_FONTS = [
     ("source-sans", "Source Sans 3"),
     ("merriweather", "Merriweather"),
     ("fira-sans", "Fira Sans"),
+    ("hack", "Hack (monospace)"),
+    ("jetbrains-mono", "JetBrains Mono (monospace)"),
+    ("fira-code", "Fira Code (monospace)"),
+    ("consolas", "Consolas (monospace, alleen als lokaal geïnstalleerd)"),
 ]
 AVAILABLE_FONT_IDS = {font_id for font_id, _ in AVAILABLE_FONTS}
 

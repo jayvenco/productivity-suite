@@ -15,6 +15,23 @@ h1, h2, h3 {
   font-family: var(--font-heading, inherit);
 }
 
+/* Hack wordt zelf meegeleverd (MIT-licentie, zie app/static/fonts/hack/LICENSE.md)
+   i.p.v. van Google Fonts geladen -- staat niet in hun catalogus. */
+@font-face {
+  font-family: "Hack";
+  src: url("/static/fonts/hack/hack-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Hack";
+  src: url("/static/fonts/hack/hack-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ---- Lettertype-keuze (Account -> Weergave) ----
    "system" gebruikt gewoon de --font-sans/--font-heading van het actieve thema
    (of de systeemfont-fallback hierboven) en heeft dus geen eigen regel nodig. */
@@ -27,6 +44,14 @@ h1, h2, h3 {
 :root[data-font="source-sans"]  { --font-sans: "Source Sans 3", sans-serif; --font-heading: "Source Sans 3", sans-serif; }
 :root[data-font="merriweather"] { --font-sans: "Merriweather", serif;       --font-heading: "Merriweather", serif; }
 :root[data-font="fira-sans"]    { --font-sans: "Fira Sans", sans-serif;     --font-heading: "Fira Sans", sans-serif; }
+
+/* Monospace-opties -- vooral leuk voor wie de hele UI in een code-font wil. Consolas
+   is Microsoft-eigendom en kan niet meegeleverd worden: die regel doet dus niets als
+   het lettertype niet al lokaal op het systeem staat (dan valt-ie terug op monospace). */
+:root[data-font="hack"]           { --font-sans: "Hack", monospace;           --font-heading: "Hack", monospace; }
+:root[data-font="jetbrains-mono"] { --font-sans: "JetBrains Mono", monospace; --font-heading: "JetBrains Mono", monospace; }
+:root[data-font="fira-code"]      { --font-sans: "Fira Code", monospace;      --font-heading: "Fira Code", monospace; }
+:root[data-font="consolas"]       { --font-sans: "Consolas", monospace;       --font-heading: "Consolas", monospace; }
 
 a {
   color: var(--link);
