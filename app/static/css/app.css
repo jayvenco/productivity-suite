@@ -7,13 +7,26 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--font-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
-  font-size: 14px;
+  font-size: var(--font-size-base, 14px);
   line-height: 1.4;
 }
 
 h1, h2, h3 {
   font-family: var(--font-heading, inherit);
 }
+
+/* ---- Lettertype-keuze (Account -> Weergave) ----
+   "system" gebruikt gewoon de --font-sans/--font-heading van het actieve thema
+   (of de systeemfont-fallback hierboven) en heeft dus geen eigen regel nodig. */
+:root[data-font="inter"]        { --font-sans: "Inter", sans-serif;         --font-heading: "Inter", sans-serif; }
+:root[data-font="roboto"]       { --font-sans: "Roboto", sans-serif;        --font-heading: "Roboto", sans-serif; }
+:root[data-font="open-sans"]    { --font-sans: "Open Sans", sans-serif;     --font-heading: "Open Sans", sans-serif; }
+:root[data-font="lato"]         { --font-sans: "Lato", sans-serif;          --font-heading: "Lato", sans-serif; }
+:root[data-font="poppins"]      { --font-sans: "Poppins", sans-serif;       --font-heading: "Poppins", sans-serif; }
+:root[data-font="nunito"]       { --font-sans: "Nunito", sans-serif;        --font-heading: "Nunito", sans-serif; }
+:root[data-font="source-sans"]  { --font-sans: "Source Sans 3", sans-serif; --font-heading: "Source Sans 3", sans-serif; }
+:root[data-font="merriweather"] { --font-sans: "Merriweather", serif;       --font-heading: "Merriweather", serif; }
+:root[data-font="fira-sans"]    { --font-sans: "Fira Sans", sans-serif;     --font-heading: "Fira Sans", sans-serif; }
 
 a {
   color: var(--link);
@@ -322,6 +335,32 @@ th, td {
   letter-spacing: 0.04em;
   margin-bottom: 6px;
   padding-left: 8px;
+}
+
+.swimlane-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.swimlane-toggle-arrow {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.swimlane-collapsed .swimlane-heading {
+  margin-bottom: 0;
+}
+
+.board-row[hidden] {
+  display: none;
 }
 
 .board-row {
@@ -1028,3 +1067,64 @@ th, td {
 .pomodoro-float input {
   color: #111;
 }
+
+/* ---- Compacte weergave (Account -> Weergave -> Compactheid) ----
+   Geen aparte spacing-schaal met var()'s (dat had elke padding/margin in dit
+   bestand moeten aanraken); in plaats daarvan overschrijft dit blok gericht de
+   plekken die het meest bijdragen aan "lucht" tussen tekst en elementen. */
+:root[data-density="compact"] .sidebar { padding: 8px 6px; gap: 3px; }
+:root[data-density="compact"] .sidebar-heading { padding: 0 6px; margin-bottom: 2px; }
+:root[data-density="compact"] .nav-disabled,
+:root[data-density="compact"] .sidebar a,
+:root[data-density="compact"] #pomodoro-menu-btn { padding: 4px 6px; }
+:root[data-density="compact"] .sidebar .brand { padding: 3px 6px 8px; }
+:root[data-density="compact"] .main { padding: 10px 12px; }
+:root[data-density="compact"] .theme-switcher { padding: 4px; gap: 3px; }
+:root[data-density="compact"] .btn { padding: 4px 10px; }
+:root[data-density="compact"] input[type="text"],
+:root[data-density="compact"] input[type="date"],
+:root[data-density="compact"] input[type="password"],
+:root[data-density="compact"] select,
+:root[data-density="compact"] textarea { padding: 4px 6px; }
+:root[data-density="compact"] th,
+:root[data-density="compact"] td { padding: 4px 6px; }
+:root[data-density="compact"] .toolbar { margin-bottom: 8px; }
+:root[data-density="compact"] .task-controls { gap: 10px; margin-bottom: 8px; }
+:root[data-density="compact"] .task-group-heading { margin: 12px 0 4px; }
+:root[data-density="compact"] .login-box { padding: 16px; }
+:root[data-density="compact"] .field { margin-bottom: 6px; }
+:root[data-density="compact"] .field label { margin-bottom: 2px; }
+:root[data-density="compact"] .board-swimlanes { gap: 14px; }
+:root[data-density="compact"] .swimlane-heading { margin-bottom: 4px; }
+:root[data-density="compact"] .board-row { gap: 6px; padding-bottom: 5px; }
+:root[data-density="compact"] .column { padding: 6px; }
+:root[data-density="compact"] .column-header { padding: 3px 3px 5px; }
+:root[data-density="compact"] .add-column-form { padding: 6px; }
+:root[data-density="compact"] .card-list { gap: 4px; }
+:root[data-density="compact"] .kanban-card { padding: 4px 6px; }
+:root[data-density="compact"] .card-actions { margin-top: 3px; gap: 4px; }
+:root[data-density="compact"] .add-card-form { margin-top: 4px; }
+:root[data-density="compact"] .card-edit-form { gap: 5px; margin-top: 4px; }
+:root[data-density="compact"] .card-edit-form.kanban-modal { padding: 10px 12px; }
+:root[data-density="compact"] .kanban-modal-actions { gap: 5px; margin-top: 3px; }
+:root[data-density="compact"] .md-toolbar,
+:root[data-density="compact"] .rich-toolbar { gap: 3px; margin-bottom: 4px; }
+:root[data-density="compact"] .md-toolbar button,
+:root[data-density="compact"] .rich-toolbar button,
+:root[data-density="compact"] .rich-toolbar select { padding: 3px 6px; }
+:root[data-density="compact"] .markdown-preview { padding: 5px 7px; }
+:root[data-density="compact"] .rich-editor { padding: 6px 8px; }
+:root[data-density="compact"] .notes-grid,
+:root[data-density="compact"] .snippets-list { gap: 8px; }
+:root[data-density="compact"] .note-card,
+:root[data-density="compact"] .snippet-card { padding: 6px 8px; gap: 4px; }
+:root[data-density="compact"] .note-card-header,
+:root[data-density="compact"] .snippet-card-header { gap: 5px; }
+:root[data-density="compact"] .notes-bulk-bar { padding: 5px 7px; margin-bottom: 8px; gap: 5px; }
+:root[data-density="compact"] .snippet-card-tags { margin: 4px 0; gap: 3px; }
+:root[data-density="compact"] .snippet-file { margin-top: 5px; }
+:root[data-density="compact"] .snippet-file-block { padding: 6px; margin-bottom: 6px; }
+:root[data-density="compact"] .snippet-file-block-row { gap: 5px; margin-bottom: 4px; }
+:root[data-density="compact"] .deadlines-widget { margin-bottom: 6px; }
+:root[data-density="compact"] .deadlines-item,
+:root[data-density="compact"] .deadlines-empty { padding: 2px 6px; }

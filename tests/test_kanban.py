@@ -7,6 +7,18 @@ def _first_ids(html: str):
     return column_id, swimlane_id
 
 
+def _swimlane_id_for_name(html: str, name: str) -> str:
+    """Zoekt het data-swimlane-toggle-id horend bij deze swimlane-naam. Zoekt terug
+    vanaf de naam naar de dichtstbijzijnde voorgaande data-swimlane-toggle, i.p.v.
+    voorwaarts -- anders kan een niet-greedy .*? per ongeluk over een hele
+    swimlane-sectie heen springen naar een latere naam."""
+    marker = f'swimlane-toggle-arrow">▾</span> {name}'
+    idx = html.index(marker)
+    matches = list(re.finditer(r'data-swimlane-toggle="(\d+)"', html[:idx]))
+    assert matches, f"Swimlane met naam {name!r} niet gevonden"
+    return matches[-1].group(1)
+
+
 def _card_id_for_title(html: str, title: str) -> str:
     """Zoekt het data-card-id van de kaart met deze titel (het board bevat kaarten
     uit eerdere tests in dezelfde sessie, dus de eerste data-card-id is niet altijd
@@ -116,9 +128,7 @@ def test_new_swimlane_gets_its_own_default_columns(logged_in_client):
 def test_add_custom_column_to_swimlane(logged_in_client):
     logged_in_client.post("/kanban/swimlanes", data={"name": "Marketing"})
     board_html = logged_in_client.get("/kanban").text
-    match = re.search(r'swimlane-heading"[^>]*>Marketing<.*?data-swimlane-id="(\d+)"', board_html, re.S)
-    assert match, "Kon swimlane-id van Marketing niet vinden"
-    swimlane_id = match.group(1)
+    swimlane_id = _swimlane_id_for_name(board_html, "Marketing")
 
     response = logged_in_client.post(
         f"/kanban/swimlanes/{swimlane_id}/columns", data={"name": "Review"}, follow_redirects=False
@@ -135,8 +145,7 @@ def test_cannot_create_card_with_column_from_other_swimlane(logged_in_client):
 
     logged_in_client.post("/kanban/swimlanes", data={"name": "Andere lane"})
     board_html_after = logged_in_client.get("/kanban").text
-    match = re.search(r'swimlane-heading"[^>]*>Andere lane<.*?data-swimlane-id="(\d+)"', board_html_after, re.S)
-    other_swimlane_id = match.group(1)
+    other_swimlane_id = _swimlane_id_for_name(board_html_after, "Andere lane")
 
     response = logged_in_client.post(
         "/kanban/cards",

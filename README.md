@@ -44,6 +44,13 @@ Gebouwd:
 - 5 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
   achtergrond met signaalgroen accent en het lettertype van nexmail — Space Grotesk voor
   koppen, IBM Plex Sans voor lopende tekst)
+- **Weergave-instellingen** (Account → Weergave): los van het thema kiesbaar **lettertype**
+  (10 opties — systeemstandaard of Inter/Roboto/Open Sans/Lato/Poppins/Nunito/Source Sans 3/
+  Merriweather/Fira Sans), **lettergrootte** (13–18px) en **compactheid** (comfortabel/compact,
+  verkleint de ruimte tussen tekst en elementen door de sidebar, tabellen, kaarten en formulieren)
+- Kanban-**swimlanes zijn in-/uitklapbaar**: klik op de swimlane-titel om de rij te verbergen.
+  Status wordt per bord onthouden in `localStorage` (client-side, geen serverstate nodig voor
+  een enkele gebruiker)
 - **Notities**: lichte rich-text editor met knoppenbalk (vet, cursief, koppen, opsommingen,
   genummerde lijsten, links, code) — geen markdown-syntax typen nodig, wat je ziet is wat er
   opgeslagen wordt. Inhoud is HTML, server-side gesanitized (`bleach`) tegen XSS. Taggable met
@@ -284,3 +291,18 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   kolommen worden bestaande kolommen automatisch aan de (eerste) swimlane van hun bord
   gekoppeld, zodat een update op een al draaiende installatie (bv. Unraid) geen data
   kwijtraakt. Geen Alembic voor deze schaal.
+- **Lettertype/lettergrootte/compactheid**: opgeslagen op `User` (`font_family`, `font_size`,
+  `density`), gezet via `POST /settings/appearance` vanaf de "Weergave"-sectie op de
+  Account-pagina. `base.html` zet ze als `data-font`/`data-density`-attributen en een
+  `--font-size-base`-CSS-variabele op `<html>`; `app.css` bevat per lettertype een
+  `[data-font="..."]`-regel die `--font-sans`/`--font-heading` overschrijft (los van het
+  actieve thema, dus een gekozen lettertype wint altijd van het thema-lettertype), en een
+  `[data-density="compact"]`-blok met gerichte, kleinere padding/margin/gap-waarden voor de
+  belangrijkste plekken (sidebar, tabellen, kaarten, formulieren) — geen volledige
+  spacing-schaal, want dat had elke losse padding/margin in het bestand moeten aanraken.
+- **Swimlanes in-/uitklappen**: puur client-side (`app/static/js/kanban.js`), status per
+  swimlane-id opgeslagen in `localStorage` onder een sleutel per bord-id — geen migratie of
+  databaseveld nodig voor een enkele gebruiker. Hetzelfde `[hidden]`-i.c.m.-`display:flex`
+  probleem als eerder bij `.pomodoro-controls`/`.notes-bulk-bar`: `.board-row[hidden]` moest
+  expliciet `display: none` krijgen, anders wint `.board-row { display: flex }` van de
+  standaard hidden-stijl.

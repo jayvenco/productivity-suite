@@ -136,4 +136,55 @@ document.addEventListener("DOMContentLoaded", () => {
       { offset: Number.NEGATIVE_INFINITY, element: null }
     ).element;
   }
+
+  // Swimlanes in-/uitklappen. Status per bord onthouden in localStorage (per
+  // swimlane-id), zodat een dichtgeklapte lane dat blijft na een refresh --
+  // puur weergave, geen serverstate nodig voor een enkele gebruiker.
+  const collapseKey = `kanban-collapsed-lanes-${board.dataset.boardId || "default"}`;
+
+  function loadCollapsed() {
+    try {
+      return new Set(JSON.parse(localStorage.getItem(collapseKey) || "[]"));
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveCollapsed(set) {
+    try {
+      localStorage.setItem(collapseKey, JSON.stringify([...set]));
+    } catch {
+      /* privénavigatie of volle opslag: dan onthoudt de sessie het gewoon niet */
+    }
+  }
+
+  const collapsed = loadCollapsed();
+
+  function applyCollapsed(block, isCollapsed) {
+    block.classList.toggle("swimlane-collapsed", isCollapsed);
+    const row = block.querySelector(".board-row");
+    if (row) row.hidden = isCollapsed;
+    const arrow = block.querySelector(".swimlane-toggle-arrow");
+    if (arrow) arrow.textContent = isCollapsed ? "▸" : "▾";
+  }
+
+  board.querySelectorAll("[data-swimlane-block]").forEach((block) => {
+    applyCollapsed(block, collapsed.has(block.dataset.swimlaneBlock));
+  });
+
+  board.addEventListener("click", (event) => {
+    const toggle = event.target.closest("[data-swimlane-toggle]");
+    if (!toggle) return;
+    const id = toggle.dataset.swimlaneToggle;
+    const block = toggle.closest("[data-swimlane-block]");
+    if (!block) return;
+    const isCollapsed = !collapsed.has(id);
+    if (isCollapsed) {
+      collapsed.add(id);
+    } else {
+      collapsed.delete(id);
+    }
+    saveCollapsed(collapsed);
+    applyCollapsed(block, isCollapsed);
+  });
 });

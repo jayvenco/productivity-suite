@@ -18,10 +18,12 @@
 
 <div class="kanban-modal-backdrop" id="kanban-modal-backdrop" hidden></div>
 
-<div class="board-swimlanes">
+<div class="board-swimlanes" data-board-id="{{ board.id }}">
   {% for swimlane in board.swimlanes %}
-  <section class="swimlane-block">
-    <div class="swimlane-heading" style="{{ swimlane.heading_style }}">{{ swimlane.name }}</div>
+  <section class="swimlane-block" data-swimlane-block="{{ swimlane.id }}">
+    <button type="button" class="swimlane-heading swimlane-toggle" style="{{ swimlane.heading_style }}" data-swimlane-toggle="{{ swimlane.id }}">
+      <span class="swimlane-toggle-arrow">▾</span> {{ swimlane.name }}
+    </button>
     <div class="board-row">
       {% for column in swimlane.columns %}
       <div class="column" style="{{ swimlane.column_style }}">

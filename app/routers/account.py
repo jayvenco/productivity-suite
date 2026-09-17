@@ -7,14 +7,25 @@ from app.auth.dependencies import require_user
 from app.auth.security import hash_password, verify_password
 from app.database import get_db
 from app.models.user import User
+from app.routers.settings import AVAILABLE_DENSITIES, AVAILABLE_FONT_SIZES, AVAILABLE_FONTS
 from app.templating import templates
 
 router = APIRouter(prefix="/account", tags=["account"])
 
 
+def _appearance_context() -> dict:
+    return {
+        "available_fonts": AVAILABLE_FONTS,
+        "available_font_sizes": AVAILABLE_FONT_SIZES,
+        "available_densities": AVAILABLE_DENSITIES,
+    }
+
+
 @router.get("")
 def account_form(request: Request, user: User = Depends(require_user)):
-    return templates.TemplateResponse(request, "account/form.html", {"user": user, "error": None, "success": None})
+    return templates.TemplateResponse(
+        request, "account/form.html", {"user": user, "error": None, "success": None, **_appearance_context()}
+    )
 
 
 @router.post("")
@@ -31,7 +42,7 @@ def update_account(
         return templates.TemplateResponse(
             request,
             "account/form.html",
-            {"user": user, "error": "Huidig wachtwoord klopt niet", "success": None},
+            {"user": user, "error": "Huidig wachtwoord klopt niet", "success": None, **_appearance_context()},
             status_code=401,
         )
 
@@ -39,7 +50,7 @@ def update_account(
         return templates.TemplateResponse(
             request,
             "account/form.html",
-            {"user": user, "error": "Nieuwe wachtwoorden komen niet overeen", "success": None},
+            {"user": user, "error": "Nieuwe wachtwoorden komen niet overeen", "success": None, **_appearance_context()},
             status_code=400,
         )
 
@@ -48,7 +59,7 @@ def update_account(
         return templates.TemplateResponse(
             request,
             "account/form.html",
-            {"user": user, "error": "Gebruikersnaam is al in gebruik", "success": None},
+            {"user": user, "error": "Gebruikersnaam is al in gebruik", "success": None, **_appearance_context()},
             status_code=400,
         )
 
@@ -59,5 +70,5 @@ def update_account(
     db.commit()
 
     return templates.TemplateResponse(
-        request, "account/form.html", {"user": user, "error": None, "success": "Opgeslagen"}
+        request, "account/form.html", {"user": user, "error": None, "success": "Opgeslagen", **_appearance_context()}
     )

@@ -10,6 +10,11 @@ _COLUMNS_TO_ENSURE = {
     "tasks": [("priority", "BOOLEAN DEFAULT 0")],
     "kanban_cards": [("color", "VARCHAR(20)")],
     "kanban_columns": [("swimlane_id", "INTEGER")],
+    "users": [
+        ("font_family", "VARCHAR(50) DEFAULT 'system'"),
+        ("font_size", "INTEGER DEFAULT 14"),
+        ("density", "VARCHAR(20) DEFAULT 'comfortable'"),
+    ],
 }
 
 

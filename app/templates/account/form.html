@@ -28,4 +28,34 @@
   </div>
   <button type="submit" class="btn">Opslaan</button>
 </form>
+
+<h2 style="margin-top:28px">Weergave</h2>
+<form method="post" action="/settings/appearance" style="max-width:360px">
+  <input type="hidden" name="redirect_to" value="/account">
+  <div class="field">
+    <label for="font_family">Lettertype</label>
+    <select id="font_family" name="font_family">
+      {% for font_id, label in available_fonts %}
+      <option value="{{ font_id }}" {{ "selected" if user.font_family == font_id }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="font_size">Lettergrootte</label>
+    <select id="font_size" name="font_size">
+      {% for size in available_font_sizes %}
+      <option value="{{ size }}" {{ "selected" if user.font_size == size }}>{{ size }}px</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="density">Compactheid</label>
+    <select id="density" name="density">
+      {% for density_id, label in available_densities %}
+      <option value="{{ density_id }}" {{ "selected" if user.density == density_id }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="btn">Toepassen</button>
+</form>
 {% endblock %}
