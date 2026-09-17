@@ -707,9 +707,10 @@ th, td {
 /* ---- Snippets ---- */
 
 .snippets-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  align-items: start;
 }
 
 .snippet-card {
@@ -717,6 +718,7 @@ th, td {
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 10px 12px;
+  min-width: 0;
 }
 
 .snippet-card-header {

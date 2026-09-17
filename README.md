@@ -51,9 +51,10 @@ Gebouwd:
   toevoegen
 - **Code snippets** (ByteStash-stijl): een snippet kan **meerdere bestanden** bevatten (bv.
   `main.py` + `requirements.txt` bij elkaar), elk met een eigen taal voor **syntax
-  highlighting** (highlight.js). Kaarten staan in de lijst **standaard ingeklapt** (alleen
-  titel, tags en bestandsnamen) — klik erop om de code te tonen, net als notities. Eén
-  zoekveld doorzoekt titel, tag én code-inhoud tegelijk, taggable met hetzelfde gedeelde
+  highlighting** (highlight.js). Kaarten staan **in een raster** (net als notities) en
+  **standaard ingeklapt** (alleen titel, tags en bestandsnamen) — klik erop om de code
+  compact binnen die kaart te tonen, i.p.v. een regel die over het hele werkscherm uitrekt.
+  Eén zoekveld doorzoekt titel, tag én code-inhoud tegelijk, taggable met hetzelfde gedeelde
   tag-systeem
 
 Nog niet gebouwd: volledige kalenderweergave (maand/week), CI/CD, backup/export-import,
@@ -249,6 +250,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   klik op de titel (`app/static/js/snippets-list.js`) toont/verbergt 'm. `hljs.highlightAll()`
   verwerkt de code-blokken sowieso bij het laden, ook terwijl ze verborgen zijn — highlight.js
   werkt op de DOM, niet op wat er zichtbaar is.
+- **Snippets — raster i.p.v. volle-breedte rij**: `.snippets-list` gebruikt dezelfde
+  `grid-template-columns: repeat(auto-fill, minmax(...px, 1fr))`-aanpak als `.notes-grid`,
+  met `align-items: start` zodat een opengeklapte kaart de rijhoogte van de hele grid-rij niet
+  optrekt voor zijn buren, en `min-width: 0` op de kaart zodat de `<pre>`-code binnen zijn
+  eigen kolom horizontaal scrollt i.p.v. de kolombreedte op te rekken.
 - **Kanban-kaart bewerken als modal**: `.card-edit-form.kanban-modal` gebruikt
   `position: fixed` + een losse backdrop-div, dus geen JS-herstructurering nodig — alleen CSS
   om de bestaande, per-kaart formulieren gecentreerd en groter te tonen i.p.v. inline in de
