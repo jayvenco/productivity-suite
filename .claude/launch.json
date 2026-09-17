@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "productivity-suite",
+      "runtimeExecutable": "./.venv/bin/python",
+      "runtimeArgs": ["-m", "uvicorn", "app.main:app", "--port", "8887"],
+      "port": 8887
+    }
+  ]
+}

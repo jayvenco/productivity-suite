@@ -1,0 +1,19 @@
+/* Uiterlijk overgenomen van nexmail (github.com/DerKezorm/nexmail):
+   graphite-neutrale achtergrond met een signaalgroen accent. */
+:root[data-theme="nexmail"] {
+  --bg: #0b0f0f;
+  --bg-elevated: #121817;
+  --bg-hover: #1d2524;
+  --border: #2f3a38;
+  --text: #edf1f1;
+  --text-muted: #9ba6a5;
+  --accent: #23d19e;
+  --accent-text: #060909;
+  --success: #23d19e;
+  --warning: #ffb020;
+  --danger: #ff6b5a;
+  --link: #23d19e;
+  --font-sans: "IBM Plex Sans", "Helvetica Neue", Helvetica, sans-serif;
+  --font-heading: "Space Grotesk", "Helvetica Neue", Helvetica, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+}

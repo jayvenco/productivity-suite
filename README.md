@@ -41,7 +41,9 @@ Gebouwd:
   plek zolang je door de app navigeert, en verschijnt automatisch weer als er al een sessie
   loopt; sluiten via het kruisje stopt de timer niet, verbergt 'm alleen. Geschiedenis
   zichtbaar op de taakpagina
-- 4 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten)
+- 5 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
+  achtergrond met signaalgroen accent en het lettertype van nexmail — Space Grotesk voor
+  koppen, IBM Plex Sans voor lopende tekst)
 - **Notities**: lichte rich-text editor met knoppenbalk (vet, cursief, koppen, opsommingen,
   genummerde lijsten, links, code) — geen markdown-syntax typen nodig, wat je ziet is wat er
   opgeslagen wordt. Inhoud is HTML, server-side gesanitized (`bleach`) tegen XSS. Taggable met

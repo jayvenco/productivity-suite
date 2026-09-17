@@ -8,6 +8,10 @@
   <link rel="stylesheet" href="/static/css/themes/one-dark-pro.css">
   <link rel="stylesheet" href="/static/css/themes/nord.css">
   <link rel="stylesheet" href="/static/css/themes/light.css">
+  <link rel="stylesheet" href="/static/css/themes/nexmail.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
   <link rel="stylesheet" href="/static/css/app.css">
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
   <script defer src="https://unpkg.com/alpinejs@3.14.1/dist/cdn.min.js"></script>
@@ -32,7 +36,7 @@
       <a href="/snippets" class="{{ 'active' if request.url.path.startswith('/snippets') }}">Snippets</a>
       <div class="spacer"></div>
       <div class="theme-switcher">
-        {% for theme in ["dracula", "one-dark-pro", "nord", "light"] %}
+        {% for theme in ["dracula", "one-dark-pro", "nord", "light", "nexmail"] %}
         <form method="post" action="/settings/theme">
           <input type="hidden" name="theme" value="{{ theme }}">
           <input type="hidden" name="redirect_to" value="{{ request.url.path }}">
