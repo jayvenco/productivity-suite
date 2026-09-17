@@ -29,7 +29,7 @@
       <a href="/kanban" class="{{ 'active' if request.url.path.startswith('/kanban') }}">Kanban</a>
       <a href="/notes" class="{{ 'active' if request.url.path.startswith('/notes') }}">Notities</a>
       <button type="button" id="pomodoro-menu-btn">Pomodoro</button>
-      <span class="nav-disabled" title="Komt in een latere fase">Snippets <em>binnenkort</em></span>
+      <a href="/snippets" class="{{ 'active' if request.url.path.startswith('/snippets') }}">Snippets</a>
       <div class="spacer"></div>
       <div class="theme-switcher">
         {% for theme in ["dracula", "one-dark-pro", "nord", "light"] %}

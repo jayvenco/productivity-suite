@@ -32,7 +32,12 @@ note_tags = Table(
     Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
 )
 
-# Fase 3 voegt snippet_tags toe zodra het Snippet-model bestaat.
+snippet_tags = Table(
+    "snippet_tags",
+    Base.metadata,
+    Column("snippet_id", ForeignKey("snippets.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
+)
 
 
 class Tag(Base):
@@ -50,6 +55,9 @@ class Tag(Base):
     )
     notes: Mapped[list["Note"]] = relationship(  # noqa: F821
         "Note", secondary=note_tags, back_populates="tags"
+    )
+    snippets: Mapped[list["Snippet"]] = relationship(  # noqa: F821
+        "Snippet", secondary=snippet_tags, back_populates="tags"
     )
 
     @property

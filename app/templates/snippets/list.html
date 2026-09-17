@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Snippets - Productivity Suite{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<div class="toolbar">
+  <h2 style="margin:0">Snippets{% if active_tag %} — tag: {{ active_tag }}{% endif %}</h2>
+  <a href="/snippets/new" class="btn">+ Nieuwe snippet</a>
+</div>
+
+<form method="get" action="/snippets" class="task-controls">
+  {% if active_tag %}<input type="hidden" name="tag" value="{{ active_tag }}">{% endif %}
+  <input type="text" name="q" placeholder="Zoeken in titel of code..." value="{{ q }}" style="max-width:280px">
+  <button type="submit" class="btn btn-secondary">Zoeken</button>
+  {% if active_tag or q %}<a href="/snippets" class="btn btn-secondary">Filters wissen</a>{% endif %}
+</form>
+
+<div class="snippets-list">
+  {% for snippet in snippets %}
+  <div class="snippet-card" style="{{ snippet.row_tint_style }}">
+    <div class="snippet-card-header">
+      <a href="/snippets/{{ snippet.id }}/edit" class="snippet-card-title">{{ snippet.title }}</a>
+      <form method="post" action="/snippets/{{ snippet.id }}/delete" onsubmit="return confirm('Snippet verwijderen?')">
+        <button type="submit" class="btn btn-danger">Verwijder</button>
+      </form>
+    </div>
+    <div class="snippet-card-tags">
+      {% for t in snippet.tags %}<a class="tag" style="{{ t.badge_style }}" href="/snippets?tag={{ t.name }}">{{ t.name }}</a>{% endfor %}
+    </div>
+    {% for file in snippet.files %}
+    <div class="snippet-file">
+      <div class="snippet-file-name">{{ file.filename }} <span class="snippet-file-lang">{{ file.language }}</span></div>
+      <pre><code class="language-{{ file.language }}">{{ file.content }}</code></pre>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p>Nog geen snippets. Maak er één aan.</p>
+  {% endfor %}
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+{% endblock %}

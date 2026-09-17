@@ -46,9 +46,13 @@ Gebouwd:
   lijstweergave is klikbaar om te bewerken, en een **selectievak per notitie** maakt
   bulk-acties mogelijk: meerdere notities in één keer verwijderen of er samen een tag aan
   toevoegen
+- **Code snippets** (ByteStash-stijl): een snippet kan **meerdere bestanden** bevatten (bv.
+  `main.py` + `requirements.txt` bij elkaar), elk met een eigen taal voor **syntax
+  highlighting** (highlight.js). Doorzoekbaar op titel én op code-inhoud, taggable met
+  hetzelfde gedeelde tag-systeem
 
-Nog niet gebouwd: volledige kalenderweergave (maand/week), code snippets (link in de sidebar
-toont "binnenkort"), CI/CD, backup/export-import, spraaknotities, LLM-koppeling.
+Nog niet gebouwd: volledige kalenderweergave (maand/week), CI/CD, backup/export-import,
+spraaknotities, LLM-koppeling.
 
 ## Configuratie
 
@@ -144,7 +148,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    opent de bewerkpagina. Vink twee notities aan via het selectievakje → de bulk-balk
    verschijnt bovenaan; voeg een tag toe aan de selectie en controleer dat beide notities 'm
    krijgen zonder bestaande tags te verliezen, en test daarna bulk-verwijderen.
-10. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
+10. Naar Snippets gaan, een snippet aanmaken met titel + tags, en via "+ Bestand toevoegen"
+    een tweede bestand met een andere taal toevoegen (bv. `main.py` als python en
+    `requirements.txt` als plaintext) → controleer dat beide bestanden apart met syntax
+    highlighting getoond worden in de lijst. Zoek op een woord dat alleen in de code van één
+    snippet voorkomt (niet in de titel) → alleen die snippet verschijnt. Filteren op tag
+    uitproberen.
+11. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
 
 ## Architectuur
 
@@ -212,6 +222,19 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   `mousedown`/`mousemove`/`mouseup` op de titelbalk, geklemd binnen het viewport, met de
   positie bewaard in `localStorage` (per-browser gemak, geen server-state) zodat 'm na een
   refresh op dezelfde plek terugkomt.
+- **Snippets — meerdere bestanden per snippet**: `Snippet` en `SnippetFile` zijn losse
+  modellen (1-op-N), zodat één snippet bv. `main.py` + `requirements.txt` samen kan bevatten
+  zoals bij ByteStash. Het formulier gebruikt geen indexed field-namen; alle
+  `filename`/`language`/`content`-velden delen dezelfde naam en worden server-side via
+  `request.form().getlist(...)` op volgorde bij elkaar gezet (`_apply_files_from_form`). Bij
+  bewerken worden bestaande bestanden simpelweg vervangen (`snippet.files.clear()` + opnieuw
+  aanmaken) i.p.v. een diff bij te houden — voor deze schaal eenvoudiger en robuuster dan
+  bestanden individueel bijwerken.
+- **Snippets — bestand toevoegen/verwijderen in de browser**: `app/static/js/snippets.js`
+  kloont het laatste bestand-blok i.p.v. de talenlijst te dupliceren in JS, en maakt de kloon
+  leeg. Minstens één bestand blijft altijd staan.
+- **Snippets — syntax highlighting**: highlight.js via CDN, alleen geladen op de lijstpagina.
+  Zoeken (`?q=`) filtert op titel ÓF code-inhoud (`Snippet.files.any(SnippetFile.content.ilike(...))`).
 - **Deadline-gradiëntbalk**: kleur wordt server-side berekend (`Task.urgency_color`) op basis
   van een venster van 14 dagen — antraciet (`rgb(63,63,70)`) ver van de deadline, lineair naar
   donkeroranje (`rgb(154,52,18)`) op de deadline zelf, en blijft donkeroranje bij een

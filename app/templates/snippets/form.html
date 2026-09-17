@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Snippet bewerken' if snippet else 'Nieuwe snippet' }} - Productivity Suite{% endblock %}
+
+{% set languages = ["plaintext","python","javascript","typescript","bash","html","css","json","yaml","sql","markdown","go","rust","java","csharp","php","ruby","c","cpp"] %}
+
+{% macro file_block(filename, language, content) %}
+<div class="snippet-file-block">
+  <div class="snippet-file-block-row">
+    <input type="text" name="filename" placeholder="Bestandsnaam (bv. main.py)" value="{{ filename }}" required>
+    <select name="language">
+      {% for lang in languages %}
+      <option value="{{ lang }}" {{ 'selected' if language == lang }}>{{ lang }}</option>
+      {% endfor %}
+    </select>
+    <button type="button" class="btn btn-danger remove-file-btn">Verwijder</button>
+  </div>
+  <textarea name="content" rows="10" class="snippet-code-input" placeholder="Code...">{{ content }}</textarea>
+</div>
+{% endmacro %}
+
+{% block content %}
+<h2>{{ 'Snippet bewerken' if snippet else 'Nieuwe snippet' }}</h2>
+<form method="post" action="{{ '/snippets/' ~ snippet.id if snippet else '/snippets' }}">
+  <div class="field" style="max-width:600px">
+    <label for="title">Titel</label>
+    <input type="text" id="title" name="title" required value="{{ snippet.title if snippet else '' }}">
+  </div>
+
+  <div id="snippet-files">
+    {% if snippet and snippet.files %}
+      {% for file in snippet.files %}{{ file_block(file.filename, file.language, file.content) }}{% endfor %}
+    {% else %}
+      {{ file_block("", "plaintext", "") }}
+    {% endif %}
+  </div>
+  <button type="button" class="btn btn-secondary" id="add-file-btn">+ Bestand toevoegen</button>
+
+  <div class="field" style="max-width:600px;margin-top:16px">
+    <label for="tags">Tags (komma-gescheiden)</label>
+    <input type="text" id="tags" name="tags" value="{{ snippet.tags|map(attribute='name')|join(', ') if snippet else '' }}">
+  </div>
+
+  <button type="submit" class="btn">Opslaan</button>
+  <a href="/snippets" class="btn btn-secondary">Annuleren</a>
+</form>
+
+{% if snippet %}
+<form method="post" action="/snippets/{{ snippet.id }}/delete" onsubmit="return confirm('Snippet verwijderen?')" style="display:inline-block;margin-top:8px">
+  <button type="submit" class="btn btn-danger">Verwijderen</button>
+</form>
+{% endif %}
+
+<script src="/static/js/snippets.js"></script>
+{% endblock %}
