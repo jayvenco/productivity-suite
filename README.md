@@ -51,11 +51,13 @@ Gebouwd:
   toevoegen
 - **Code snippets** (ByteStash-stijl): een snippet kan **meerdere bestanden** bevatten (bv.
   `main.py` + `requirements.txt` bij elkaar), elk met een eigen taal voor **syntax
-  highlighting** (highlight.js). Kaarten staan **in een raster** (net als notities) en
-  **standaard ingeklapt** (alleen titel, tags en bestandsnamen) — klik erop om de code
-  compact binnen die kaart te tonen, i.p.v. een regel die over het hele werkscherm uitrekt.
-  Eén zoekveld doorzoekt titel, tag én code-inhoud tegelijk, taggable met hetzelfde gedeelde
-  tag-systeem
+  highlighting** (highlight.js) — de taal wordt **automatisch afgeleid uit de
+  bestandsextensie** zodra je een bestandsnaam typt (bv. `config.json` → json,
+  `app.py` → python), en blijft daarna gewoon handmatig aan te passen via de select. Kaarten
+  staan **in een raster** (net als notities) en **standaard ingeklapt** (alleen titel, tags en
+  bestandsnamen) — klik erop om de code compact binnen die kaart te tonen, i.p.v. een regel
+  die over het hele werkscherm uitrekt. Eén zoekveld doorzoekt titel, tag én code-inhoud
+  tegelijk, taggable met hetzelfde gedeelde tag-systeem
 
 Nog niet gebouwd: volledige kalenderweergave (maand/week), CI/CD, backup/export-import,
 spraaknotities, LLM-koppeling.
@@ -243,6 +245,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 - **Snippets — bestand toevoegen/verwijderen in de browser**: `app/static/js/snippets.js`
   kloont het laatste bestand-blok i.p.v. de talenlijst te dupliceren in JS, en maakt de kloon
   leeg. Minstens één bestand blijft altijd staan.
+- **Snippets — taal uit extensie**: een `EXTENSION_TO_LANGUAGE`-mapping in hetzelfde bestand
+  luistert naar `input`-events op het bestandsnaam-veld en zet de taal-select automatisch op
+  basis van de extensie (`.py` → python, `.json` → json, ...). Puur een gemaksfunctie op het
+  moment van typen — er wordt niets herberekend of afgedwongen na het opslaan, dus een
+  handmatige aanpassing van de select blijft altijd mogelijk en behouden.
 - **Snippets — syntax highlighting**: highlight.js via CDN, alleen geladen op de lijstpagina.
   Zoeken (`?q=`) filtert op titel, tag-naam ÓF code-inhoud in één keer
   (`Snippet.tags.any(Tag.name.ilike(...))` / `Snippet.files.any(SnippetFile.content.ilike(...))`).
