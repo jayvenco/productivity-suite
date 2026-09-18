@@ -2,18 +2,19 @@
 {% block title %}Kalender - Productivity Suite{% endblock %}
 
 {% block content %}
-<div class="toolbar">
-  <h2 style="margin:0">{{ title }}</h2>
-  <a href="/calendar/events/new?on={{ today.isoformat() }}" class="btn">+ Afspraak</a>
-</div>
-
-<div class="calendar-controls">
-  <a href="{{ prev_url }}" class="btn btn-secondary">← Vorige</a>
-  <a href="/calendar" class="btn btn-secondary">Vandaag</a>
-  <a href="{{ next_url }}" class="btn btn-secondary">Volgende →</a>
-  <div class="calendar-view-switch">
-    <a href="/calendar" class="btn {{ 'btn-secondary' if view != 'month' }}">Maand</a>
-    <a href="/calendar?view=week&day={{ today.isoformat() }}" class="btn {{ 'btn-secondary' if view != 'week' }}">Week</a>
+<div class="calendar-toolbar">
+  <div class="calendar-nav">
+    <a href="{{ prev_url }}" class="calendar-nav-btn" title="Vorige">‹</a>
+    <a href="/calendar" class="calendar-nav-btn calendar-today-btn" title="Vandaag">Vandaag</a>
+    <a href="{{ next_url }}" class="calendar-nav-btn" title="Volgende">›</a>
+    <h2 class="calendar-title">{{ title }}</h2>
+  </div>
+  <div class="calendar-toolbar-right">
+    <div class="calendar-view-switch">
+      <a href="/calendar" class="btn {{ 'btn-secondary' if view != 'month' }}">Maand</a>
+      <a href="/calendar?view=week&day={{ today.isoformat() }}" class="btn {{ 'btn-secondary' if view != 'week' }}">Week</a>
+    </div>
+    <a href="/calendar/events/new?on={{ today.isoformat() }}" class="btn">+ Afspraak</a>
   </div>
 </div>
 
@@ -37,7 +38,7 @@
         {% endfor %}
         {% for event in events_by_date.get(day, []) %}
         <a href="/calendar/events/{{ event.id }}/edit" class="calendar-item calendar-item-event"
-           style="{{ event.tags[0].badge_style if event.tags else '' }}"
+           {% if event.tags and event.tags[0].hue is not none %}style="--dot-color: hsl({{ event.tags[0].hue }}, 60%, 55%)"{% endif %}
            title="{{ event.title }}">{{ event.title }}</a>
         {% endfor %}
       </div>

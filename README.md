@@ -72,11 +72,15 @@ Gebouwd:
   die over het hele werkscherm uitrekt. Eén zoekveld doorzoekt titel, tag én code-inhoud
   tegelijk, taggable met hetzelfde gedeelde tag-systeem
 - **Kalender** met een **maand-** en **weekweergave** (te wisselen via de knoppen boven het
-  rooster), navigatie met vorige/volgende en een "Vandaag"-knop. Toont twee soorten items door
-  elkaar: **eigen afspraken** (titel, datum, beschrijving, tags — CRUD via `/calendar/events`)
-  en, puur ter info, **taken met een deadline** (klikbaar naar de taak, doorgestreept als de
-  taak al "done" is). Elke dag heeft een "+"-knop die direct een nieuwe afspraak opent met die
-  datum vooringevuld
+  rooster), navigatie met vorige/volgende en een "Vandaag"-knop, simpel/strak vormgegeven:
+  één doorlopend raster met dunne lijnen tussen de dagen (geen losse "kaartjes" per dag),
+  vandaag als een gekleurd rond bolletje om het dagnummer, en items als een klein gekleurd
+  stipje + titel i.p.v. een gevulde badge. Toont twee soorten items door elkaar: **eigen
+  afspraken** (titel, datum, beschrijving, tags — CRUD via `/calendar/events`, stipkleur volgt
+  de eerste tag) en, puur ter info, **taken met een deadline** (klikbaar naar de taak,
+  doorgestreept als de taak al "done" is, altijd een geel stipje). Elke dag heeft een
+  "+"-knop (verschijnt bij hover) die direct een nieuwe afspraak opent met die datum
+  vooringevuld
 - **Mini-kalender in de sidebar**: een compact maandoverzicht op elke pagina, met een **rood
   stipje** op elke dag die een taak-deadline of afspraak heeft. Klik op een dag om direct
   (zonder de pagina te verlaten) een **taak aan te maken met die dag als deadline** — verschijnt
