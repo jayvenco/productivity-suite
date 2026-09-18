@@ -3,12 +3,13 @@ from __future__ import annotations
 from datetime import date
 from urllib.parse import urlencode
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session, selectinload
 
 from app.auth.dependencies import require_user
 from app.database import get_db
+from app.models.tag import Tag
 from app.models.task import Task, TaskStatus
 from app.models.user import User
 from app.services.tags import resolve_tags
@@ -28,17 +29,17 @@ _GEEN_TAG_LABEL = "Zonder tag"
 def _redirect_to_list(
     sort: str = "deadline",
     group_by: str = "none",
-    tag: str | None = None,
+    tags: list[str] | None = None,
     status_filter: str | None = None,
 ) -> RedirectResponse:
     """Stuurt terug naar de takenlijst met dezelfde sortering/groepering/filters,
     zodat een snelle actie (afvinken, verwijderen) de huidige weergave niet reset."""
-    params = {"sort": sort, "group_by": group_by}
-    if tag:
-        params["tag"] = tag
+    params: dict[str, str | list[str]] = {"sort": sort, "group_by": group_by}
+    if tags:
+        params["tags"] = tags
     if status_filter:
         params["status_filter"] = status_filter
-    return RedirectResponse(f"/tasks?{urlencode(params)}", status_code=303)
+    return RedirectResponse(f"/tasks?{urlencode(params, doseq=True)}", status_code=303)
 
 
 def _get_task_or_404(db: Session, task_id: int, user_id: int) -> Task:
@@ -56,7 +57,7 @@ def _get_task_or_404(db: Session, task_id: int, user_id: int) -> Task:
 @router.get("")
 def list_tasks(
     request: Request,
-    tag: str | None = None,
+    tags: list[str] = Query(default=[]),
     status_filter: str | None = None,
     sort: str = "deadline",
     group_by: str = "none",
@@ -66,11 +67,20 @@ def list_tasks(
     sort = sort if sort in _SORT_OPTIONS else "deadline"
 
     query = db.query(Task).options(selectinload(Task.tags)).filter(Task.user_id == user.id)
-    if tag:
-        query = query.filter(Task.tags.any(name=tag))
+    if tags:
+        query = query.filter(Task.tags.any(Tag.name.in_(tags)))
     if status_filter:
         query = query.filter(Task.status == status_filter)
     tasks = query.order_by(*_SORT_OPTIONS[sort]).all()
+
+    all_tags = (
+        db.query(Tag)
+        .join(Tag.tasks)
+        .filter(Task.user_id == user.id)
+        .distinct()
+        .order_by(Tag.name)
+        .all()
+    )
 
     groups: list[tuple[str, list[Task]]] | None = None
     if group_by == "tag":
@@ -93,7 +103,8 @@ def list_tasks(
             "tasks": tasks,
             "groups": groups,
             "statuses": list(TaskStatus),
-            "active_tag": tag,
+            "all_tags": all_tags,
+            "active_tags": tags,
             "active_status": status_filter,
             "sort": sort,
             "group_by": group_by,
@@ -186,7 +197,7 @@ def toggle_done(
     task_id: int,
     sort: str = Form("deadline"),
     group_by: str = Form("none"),
-    tag: str = Form(""),
+    filter_tags: list[str] = Form(default=[]),
     status_filter: str = Form(""),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
@@ -195,7 +206,7 @@ def toggle_done(
     task = _get_task_or_404(db, task_id, user.id)
     task.status = TaskStatus.TODO if task.status == TaskStatus.DONE else TaskStatus.DONE
     db.commit()
-    return _redirect_to_list(sort, group_by, tag or None, status_filter or None)
+    return _redirect_to_list(sort, group_by, filter_tags, status_filter or None)
 
 
 @router.post("/{task_id}/delete")
@@ -203,7 +214,7 @@ def delete_task(
     task_id: int,
     sort: str = Form("deadline"),
     group_by: str = Form("none"),
-    tag: str = Form(""),
+    filter_tags: list[str] = Form(default=[]),
     status_filter: str = Form(""),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
@@ -211,4 +222,4 @@ def delete_task(
     task = _get_task_or_404(db, task_id, user.id)
     db.delete(task)
     db.commit()
-    return _redirect_to_list(sort, group_by, tag or None, status_filter or None)
+    return _redirect_to_list(sort, group_by, filter_tags, status_filter or None)

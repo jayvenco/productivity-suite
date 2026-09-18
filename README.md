@@ -24,10 +24,13 @@ Gebouwd:
 - Checklists in kaartbeschrijvingen (`- [ ] item`) — aanklikbaar, direct persistent; een
   "☑ Item"-knop op de werkbalk voegt de syntax voor je toe
 - Gedeeld tag-systeem (taken + kanban-kaarten): elke tag krijgt automatisch een eigen,
-  stabiele kleur; filteren op tag, **sorteren** (deadline/titel/prioriteit/status) en
-  **groeperen op tag** (dat is hier ook het "project"-alternatief — er is geen apart
-  projectveld, tags dienen als project/categorie) op de takenlijst. Een taak met tags krijgt
-  een lichte kleurtint op de rij, gebaseerd op de eerste tag
+  stabiele kleur; **sorteren** (deadline/titel/prioriteit/status) en **groeperen op tag**
+  (dat is hier ook het "project"-alternatief — er is geen apart projectveld, tags dienen als
+  project/categorie) op de takenlijst, met tag-groepen die je individueel kunt **in-/uitklappen**
+  (status per groep onthouden in `localStorage`). **Filteren op tags** gaat via aanklikbare
+  tag-checkboxes boven de lijst (meerdere tegelijk aan te vinken, OR-logica: een taak met
+  minstens één van de aangevinkte tags blijft zichtbaar) — de taakrij zelf krijgt geen
+  kleurtint meer op basis van de tag, alleen de tag-badge zelf is gekleurd
 - Taken hebben een **prioriteitsvinkje** (★, sorteert bovenaan de takenlijst), een
   **snel-afvink-vinkje** (zet de taak direct op "done", of terug naar "todo") en een dunne
   **deadline-gradiëntbalk** onder de deadline-datum (halve breedte van die cel) die geleidelijk
@@ -314,3 +317,19 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   probleem als eerder bij `.pomodoro-controls`/`.notes-bulk-bar`: `.board-row[hidden]` moest
   expliciet `display: none` krijgen, anders wint `.board-row { display: flex }` van de
   standaard hidden-stijl.
+- **Multi-tag filter op taken**: `GET /tasks?tags=werk&tags=prive` (herhaalde query-param,
+  FastAPI's `Query(default=[])`) i.p.v. het vorige losse `tag`-param — de tasks-tabel wordt
+  gefilterd met `Task.tags.any(Tag.name.in_(tags))` (OR-logica). De checkbox-lijst zelf toont
+  alle tags die daadwerkelijk op een taak van de gebruiker staan (`Tag` gejoined via
+  `Tag.tasks`), niet alle tags in het hele systeem (die kunnen ook van kanban/notities/
+  snippets zijn). Quick-acties (afvinken, verwijderen) sturen de actieve filter-tags mee als
+  herhaalde hidden inputs (`filter_tags`) zodat de weergave niet reset na de actie.
+- **Taakgroepen in-/uitklappen**: zelfde patroon en zelfde `localStorage`-aanpak als de
+  kanban-swimlanes, nu in `app/static/js/tasks-list.js`, met de groepsnaam zelf (niet de
+  positie) als sleutel — blijft dus correct werken als de samenstelling van de groepen
+  verandert door een andere filter.
+- **Geen kleurtint meer op de taakrij**: `Task.row_tint_style` (achtergrondkleur van de hele
+  rij, afgeleid van de eerste tag) is verwijderd. De tag-badges zelf blijven gekleurd
+  (`Tag.badge_style`) — alleen de rij-brede tint is weg, op verzoek net iets rustiger en
+  compacter (`.tasks-table th/td` heeft nu ook een eigen, kleinere padding dan de algemene
+  tabel-stijl, en wordt in de compacte weergave nog verder verkleind).

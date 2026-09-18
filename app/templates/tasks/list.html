@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% block title %}Taken - Productivity Suite{% endblock %}
 
-{% macro task_row(task, sort, group_by, active_tag, active_status) %}
-<tr style="{{ task.row_tint_style }}" class="{{ 'task-row-done' if task.status.value == 'done' }}">
+{% macro task_row(task, sort, group_by, active_tags, active_status) %}
+<tr class="{{ 'task-row-done' if task.status.value == 'done' }}">
   <td class="task-done-cell">
     <form method="post" action="/tasks/{{ task.id }}/toggle-done">
       <input type="hidden" name="sort" value="{{ sort }}">
       <input type="hidden" name="group_by" value="{{ group_by }}">
-      {% if active_tag %}<input type="hidden" name="tag" value="{{ active_tag }}">{% endif %}
+      {% for t in active_tags %}<input type="hidden" name="filter_tags" value="{{ t }}">{% endfor %}
       {% if active_status %}<input type="hidden" name="status_filter" value="{{ active_status }}">{% endif %}
       <input type="checkbox" onchange="this.form.submit()" title="Taak afronden" {{ 'checked' if task.status.value == 'done' }}>
     </form>
@@ -26,13 +26,13 @@
     {% if task.urgency_color %}<div class="deadline-bar" style="background:{{ task.urgency_color }}"></div>{% endif %}
   </td>
   <td>
-    {% for t in task.tags %}<a class="tag" style="{{ t.badge_style }}" href="/tasks?tag={{ t.name }}">{{ t.name }}</a>{% endfor %}
+    {% for t in task.tags %}<a class="tag" style="{{ t.badge_style }}" href="/tasks?tags={{ t.name }}">{{ t.name }}</a>{% endfor %}
   </td>
   <td>
     <form method="post" action="/tasks/{{ task.id }}/delete" onsubmit="return confirm('Taak verwijderen?')">
       <input type="hidden" name="sort" value="{{ sort }}">
       <input type="hidden" name="group_by" value="{{ group_by }}">
-      {% if active_tag %}<input type="hidden" name="tag" value="{{ active_tag }}">{% endif %}
+      {% for t in active_tags %}<input type="hidden" name="filter_tags" value="{{ t }}">{% endfor %}
       {% if active_status %}<input type="hidden" name="status_filter" value="{{ active_status }}">{% endif %}
       <button type="submit" class="btn btn-danger">Verwijder</button>
     </form>
@@ -63,12 +63,11 @@
 
 {% block content %}
 <div class="toolbar">
-  <h2 style="margin:0">Taken{% if active_tag %} — tag: {{ active_tag }}{% endif %}</h2>
+  <h2 style="margin:0">Taken{% if active_tags %} — tags: {{ active_tags | join(', ') }}{% endif %}</h2>
   <a href="/tasks/new" class="btn">+ Nieuwe taak</a>
 </div>
 
 <form method="get" action="/tasks" class="task-controls">
-  {% if active_tag %}<input type="hidden" name="tag" value="{{ active_tag }}">{% endif %}
   {% if active_status %}<input type="hidden" name="status_filter" value="{{ active_status }}">{% endif %}
   <label>Sorteren op
     <select name="sort" onchange="this.form.submit()">
@@ -84,16 +83,29 @@
       <option value="tag" {{ 'selected' if group_by == 'tag' }}>Tag / project</option>
     </select>
   </label>
-  {% if active_tag %}<a href="/tasks?sort={{ sort }}&group_by={{ group_by }}" class="btn btn-secondary">Tag-filter wissen</a>{% endif %}
+  {% if all_tags %}
+  <div class="task-tag-filter">
+    <span class="task-tag-filter-label">Tags:</span>
+    {% for t in all_tags %}
+    <label class="tag-checkbox" style="{{ t.badge_style }}">
+      <input type="checkbox" name="tags" value="{{ t.name }}" onchange="this.form.submit()" {{ 'checked' if t.name in active_tags }}>
+      {{ t.name }}
+    </label>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if active_tags %}<a href="/tasks?sort={{ sort }}&group_by={{ group_by }}" class="btn btn-secondary">Tag-filter wissen</a>{% endif %}
 </form>
 
 {% if groups is not none %}
   {% for group_name, group_tasks in groups %}
-  <h3 class="task-group-heading">{{ group_name }}</h3>
-  <table class="tasks-table">
+  <button type="button" class="task-group-heading task-group-toggle" data-group-toggle="{{ group_name }}">
+    <span class="task-group-toggle-arrow">▾</span> {{ group_name }} <span class="task-group-count">({{ group_tasks | length }})</span>
+  </button>
+  <table class="tasks-table" data-group-block="{{ group_name }}">
     {{ table_head() }}
     <tbody>
-      {% for task in group_tasks %}{{ task_row(task, sort, group_by, active_tag, active_status) }}{% endfor %}
+      {% for task in group_tasks %}{{ task_row(task, sort, group_by, active_tags, active_status) }}{% endfor %}
     </tbody>
   </table>
   {% endfor %}
@@ -101,11 +113,12 @@
 <table class="tasks-table">
   {{ table_head() }}
   <tbody>
-    {% for task in tasks %}{{ task_row(task, sort, group_by, active_tag, active_status) }}
+    {% for task in tasks %}{{ task_row(task, sort, group_by, active_tags, active_status) }}
     {% else %}
     <tr><td colspan="6">Nog geen taken. Maak er één aan.</td></tr>
     {% endfor %}
   </tbody>
 </table>
 {% endif %}
+<script src="/static/js/tasks-list.js"></script>
 {% endblock %}

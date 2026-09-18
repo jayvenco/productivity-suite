@@ -83,6 +83,54 @@ def test_each_tag_gets_a_distinct_color(logged_in_client):
     assert len(hues) >= 2
 
 
+def test_filter_by_single_tag(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Werktaak", "description": "", "deadline": "", "tags": "werk"})
+    logged_in_client.post("/tasks", data={"title": "Privetaak", "description": "", "deadline": "", "tags": "prive"})
+
+    filtered = logged_in_client.get("/tasks?tags=werk").text
+    assert "Werktaak" in filtered
+    assert "Privetaak" not in filtered
+
+
+def test_filter_by_multiple_tags_is_or(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Werktaak", "description": "", "deadline": "", "tags": "werk"})
+    logged_in_client.post("/tasks", data={"title": "Privetaak", "description": "", "deadline": "", "tags": "prive"})
+    logged_in_client.post("/tasks", data={"title": "Sporttaak", "description": "", "deadline": "", "tags": "sport"})
+
+    filtered = logged_in_client.get("/tasks?tags=werk&tags=prive").text
+    assert "Werktaak" in filtered
+    assert "Privetaak" in filtered
+    assert "Sporttaak" not in filtered
+
+
+def test_tag_filter_checkboxes_listed_and_checked(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Werktaak", "description": "", "deadline": "", "tags": "werk"})
+
+    page = logged_in_client.get("/tasks?tags=werk").text
+    assert 'class="task-tag-filter"' in page
+    assert 'name="tags" value="werk"' in page
+    checkbox = re.search(r'<input type="checkbox" name="tags" value="werk"[^>]*>', page).group(0)
+    assert "checked" in checkbox
+
+
+def test_task_row_has_no_tag_color_tint(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Geen tint", "description": "", "deadline": "", "tags": "werk"}
+    )
+    listing = logged_in_client.get("/tasks").text
+    # De rij zelf (<tr>) mag geen inline achtergrondkleur meer krijgen op basis van
+    # de tag -- de tag-badge en de filter-checkbox mogen wel gekleurd zijn.
+    assert "<tr style=" not in listing
+
+
+def test_task_group_headings_are_toggle_buttons(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Werktaak", "description": "", "deadline": "", "tags": "werk"})
+
+    listing = logged_in_client.get("/tasks?group_by=tag").text
+    assert 'data-group-toggle="werk"' in listing
+    assert 'data-group-block="werk"' in listing
+
+
 def _task_id_for_title(html: str, title: str) -> str:
     match = re.search(rf'/tasks/(\d+)/edit">{re.escape(title)}</a>', html)
     assert match, f"Taak met titel {title!r} niet gevonden"

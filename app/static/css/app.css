@@ -214,6 +214,19 @@ th, td {
   overflow-wrap: break-word;
 }
 
+/* Iets krapper dan de algemene th/td-padding, en zelf ook nog eens verkleind
+   bij "compact" -- taken staan meestal in een lange lijst, dus rijhoogte
+   telt hier zwaarder mee dan bij een tabel met weinig regels. */
+.tasks-table th,
+.tasks-table td {
+  padding: 3px 8px;
+}
+
+:root[data-density="compact"] .tasks-table th,
+:root[data-density="compact"] .tasks-table td {
+  padding: 1px 6px;
+}
+
 .task-done-cell {
   text-align: center;
 }
@@ -297,6 +310,35 @@ th, td {
   width: auto;
 }
 
+.task-tag-filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.task-tag-filter-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.tag-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tag-checkbox input {
+  width: auto;
+  cursor: pointer;
+}
+
 .task-group-heading {
   margin: 18px 0 6px;
   font-size: 13px;
@@ -307,6 +349,29 @@ th, td {
 
 .task-group-heading:first-of-type {
   margin-top: 0;
+}
+
+.task-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.task-group-toggle-arrow {
+  font-size: 10px;
+}
+
+.task-group-count {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0.7;
 }
 
 .login-page {
