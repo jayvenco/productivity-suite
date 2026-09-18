@@ -11,13 +11,12 @@ waarmee je op meerdere tags tegelijk kunt filteren (OR-logica).
 foto's i.p.v. een live externe API — geen netwerkafhankelijkheid, in lijn met de rest van de
 app. Meer categorieën/foto's toevoegen kan later alsnog als daar behoefte aan is.
 
-- **API voor externe agents/automatisering** (taken, snippets, kanban-kaarten, notities
-  aanmaken vanaf buiten de app, bv. vanuit een eigen agent-script): gematigd complex, geen
-  herontwerp nodig, maar wel een aparte laag naast de bestaande routes. De huidige routes
-  zijn form-based en geven HTML-redirects terug, geen JSON, dus dit wordt een nieuwe
-  `/api/v1/...`-laag die dezelfde services (`resolve_tags`, model-CRUD) hergebruikt maar JSON
-  in/uit levert. Voor authenticatie is een los API-token nodig (bv. gegenereerd op de
-  Account-pagina, gecontroleerd via een nieuwe auth-dependency die zowel de sessie-cookie als
-  een `Authorization: Bearer <token>`-header accepteert) — de huidige sessie-cookie-auth is
-  namelijk niet praktisch voor een extern script. Uitdrukkelijk als laatste op de lijst
-  gezet.
+~~**API voor externe agents/automatisering**~~ — opgelost: `/api/v1/tasks`,
+`/api/v1/kanban/cards`, `/api/v1/notes` en `/api/v1/snippets` (JSON in/uit), beveiligd met
+een los API-token (Account → API-token) i.p.v. de sessie-cookie. Scope bewust beperkt tot
+*aanmaken* (geen lijst/bewerk/verwijder-endpoints) — dat kan later alsnog als daar behoefte
+aan is.
+
+~~**Backup/export-import**~~ — opgelost: Account → Backup, hele database in één `.db`-bestand
+(via `VACUUM INTO`, dus veilig naast een lopende app), met automatische veiligheidskopie en
+schema-update bij het importeren van een oudere back-up.

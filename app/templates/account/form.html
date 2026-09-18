@@ -70,4 +70,46 @@
   </div>
   <button type="submit" class="btn">Toepassen</button>
 </form>
+
+<h2 style="margin-top:28px">API-token</h2>
+<p style="color:var(--text-muted);font-size:12px;max-width:480px">
+  Met een API-token kan een extern script/agent taken, kanban-kaarten, notities en
+  code-snippets aanmaken via <code>/api/v1/...</code>, zonder in te loggen. Stuur het token
+  mee als <code>Authorization: Bearer &lt;token&gt;</code>-header.
+</p>
+{% if new_api_token %}
+<div class="badge-warning" style="display:block;max-width:480px;margin-bottom:12px">
+  Nieuw token (wordt maar één keer getoond, bewaar 'm nu ergens veilig):<br>
+  <code style="user-select:all">{{ new_api_token }}</code>
+</div>
+{% elif user.api_token_hash %}
+<p style="color:var(--text-muted);font-size:12px">Er staat al een token actief (niet meer opvraagbaar).</p>
+{% else %}
+<p style="color:var(--text-muted);font-size:12px">Nog geen token aangemaakt.</p>
+{% endif %}
+<form method="post" action="/account/api-token/generate" style="display:inline">
+  <button type="submit" class="btn">{{ "Nieuw token genereren (vervangt het huidige)" if user.api_token_hash else "Token genereren" }}</button>
+</form>
+{% if user.api_token_hash %}
+<form method="post" action="/account/api-token/revoke" style="display:inline" onsubmit="return confirm('Token intrekken? Scripts die dit token gebruiken werken dan niet meer.')">
+  <button type="submit" class="btn btn-danger">Intrekken</button>
+</form>
+{% endif %}
+
+<h2 style="margin-top:28px">Backup</h2>
+<p style="color:var(--text-muted);font-size:12px;max-width:480px">
+  Exporteert/importeert de hele database (taken, kanban, notities, snippets, kalender,
+  mindmap, instellingen) in één bestand.
+</p>
+<a href="/account/backup/export" class="btn">Database exporteren</a>
+
+<form method="post" action="/account/backup/import" enctype="multipart/form-data"
+      style="max-width:360px;margin-top:12px"
+      onsubmit="return confirm('Dit vervangt ALLE huidige data door de inhoud van dit back-upbestand. Er wordt eerst automatisch een veiligheidskopie van de huidige database gemaakt. Doorgaan?')">
+  <div class="field">
+    <label for="backup_file">Database importeren (.db) — vervangt alle huidige data</label>
+    <input type="file" id="backup_file" name="backup_file" accept=".db,.sqlite,.sqlite3" required>
+  </div>
+  <button type="submit" class="btn btn-danger">Importeren</button>
+</form>
 {% endblock %}

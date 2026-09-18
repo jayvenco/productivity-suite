@@ -103,8 +103,20 @@ Gebouwd:
   (zonder de pagina te verlaten) een **taak aan te maken met die dag als deadline** — verschijnt
   meteen in de takenlijst en het "Komende deadlines"-widgetje. De maandnaam bovenin is ook een
   link naar de volledige kalenderpagina (maand-/weekweergave)
+- **API voor externe agents/scripts** (Account → API-token): een los token (los van je
+  wachtwoord, `Authorization: Bearer <token>`-header) waarmee een extern script taken,
+  kanban-kaarten, notities en code-snippets kan aanmaken via `/api/v1/tasks`,
+  `/api/v1/kanban/cards`, `/api/v1/notes` en `/api/v1/snippets` (JSON in, JSON uit). Een
+  kanban-kaart aanmaken zonder swimlane/kolom op te geven belandt automatisch in de eerste
+  kolom van de eerste swimlane. Het token wordt maar één keer getoond (alleen de hash wordt
+  bewaard) en is op elk moment in te trekken
+- **Backup** (Account → Backup): de hele database (taken, kanban, notities, snippets,
+  kalender, mindmap, instellingen) in één keer **exporteren** als downloadbaar `.db`-bestand,
+  en later weer **importeren** om alles terug te zetten — er wordt automatisch eerst een
+  veiligheidskopie van de huidige database gemaakt voordat 'm vervangen wordt
 
-Nog niet gebouwd: CI/CD, backup/export-import, spraaknotities, LLM-koppeling.
+Nog niet gebouwd: CI/CD, spraaknotities, verdere LLM-koppeling (er is nu wel een API voor
+scripts/agents, zie hieronder).
 
 ## Configuratie
 
@@ -237,7 +249,22 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     component via "+ Component" boven de pagina, klik 🔗 op het eerste component en dan op
     het losse component om ze te verbinden. Klik op een verbindingslijn om 'm te verwijderen,
     en verwijder een component via × → de bijbehorende verbindingen verdwijnen mee.
-15. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
+15. Bij Account → API-token op "Token genereren" klikken → het token wordt één keer getoond.
+    Test 'm vanaf de terminal, bv.:
+    ```bash
+    curl -X POST http://localhost:8887/api/v1/tasks \
+      -H "Authorization: Bearer <token>" -H "Content-Type: application/json" \
+      -d '{"title": "Taak via API", "tags": "agent"}'
+    ```
+    → controleer dat de taak verschijnt op `/tasks`. Probeer hetzelfde met
+    `/api/v1/kanban/cards`, `/api/v1/notes` en `/api/v1/snippets`. Klik daarna "Intrekken" →
+    hetzelfde token geeft nu een 401.
+16. Bij Account → Backup op "Database exporteren" klikken → een `.db`-bestand wordt
+    gedownload. Maak een testtaak aan, importeer daarna het zojuist gedownloade bestand terug
+    (met de bevestiging) → je wordt naar de inlogpagina gestuurd; na opnieuw inloggen is de
+    testtaak weer weg (en staat er een `app.db.before-import-<tijdstip>`-veiligheidskopie in
+    de `data`-map).
+17. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
 
 ## Architectuur
 
@@ -449,3 +476,27 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   foreign keys niet zonder `PRAGMA foreign_keys=ON`, wat deze app niet zet). Posities worden
   pas na het loslaten opgeslagen (niet per pixel tijdens het slepen) om het aantal
   AJAX-verzoeken te beperken.
+- **API-authenticatie**: een los, willekeurig token (`secrets.token_urlsafe(32)`), waarvan
+  alleen de SHA-256-hash in `User.api_token_hash` staat — zelfde patroon als
+  `password_hash`. De nieuwe dependency `require_api_user` (naast het bestaande
+  `require_user` voor de sessie-cookie) leest de `Authorization: Bearer <token>`-header,
+  hasht 'm en zoekt de gebruiker erbij op; geen match of ontbrekende header geeft direct 401.
+  De `/api/v1/...`-routes zijn een aparte, JSON-in/JSON-uit-laag naast de bestaande
+  form-based/HTML-routes en hergebruiken dezelfde services (`resolve_tags`,
+  `sanitize_note_html`) zodat een via de API aangemaakte taak/notitie/kaart/snippet zich
+  identiek gedraagt aan eentje via de webinterface. Voor kanban-kaarten zonder opgegeven
+  swimlane/kolom wordt de eerste swimlane + eerste kolom van het bord gebruikt (en zo nodig
+  aangemaakt), zodat een agent niet eerst de bordstructuur hoeft op te vragen.
+- **Backup via `VACUUM INTO`**: export leest niet zomaar het live `.db`-bestand, maar laat
+  SQLite zelf (`VACUUM INTO`) een consistente, gecomprimeerde kopie wegschrijven naar een
+  tijdelijk bestand — dat kan veilig naast een lopende app, in tegenstelling tot een
+  bestandskopie tijdens een schrijfactie. Het databasepad wordt afgeleid uit
+  `settings.database_url` (niet hardcoded `app.db`), zodat het ook in tests met een eigen
+  `DATABASE_URL` werkt. Bij importeren wordt eerst gevalideerd dat het bestand een
+  SQLite-header heeft én de kerntabellen bevat (`users`, `tasks`, `tags`) voordat er iets
+  overschreven wordt; de huidige database wordt eerst gekopieerd naar
+  `app.db.before-import-<tijdstip>` als veiligheidsnet. Na het vervangen van het bestand
+  draaien `Base.metadata.create_all` en de lichte migraties opnieuw, zodat een back-up van
+  een oudere appversie (bv. van vóór de mindmap- of achtergrond-kolommen) automatisch
+  bijgewerkt wordt naar het huidige schema. De sessie van de gebruiker wijst na een import
+  niet meer zeker naar een geldige rij, dus wordt er teruggestuurd naar `/login`.

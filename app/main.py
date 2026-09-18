@@ -10,6 +10,7 @@ from app.database import Base, SessionLocal, engine
 from app.models.user import User
 from app.routers import (
     account,
+    api,
     auth,
     calendar,
     kanban,
@@ -44,6 +45,7 @@ app.include_router(calendar.router)
 app.include_router(pomodoro.router)
 app.include_router(snippets.router)
 app.include_router(settings_router.router)
+app.include_router(api.router)
 
 
 @app.get("/")

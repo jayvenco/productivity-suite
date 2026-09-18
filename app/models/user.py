@@ -24,4 +24,7 @@ class User(Base):
     # True zolang het wachtwoord nog het seed-standaardwachtwoord is -- stuurt de
     # waarschuwingsbanner die aanzet tot wachtwoord wijzigen via /account.
     using_default_password: Mapped[bool] = mapped_column(Boolean, default=True)
+    # SHA-256-hash van het API-token (nooit het token zelf) -- zelfde patroon als
+    # password_hash. None zolang er geen token gegenereerd is.
+    api_token_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

@@ -16,6 +16,7 @@ _COLUMNS_TO_ENSURE = {
         ("density", "VARCHAR(20) DEFAULT 'comfortable'"),
         ("background", "VARCHAR(30) DEFAULT 'none'"),
         ("background_opacity", "INTEGER DEFAULT 30"),
+        ("api_token_hash", "VARCHAR(64)"),
     ],
 }
 
