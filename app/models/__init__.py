@@ -1,5 +1,6 @@
 from app.models.calendar_event import CalendarEvent
 from app.models.kanban import KanbanBoard, KanbanCard, KanbanColumn, KanbanSwimlane
+from app.models.mindmap import MindmapBoard, MindmapEdge, MindmapNode
 from app.models.note import Note
 from app.models.pomodoro import PomodoroSession
 from app.models.snippet import Snippet, SnippetFile
@@ -20,4 +21,7 @@ __all__ = [
     "Snippet",
     "SnippetFile",
     "CalendarEvent",
+    "MindmapBoard",
+    "MindmapNode",
+    "MindmapEdge",
 ]

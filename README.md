@@ -80,6 +80,13 @@ Gebouwd:
   bestandsnamen) — klik erop om de code compact binnen die kaart te tonen, i.p.v. een regel
   die over het hele werkscherm uitrekt. Eén zoekveld doorzoekt titel, tag én code-inhoud
   tegelijk, taggable met hetzelfde gedeelde tag-systeem
+- **Mindmap**: een simpel, vrij canvas met losse tekst-componenten die je kunt **verslepen**,
+  van een **eigen kleur** voorzien (kleurenpicker) en met elkaar **verbinden** met lijnen. De
+  **+**-knop op een component maakt direct een nieuw, verbonden component aan (een idee
+  uitwerken); de **🔗**-knop verbindt met een willekeurig bestaand component (twee losse
+  steekwoorden aan elkaar binden, ook niet-hiërarchisch). Klik op een verbindingslijn om 'm te
+  verwijderen. Eén mindmap per gebruiker, net als het kanban-bord — geen aparte
+  board-beheer-UI nodig
 - **Kalender** met een **maand-** en **weekweergave** (te wisselen via de knoppen boven het
   rooster), navigatie met vorige/volgende en een "Vandaag"-knop, simpel/strak vormgegeven:
   één doorlopend raster met dunne lijnen tussen de dagen (geen losse "kaartjes" per dag),
@@ -222,7 +229,14 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     aanpassen → sidebar en hoofdvlak worden semi-transparant met de foto erdoorheen, kaarten
     en tabellen blijven zelf gewoon leesbaar/ondoorzichtig. Zet 'm terug op "Geen" → normale
     weergave terug zonder foto.
-14. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
+14. Naar Mindmap gaan (start met één "Hoofdonderwerp"-component) → sleep het component naar
+    een andere plek, herlaad de pagina en controleer dat de nieuwe positie bewaard is. Klik
+    "+" om een verbonden component toe te voegen, wijzig de kleur via het kleurenbolletje en
+    de tekst door erin te klikken en te typen (klik ernaast om op te slaan). Maak nog een los
+    component via "+ Component" boven de pagina, klik 🔗 op het eerste component en dan op
+    het losse component om ze te verbinden. Klik op een verbindingslijn om 'm te verwijderen,
+    en verwijder een component via × → de bijbehorende verbindingen verdwijnen mee.
+15. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
 
 ## Architectuur
 
@@ -420,3 +434,16 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   met stacking contexts te voorkomen); zichtbaar gemaakt door `.sidebar` en `.main`
   semi-transparant/getint te maken zodat de foto erdoorheen schijnt, terwijl kaarten en
   tabellen daarbovenop hun eigen ondoorzichtige achtergrond houden en dus leesbaar blijven.
+- **Mindmap**: `MindmapNode` (tekst, kleur, x/y in pixels) en `MindmapEdge` (koppeling tussen
+  twee nodes, richting is puur boekhouding — geen betekenisverschil tussen "van" en "naar").
+  Geen library: het canvas is een gewone `position: relative`-container met vrij
+  gepositioneerde `.mindmap-node`-`<div>`'s (`position: absolute; left/top`) en een
+  overlappende `<svg>`-laag voor de verbindingslijnen, geüpdatet in JS bij het slepen.
+  Verbindingslijnen krijgen twee `<line>`-elementen: een dunne zichtbare en een onzichtbare
+  bredere eronder (`stroke-width: 12`, transparant) puur om ze makkelijker aanklikbaar te
+  maken om te verwijderen — een lijn van 2px raken is anders vrijwel onmogelijk. Bij het
+  verwijderen van een node worden diens edges eerst expliciet weggegooid in de route (geen
+  ORM-cascade tussen Node en Edge, en SQLite handhaaft de `ON DELETE CASCADE` van de
+  foreign keys niet zonder `PRAGMA foreign_keys=ON`, wat deze app niet zet). Posities worden
+  pas na het loslaten opgeslagen (niet per pixel tijdens het slepen) om het aantal
+  AJAX-verzoeken te beperken.

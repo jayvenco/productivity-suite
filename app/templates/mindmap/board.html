@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Mindmap - Productivity Suite{% endblock %}
+
+{% block content %}
+<div class="toolbar">
+  <h2 style="margin:0">{{ board.name }}</h2>
+  <button type="button" class="btn" id="mindmap-add-node">+ Component</button>
+</div>
+<p class="mindmap-hint">
+  Sleep een component om 'm te verplaatsen. <strong>+</strong> voegt een nieuw, verbonden
+  component toe. <strong>🔗</strong> verbindt met een bestaand component (klik daarna op dat
+  component). Klik op een verbindingslijn om 'm te verwijderen.
+</p>
+
+<div class="mindmap-canvas" id="mindmap-canvas" data-board-id="{{ board.id }}">
+  <svg class="mindmap-edges" id="mindmap-edges"></svg>
+  {% for node in nodes %}
+  <div class="mindmap-node" data-node-id="{{ node.id }}" style="left:{{ node.x }}px; top:{{ node.y }}px; --node-color: {{ node.color }}">
+    <div class="mindmap-node-header">
+      <input type="color" class="mindmap-node-color" value="{{ node.color }}" title="Kleur wijzigen">
+      <button type="button" class="mindmap-node-btn mindmap-node-add" title="Verbonden component toevoegen">+</button>
+      <button type="button" class="mindmap-node-btn mindmap-node-link" title="Verbinden met een ander component">🔗</button>
+      <button type="button" class="mindmap-node-btn mindmap-node-delete" title="Verwijderen">×</button>
+    </div>
+    <div class="mindmap-node-text" contenteditable="true" spellcheck="false">{{ node.text }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<script type="application/json" id="mindmap-edges-data">
+  [{% for edge in edges %}{"id": {{ edge.id }}, "from_node_id": {{ edge.from_node_id }}, "to_node_id": {{ edge.to_node_id }}}{{ "," if not loop.last }}{% endfor %}]
+</script>
+<script src="/static/js/mindmap.js"></script>
+{% endblock %}

@@ -1668,3 +1668,120 @@ textarea {
 :root[data-background]:not([data-background="none"]) .main {
   background: rgba(10, 10, 14, 0.35);
 }
+
+/* ---- Mindmap ---- */
+
+.mindmap-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+}
+
+.mindmap-canvas {
+  position: relative;
+  min-height: 600px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  overflow: auto;
+}
+
+.mindmap-edges {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.mindmap-edge-line {
+  stroke: var(--border-strong, var(--border));
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.mindmap-edge-hit {
+  stroke: transparent;
+  stroke-width: 12;
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+.mindmap-edge-hit:hover + .mindmap-edge-line,
+.mindmap-edge-hit:hover {
+  stroke: var(--danger);
+}
+
+.mindmap-node {
+  position: absolute;
+  min-width: 140px;
+  max-width: 240px;
+  background: var(--bg);
+  border: 2px solid var(--node-color, var(--accent));
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  cursor: grab;
+  user-select: none;
+}
+
+.mindmap-node-dragging {
+  cursor: grabbing;
+  opacity: 0.85;
+  z-index: 5;
+}
+
+.mindmap-node-link-source {
+  box-shadow: 0 0 0 3px var(--node-color, var(--accent));
+}
+
+.mindmap-node-header {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 4px;
+  background: var(--node-color, var(--accent));
+  border-radius: 5px 5px 0 0;
+}
+
+.mindmap-node-color {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.mindmap-node-btn {
+  width: auto;
+  background: rgba(0, 0, 0, 0.2);
+  border: none;
+  color: #fff;
+  border-radius: 3px;
+  font-size: 11px;
+  line-height: 1;
+  padding: 3px 5px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.mindmap-node-btn + .mindmap-node-btn {
+  margin-left: 2px;
+}
+
+.mindmap-node-btn:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.mindmap-node-delete:hover {
+  background: var(--danger);
+}
+
+.mindmap-node-text {
+  padding: 6px 8px;
+  font-size: 13px;
+  outline: none;
+  word-break: break-word;
+  cursor: text;
+}
