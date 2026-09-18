@@ -37,9 +37,10 @@ Gebouwd:
   cirkel en de tags hebben hun eigen gedrag en negeren die klik. Een taak met een
   **prioriteitsvinkje** (★) krijgt een ster voor de titel en sorteert bovenaan de takenlijst;
   het **afvink-vinkje** zet de taak direct op "done" (doorgestreepte titel, gevulde cirkel) of
-  terug naar "todo"; onder de meta-regel staat een dunne **deadline-gradiëntbalk** die
-  geleidelijk van antraciet naar donkeroranje kleurt naarmate de deadline nadert of al
-  verstreken is
+  terug naar "todo"; naast de deadline-datum in diezelfde meta-regel staat een kleine
+  **deadline-gradiëntbalkje** dat geleidelijk van antraciet naar donkeroranje kleurt
+  naarmate de deadline nadert of al verstreken is — titel, tags, deadline en balkje staan
+  allemaal op één regel
 - **Pomodoro-timer** als "Pomodoro"-menu-item in de sidebar i.p.v. een permanent zichtbaar
   blok: klik erop om een **zwevend, verplaatsbaar, semi-transparant paneel** rechtsonder in
   beeld te openen (instelbare werk-/pauze-duur, optioneel gekoppeld aan een taak, live
