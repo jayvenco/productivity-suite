@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Mindmaps - Productivity Suite{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h2 style="margin:0">Mindmaps</h2>
+</div>
+
+<form method="post" action="/mindmap" class="mindmap-new-form">
+  <input type="text" name="name" placeholder="Naam van nieuwe mindmap">
+  <button type="submit" class="btn">+ Nieuwe mindmap</button>
+</form>
+
+<div class="mindmap-list">
+  {% for board in boards %}
+  <div class="mindmap-list-item">
+    <a href="/mindmap/{{ board.id }}" class="mindmap-list-title">{{ board.name }}</a>
+    <span class="mindmap-list-count">{{ node_counts.get(board.id, 0) }} componenten</span>
+    <form method="post" action="/mindmap/{{ board.id }}/delete" onsubmit="return confirm('Mindmap &quot;{{ board.name }}&quot; verwijderen? Dit kan niet ongedaan gemaakt worden.')">
+      <button type="submit" class="btn btn-danger">Verwijder</button>
+    </form>
+  </div>
+  {% else %}
+  <p>Nog geen mindmaps. Maak er hierboven één aan.</p>
+  {% endfor %}
+</div>
+{% endblock %}

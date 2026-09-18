@@ -81,13 +81,18 @@ Gebouwd:
   bestandsnamen) — klik erop om de code compact binnen die kaart te tonen, i.p.v. een regel
   die over het hele werkscherm uitrekt. Eén zoekveld doorzoekt titel, tag én code-inhoud
   tegelijk, taggable met hetzelfde gedeelde tag-systeem
-- **Mindmap**: een simpel, vrij canvas met losse tekst-componenten die je kunt **verslepen**,
-  van een **eigen kleur** voorzien (kleurenpicker) en met elkaar **verbinden** met lijnen. De
-  **+**-knop op een component maakt direct een nieuw, verbonden component aan (een idee
-  uitwerken); de **🔗**-knop verbindt met een willekeurig bestaand component (twee losse
-  steekwoorden aan elkaar binden, ook niet-hiërarchisch). Klik op een verbindingslijn om 'm te
-  verwijderen. Eén mindmap per gebruiker, net als het kanban-bord — geen aparte
-  board-beheer-UI nodig
+- **Mindmap**: je kunt **meerdere, losse mindmaps aanmaken en opslaan** (net als notities of
+  snippets, i.p.v. één vast bord) — de lijstpagina toont ze met naam en aantal componenten,
+  en kan je hernoemen/verwijderen. Een mindmap openen (bewerken) schakelt naar een **volledig
+  scherm** (de sidebar verdwijnt, het canvas vult de hele pagina) met alleen een smalle
+  bovenbalk (terug-link, naam bewerken, "+ Component"); teruggaan naar de lijst herstelt de
+  normale weergave. Componenten hebben een **dunne rand** in hun eigen kleur en tonen
+  standaard **alleen de tekst** — pas bij **dubbelklik** verschijnt de werkbalk (kleur
+  wijzigen, verbonden component toevoegen, koppelen aan een ander component, verwijderen);
+  een klik ernaast klapt 'm weer in. Componenten zijn vrij te **verslepen**; de
+  **+**-knop maakt direct een nieuw, verbonden component aan (een idee uitwerken), de
+  **🔗**-knop verbindt met een willekeurig bestaand component (twee losse steekwoorden aan
+  elkaar binden, ook niet-hiërarchisch). Klik op een verbindingslijn om 'm te verwijderen
 - **Kalender** met een **maand-** en **weekweergave** (te wisselen via de knoppen boven het
   rooster), navigatie met vorige/volgende en een "Vandaag"-knop, simpel/strak vormgegeven:
   één doorlopend raster met dunne lijnen tussen de dagen (geen losse "kaartjes" per dag),
@@ -242,13 +247,18 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     aanpassen → sidebar en hoofdvlak worden semi-transparant met de foto erdoorheen, kaarten
     en tabellen blijven zelf gewoon leesbaar/ondoorzichtig. Zet 'm terug op "Geen" → normale
     weergave terug zonder foto.
-14. Naar Mindmap gaan (start met één "Hoofdonderwerp"-component) → sleep het component naar
-    een andere plek, herlaad de pagina en controleer dat de nieuwe positie bewaard is. Klik
-    "+" om een verbonden component toe te voegen, wijzig de kleur via het kleurenbolletje en
-    de tekst door erin te klikken en te typen (klik ernaast om op te slaan). Maak nog een los
-    component via "+ Component" boven de pagina, klik 🔗 op het eerste component en dan op
-    het losse component om ze te verbinden. Klik op een verbindingslijn om 'm te verwijderen,
-    en verwijder een component via × → de bijbehorende verbindingen verdwijnen mee.
+14. Naar Mindmap gaan → geef een naam op en klik "+ Nieuwe mindmap" → opent de editor in
+    **volledig scherm** (sidebar verdwijnt), met één "Hoofdonderwerp"-component (dunne rand,
+    alleen tekst zichtbaar). Dubbelklik het component → de werkbalk (kleur/+/🔗/×) verschijnt;
+    klik ernaast → werkbalk klapt weer in. Sleep het component naar een andere plek, herlaad
+    en controleer dat de positie bewaard is. Dubbelklik weer, klik "+" om een verbonden
+    component toe te voegen, wijzig de kleur en de tekst (klik erin, typ, klik ernaast om op
+    te slaan). Maak nog een los component via "+ Component" boven de pagina, dubbelklik het
+    eerste component, klik 🔗 en dan op het losse component om ze te verbinden. Klik op een
+    verbindingslijn om 'm te verwijderen, en verwijder een component via × → de bijbehorende
+    verbindingen verdwijnen mee. Klik "← Mindmaps" → normale weergave (met sidebar) is terug,
+    en de mindmap staat in de lijst met naam en aantal componenten; hernoem 'm door de naam
+    bovenin te wijzigen, en verwijder 'm via de lijst.
 15. Bij Account → API-token op "Token genereren" klikken → het token wordt één keer getoond.
     Test 'm vanaf de terminal, bv.:
     ```bash
@@ -476,6 +486,25 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   foreign keys niet zonder `PRAGMA foreign_keys=ON`, wat deze app niet zet). Posities worden
   pas na het loslaten opgeslagen (niet per pixel tijdens het slepen) om het aantal
   AJAX-verzoeken te beperken.
+- **Meerdere mindmaps**: `MindmapBoard` was al een gewoon, niet-uniek-per-gebruiker model
+  (net als `Task`/`Note`) — de eerdere "één mindmap per gebruiker"-beperking zat puur in de
+  route (`_get_or_create_board` pakte altijd de eerste), niet in het datamodel. Overstappen
+  naar meerdere mindmaps was dus een routewijziging, geen migratie: `GET /mindmap` toont nu
+  een lijst, `POST /mindmap` maakt een nieuw bord, en de node-/edge-routes checken
+  eigenaarschap via een join naar `MindmapBoard.user_id` in plaats van een vast board-id, dus
+  ze werken ongeacht in welke van je mindmaps een component zit.
+- **Mindmap-editor als "fullscreen"**: geen JavaScript Fullscreen API (die heeft een
+  gebruikersgebaar nodig en gedraagt zich onvoorspelbaar in een preview/iframe) — gewoon een
+  Jinja-`{% block body_class %}` in `base.html` waarmee `mindmap/board.html` een
+  `mindmap-editor`-klasse op `<body>` zet. CSS verbergt dan `.sidebar` en geeft `.main` een
+  eigen kolom-layout met een smalle bovenbalk (`.mindmap-topbar`) i.p.v. de normale
+  pagina-padding. Terugnavigeren naar `/mindmap` (de lijst) herstelt de normale layout
+  vanzelf, omdat die pagina de `body_class`-block niet invult.
+- **Componenten pas uitklappen bij dubbelklik**: `.mindmap-node-header` (kleur/+/koppel/
+  verwijder-knoppen) staat standaard op `display: none` en wordt getoond via de
+  `.mindmap-node-expanded`-klasse, die `mindmap.js` toggelt op dubbelklik (met een check dat
+  een dubbelklik ín de tekst zelf — om een woord te selecteren — de werkbalk niet opent) en
+  weer verwijdert bij een klik buiten het component.
 - **API-authenticatie**: een los, willekeurig token (`secrets.token_urlsafe(32)`), waarvan
   alleen de SHA-256-hash in `User.api_token_hash` staat — zelfde patroon als
   `password_hash`. De nieuwe dependency `require_api_user` (naast het bestaande

@@ -1669,7 +1669,101 @@ textarea {
   background: rgba(10, 10, 14, 0.35);
 }
 
-/* ---- Mindmap ---- */
+/* ---- Mindmap: lijst van mindmaps ---- */
+
+.mindmap-new-form {
+  display: flex;
+  gap: 8px;
+  max-width: 420px;
+  margin-bottom: 16px;
+}
+
+.mindmap-new-form input {
+  flex: 1;
+}
+
+.mindmap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mindmap-list-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.mindmap-list-title {
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.mindmap-list-title:hover {
+  text-decoration: underline;
+}
+
+.mindmap-list-count {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-left: auto;
+}
+
+/* ---- Mindmap: editor (fullscreen tijdens het bewerken) ---- */
+
+body.mindmap-editor .sidebar {
+  display: none;
+}
+
+body.mindmap-editor .main {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mindmap-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-elevated);
+  flex-shrink: 0;
+}
+
+.mindmap-back {
+  color: var(--text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.mindmap-back:hover {
+  color: var(--accent);
+}
+
+.mindmap-title-input {
+  font-weight: 600;
+  border: 1px solid transparent;
+  background: none;
+  width: auto;
+  min-width: 160px;
+}
+
+.mindmap-title-input:hover,
+.mindmap-title-input:focus {
+  border-color: var(--border);
+  background: var(--bg);
+}
+
+.mindmap-topbar .mindmap-hint {
+  margin: 0;
+  flex: 1;
+}
 
 .mindmap-hint {
   font-size: 12px;
@@ -1679,11 +1773,14 @@ textarea {
 
 .mindmap-canvas {
   position: relative;
+  flex: 1;
   min-height: 600px;
-  border: 1px dashed var(--border);
-  border-radius: 8px;
   background: var(--bg-elevated);
   overflow: auto;
+}
+
+body.mindmap-editor .mindmap-canvas {
+  border-radius: 0;
 }
 
 .mindmap-edges {
@@ -1718,7 +1815,7 @@ textarea {
   min-width: 140px;
   max-width: 240px;
   background: var(--bg);
-  border: 2px solid var(--node-color, var(--accent));
+  border: 1px solid var(--node-color, var(--accent));
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
   cursor: grab;
@@ -1735,13 +1832,19 @@ textarea {
   box-shadow: 0 0 0 3px var(--node-color, var(--accent));
 }
 
+/* Simpele weergave: alleen de tekst, geen werkbalk -- pas zichtbaar na
+   dubbelklik (zie .mindmap-node-expanded, JS in mindmap.js). */
 .mindmap-node-header {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 2px;
   padding: 3px 4px;
   background: var(--node-color, var(--accent));
-  border-radius: 5px 5px 0 0;
+  border-radius: 7px 7px 0 0;
+}
+
+.mindmap-node-expanded .mindmap-node-header {
+  display: flex;
 }
 
 .mindmap-node-color {

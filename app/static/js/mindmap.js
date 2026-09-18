@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const canvas = document.getElementById("mindmap-canvas");
   if (!canvas) return;
 
+  const boardId = canvas.dataset.boardId;
   const svg = document.getElementById("mindmap-edges");
   const addBtn = document.getElementById("mindmap-add-node");
   const NS = "http://www.w3.org/2000/svg";
@@ -181,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const parentId = Number(nodeEl.dataset.nodeId);
       const x = nodeEl.offsetLeft + 220;
       const y = nodeEl.offsetTop + 40;
-      api("/mindmap/nodes", { text: "Nieuw idee", color: nodeEl.style.getPropertyValue("--node-color") || "#bd93f9", x, y, parent_id: parentId })
+      api(`/mindmap/${boardId}/nodes`, { text: "Nieuw idee", color: nodeEl.style.getPropertyValue("--node-color") || "#bd93f9", x, y, parent_id: parentId })
         .then((data) => {
           createNodeElement(data.id, data.text, data.color, data.x, data.y);
           if (data.edge) drawEdge(data.edge.id, data.edge.from_node_id, data.edge.to_node_id);
@@ -268,11 +269,25 @@ document.addEventListener("DOMContentLoaded", () => {
     addBtn.addEventListener("click", () => {
       const x = 40 + Math.round(Math.random() * 120);
       const y = 40 + Math.round(Math.random() * 120);
-      api("/mindmap/nodes", { text: "Nieuw idee", color: "#bd93f9", x, y })
+      api(`/mindmap/${boardId}/nodes`, { text: "Nieuw idee", color: "#bd93f9", x, y })
         .then((data) => createNodeElement(data.id, data.text, data.color, data.x, data.y))
         .catch(() => {});
     });
   }
+
+  // ---- Simpele weergave: pas bij dubbelklik tonen we kleur/koppelen/verwijderen ----
+  canvas.addEventListener("dblclick", (event) => {
+    if (event.target.closest("[contenteditable]")) return; // dubbelklik in tekst = woord selecteren
+    const nodeEl = event.target.closest(".mindmap-node");
+    if (!nodeEl) return;
+    nodeEl.classList.toggle("mindmap-node-expanded");
+  });
+
+  document.addEventListener("click", (event) => {
+    canvas.querySelectorAll(".mindmap-node-expanded").forEach((el) => {
+      if (!el.contains(event.target)) el.classList.remove("mindmap-node-expanded");
+    });
+  });
 
   // ---- Initiële verbindingen tekenen ----
   const edgesDataEl = document.getElementById("mindmap-edges-data");
