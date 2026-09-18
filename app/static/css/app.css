@@ -190,17 +190,17 @@ textarea {
 .task-card-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
 .task-card {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 10px 12px;
+  border-radius: 6px;
+  padding: 5px 10px;
   cursor: pointer;
 }
 
@@ -211,13 +211,12 @@ textarea {
 .task-check-form {
   flex-shrink: 0;
   display: flex;
-  padding-top: 2px;
 }
 
 .task-check {
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
   margin: 0;
   padding: 0;
   border-radius: 50%;
@@ -244,7 +243,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 9px;
   line-height: 1;
   color: var(--accent-text);
 }
@@ -254,7 +253,14 @@ textarea {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+}
+
+.task-card-main-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
 }
 
 .task-card-title-link {
@@ -312,8 +318,8 @@ textarea {
   color: var(--danger);
 }
 
-:root[data-density="compact"] .task-card-list { gap: 5px; }
-:root[data-density="compact"] .task-card { padding: 6px 8px; gap: 8px; }
+:root[data-density="compact"] .task-card-list { gap: 2px; }
+:root[data-density="compact"] .task-card { padding: 3px 8px; gap: 6px; }
 
 .tag {
   display: inline-block;
@@ -331,9 +337,9 @@ textarea {
 }
 
 .deadline-bar {
-  height: 3px;
+  height: 2px;
   border-radius: 2px;
-  margin-top: 5px;
+  margin-top: 2px;
   width: 50%;
   opacity: 0.9;
   transition: background 0.3s ease;
