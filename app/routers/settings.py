@@ -39,6 +39,19 @@ AVAILABLE_DENSITIES = [
     ("compact", "Compact"),
 ]
 
+# (id, label). id is ook de data-background-waarde die app.css afvangt om de
+# juiste afbeelding uit app/static/images/backgrounds/ te tonen.
+AVAILABLE_BACKGROUNDS = [
+    ("none", "Geen"),
+    ("nature", "Natuur (bos)"),
+    ("mountains", "Bergen (schemer)"),
+    ("space", "Heelal (sterrenhemel)"),
+]
+AVAILABLE_BACKGROUND_IDS = {bg_id for bg_id, _ in AVAILABLE_BACKGROUNDS}
+
+MIN_BACKGROUND_OPACITY = 10
+MAX_BACKGROUND_OPACITY = 70
+
 
 @router.post("/theme")
 def set_theme(
@@ -58,6 +71,8 @@ def set_appearance(
     font_family: str = Form(...),
     font_size: int = Form(...),
     density: str = Form(...),
+    background: str = Form("none"),
+    background_opacity: int = Form(30),
     redirect_to: str = Form("/account"),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
@@ -68,5 +83,9 @@ def set_appearance(
         user.font_size = font_size
     if density in {density_id for density_id, _ in AVAILABLE_DENSITIES}:
         user.density = density
+    if background in AVAILABLE_BACKGROUND_IDS:
+        user.background = background
+    if MIN_BACKGROUND_OPACITY <= background_opacity <= MAX_BACKGROUND_OPACITY:
+        user.background_opacity = background_opacity
     db.commit()
     return RedirectResponse(redirect_to, status_code=303)

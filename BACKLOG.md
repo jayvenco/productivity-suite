@@ -6,15 +6,10 @@ volgorde — gewoon een geheugensteun voor later.
 ~~**Zoeken op tags**~~ — opgelost: de takenlijst heeft nu aanklikbare tag-checkboxes
 waarmee je op meerdere tags tegelijk kunt filteren (OR-logica).
 
-- **Achtergronden-systeem**: een instelling (waarschijnlijk bij Account → Weergave, naast
-  thema/lettertype) om een achtergrondafbeelding voor de app te kiezen uit gratis
-  online bronnen — categorieën natuur, omgeving en "in het donker". Aandachtspunt bij
-  uitwerking: dit is de eerste plek in de app die bewust een externe, niet-self-hosted
-  bron nodig heeft (bv. Unsplash/Pexels API of iets dat geen API-key vereist zoals Picsum),
-  wat afwijkt van de rest van de app die verder geen externe data ophaalt buiten de
-  webfonts. Moet afwegen: vaste per-categorie afbeeldingen bundelen (blijft self-hosted,
-  minder keuze) vs. live ophalen bij een externe API (meer keuze, wel een netwerkcall en
-  eventueel een API-key-vereiste voor de gebruiker).
+~~**Achtergronden-systeem**~~ — opgelost: Account → Weergave heeft nu een achtergrondkeuze
+(Geen/Natuur/Bergen/Heelal) met een sterkte-schuifje. Gekozen voor drie vaste, self-hosted
+foto's i.p.v. een live externe API — geen netwerkafhankelijkheid, in lijn met de rest van de
+app. Meer categorieën/foto's toevoegen kan later alsnog als daar behoefte aan is.
 
 - **API voor externe agents/automatisering** (taken, snippets, kanban-kaarten, notities
   aanmaken vanaf buiten de app, bv. vanuit een eigen agent-script): gematigd complex, geen

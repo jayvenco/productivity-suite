@@ -64,3 +64,72 @@ def test_set_appearance_accepts_monospace_font(logged_in_client):
 
     page = logged_in_client.get("/tasks").text
     assert 'data-font="hack"' in page
+
+
+def test_set_appearance_accepts_background(logged_in_client):
+    response = logged_in_client.post(
+        "/settings/appearance",
+        data={
+            "font_family": "system",
+            "font_size": "14",
+            "density": "comfortable",
+            "background": "mountains",
+            "background_opacity": "45",
+            "redirect_to": "/tasks",
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+    page = logged_in_client.get("/tasks").text
+    assert 'data-background="mountains"' in page
+    assert "--background-opacity: 0.45" in page
+
+
+def test_set_appearance_defaults_background_to_none(logged_in_client):
+    response = logged_in_client.post(
+        "/settings/appearance",
+        data={"font_family": "system", "font_size": "14", "density": "comfortable", "redirect_to": "/tasks"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+    page = logged_in_client.get("/tasks").text
+    assert 'data-background="none"' in page
+
+
+def test_set_appearance_ignores_unknown_background_and_out_of_range_opacity(logged_in_client):
+    logged_in_client.post(
+        "/settings/appearance",
+        data={
+            "font_family": "system",
+            "font_size": "14",
+            "density": "comfortable",
+            "background": "space",
+            "background_opacity": "40",
+            "redirect_to": "/tasks",
+        },
+    )
+    logged_in_client.post(
+        "/settings/appearance",
+        data={
+            "font_family": "system",
+            "font_size": "14",
+            "density": "comfortable",
+            "background": "onbekend",
+            "background_opacity": "999",
+            "redirect_to": "/tasks",
+        },
+    )
+
+    page = logged_in_client.get("/tasks").text
+    assert 'data-background="space"' in page
+    assert "--background-opacity: 0.4" in page
+
+
+def test_account_page_lists_background_options(logged_in_client):
+    page = logged_in_client.get("/account").text
+    assert "Achtergrond" in page
+    assert "Natuur" in page
+    assert "Bergen" in page
+    assert "Heelal" in page

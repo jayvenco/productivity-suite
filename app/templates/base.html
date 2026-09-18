@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="nl" data-theme="{{ user.theme if user else 'dracula' }}" data-font="{{ user.font_family if user else 'system' }}" data-density="{{ user.density if user else 'comfortable' }}" style="--font-size-base: {{ user.font_size if user else 14 }}px">
+<html lang="nl" data-theme="{{ user.theme if user else 'dracula' }}" data-font="{{ user.font_family if user else 'system' }}" data-density="{{ user.density if user else 'comfortable' }}" data-background="{{ user.background if user else 'none' }}" style="--font-size-base: {{ user.font_size if user else 14 }}px; --background-opacity: {{ (user.background_opacity if user else 30) / 100 }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,6 +18,7 @@
 </head>
 <body>
   {% if user %}
+  <div class="app-background"></div>
   <div class="layout">
     <aside class="sidebar">
       <div class="brand">Productivity Suite</div>

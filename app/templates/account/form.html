@@ -56,6 +56,18 @@
       {% endfor %}
     </select>
   </div>
+  <div class="field">
+    <label for="background">Achtergrond</label>
+    <select id="background" name="background">
+      {% for bg_id, label in available_backgrounds %}
+      <option value="{{ bg_id }}" {{ "selected" if user.background == bg_id }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="background_opacity">Sterkte achtergrond ({{ user.background_opacity }}%)</label>
+    <input type="range" id="background_opacity" name="background_opacity" min="10" max="70" step="5" value="{{ user.background_opacity }}">
+  </div>
   <button type="submit" class="btn">Toepassen</button>
 </form>
 {% endblock %}

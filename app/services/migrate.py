@@ -14,6 +14,8 @@ _COLUMNS_TO_ENSURE = {
         ("font_family", "VARCHAR(50) DEFAULT 'system'"),
         ("font_size", "INTEGER DEFAULT 14"),
         ("density", "VARCHAR(20) DEFAULT 'comfortable'"),
+        ("background", "VARCHAR(30) DEFAULT 'none'"),
+        ("background_opacity", "INTEGER DEFAULT 30"),
     ],
 }
 

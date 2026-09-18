@@ -7,7 +7,7 @@ from app.auth.dependencies import require_user
 from app.auth.security import hash_password, verify_password
 from app.database import get_db
 from app.models.user import User
-from app.routers.settings import AVAILABLE_DENSITIES, AVAILABLE_FONT_SIZES, AVAILABLE_FONTS
+from app.routers.settings import AVAILABLE_BACKGROUNDS, AVAILABLE_DENSITIES, AVAILABLE_FONT_SIZES, AVAILABLE_FONTS
 from app.templating import templates
 
 router = APIRouter(prefix="/account", tags=["account"])
@@ -18,6 +18,7 @@ def _appearance_context() -> dict:
         "available_fonts": AVAILABLE_FONTS,
         "available_font_sizes": AVAILABLE_FONT_SIZES,
         "available_densities": AVAILABLE_DENSITIES,
+        "available_backgrounds": AVAILABLE_BACKGROUNDS,
     }
 
 

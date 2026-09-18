@@ -54,7 +54,11 @@ Gebouwd:
   (14 opties — systeemstandaard, de leesletters Inter/Roboto/Open Sans/Lato/Poppins/Nunito/
   Source Sans 3/Merriweather/Fira Sans, en de monospace/code-letters Hack/JetBrains Mono/
   Fira Code/Consolas), **lettergrootte** (13–18px) en **compactheid** (comfortabel/compact,
-  verkleint de ruimte tussen tekst en elementen door de sidebar, tabellen, kaarten en formulieren)
+  verkleint de ruimte tussen tekst en elementen door de sidebar, tabellen, kaarten en formulieren).
+  Ook een **achtergrondafbeelding** (Geen/Natuur/Bergen/Heelal, self-hosted foto's, geen
+  externe API) met een **sterkte-schuifje** (10–70%) — de sidebar en het hoofdvlak worden dan
+  semi-transparant zodat de foto erdoorheen schijnt, terwijl kaarten/tabellen zelf gewoon
+  ondoorzichtig en leesbaar blijven
 - Kanban-**swimlanes zijn in-/uitklapbaar**: klik op de swimlane-titel om de rij te verbergen.
   Status wordt per bord onthouden in `localStorage` (client-side, geen serverstate nodig voor
   een enkele gebruiker)
@@ -214,7 +218,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     bezoek aan de takenlijst met de juiste deadline. Blader met de pijltjes naar een andere
     maand en terug, en klik op de maandnaam bovenin → opent de volledige kalenderpagina op die
     maand.
-13. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
+13. Bij Account → Weergave een achtergrond kiezen (bv. Bergen) en het sterkte-schuifje
+    aanpassen → sidebar en hoofdvlak worden semi-transparant met de foto erdoorheen, kaarten
+    en tabellen blijven zelf gewoon leesbaar/ondoorzichtig. Zet 'm terug op "Geen" → normale
+    weergave terug zonder foto.
+14. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
 
 ## Architectuur
 
@@ -401,3 +409,14 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   `<form id="notes-tag-filter-form">`. `Note.row_tint_style` (de rij-brede kleurtint
   afgeleid van de eerste tag) is verwijderd, net als eerder bij `Task` — de tag-badges zelf
   blijven gekleurd.
+- **Achtergrondafbeeldingen**: drie vaste foto's onder `app/static/images/backgrounds/`
+  (nature/mountains/space, gedownload van Pexels — vrij te gebruiken, geen attributie
+  vereist), bewust self-hosted i.p.v. een live externe API zoals Unsplash/Pexels: geen
+  netwerkafhankelijkheid bij het laden van de app, in lijn met de rest van de app die verder
+  alleen webfonts extern ophaalt. `user.background`/`user.background_opacity` sturen een
+  `data-background`-attribuut en een `--background-opacity`-CSS-variabele op `<html>` (zelfde
+  patroon als thema/lettertype/dichtheid). De foto zelf zit in een `position: fixed`-laag
+  achter de hele app (`z-index: -2`, met `.layout` expliciet op `z-index: 1` om verrassingen
+  met stacking contexts te voorkomen); zichtbaar gemaakt door `.sidebar` en `.main`
+  semi-transparant/getint te maken zodat de foto erdoorheen schijnt, terwijl kaarten en
+  tabellen daarbovenop hun eigen ondoorzichtige achtergrond houden en dus leesbaar blijven.

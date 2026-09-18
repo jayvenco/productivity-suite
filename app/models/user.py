@@ -19,6 +19,8 @@ class User(Base):
     font_family: Mapped[str] = mapped_column(String(50), default="system")
     font_size: Mapped[int] = mapped_column(Integer, default=14)
     density: Mapped[str] = mapped_column(String(20), default="comfortable")
+    background: Mapped[str] = mapped_column(String(30), default="none")
+    background_opacity: Mapped[int] = mapped_column(Integer, default=30)
     # True zolang het wachtwoord nog het seed-standaardwachtwoord is -- stuurt de
     # waarschuwingsbanner die aanzet tot wachtwoord wijzigen via /account.
     using_default_password: Mapped[bool] = mapped_column(Boolean, default=True)

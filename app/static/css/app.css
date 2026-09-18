@@ -60,6 +60,8 @@ a {
 .layout {
   display: flex;
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
 }
 
 .sidebar {
@@ -1627,4 +1629,42 @@ textarea {
   font-size: 11px;
   padding: 3px 6px;
   text-align: center;
+}
+
+/* ---- Achtergrond (Account -> Weergave) ----
+   Vaste, self-hosted foto's per categorie (app/static/images/backgrounds/) i.p.v.
+   een externe API -- geen netwerkafhankelijkheid bij het laden van de app. Zichtbaar
+   gemaakt door de sidebar/main semi-transparant te maken zodat de foto er doorheen
+   schijnt; kaarten/tabellen erbovenop houden hun eigen ondoorzichtige achtergrond,
+   dus blijft alles leesbaar. */
+.app-background {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: none;
+}
+
+:root[data-background]:not([data-background="none"]) .app-background {
+  display: block;
+  opacity: var(--background-opacity, 0.3);
+}
+
+:root[data-background="nature"] .app-background { background-image: url("/static/images/backgrounds/nature.jpg"); }
+:root[data-background="mountains"] .app-background { background-image: url("/static/images/backgrounds/mountains.jpg"); }
+:root[data-background="space"] .app-background { background-image: url("/static/images/backgrounds/space.jpg"); }
+
+:root[data-background]:not([data-background="none"]) body {
+  background: transparent;
+}
+
+:root[data-background]:not([data-background="none"]) .sidebar {
+  background: rgba(10, 10, 14, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+:root[data-background]:not([data-background="none"]) .main {
+  background: rgba(10, 10, 14, 0.35);
 }
