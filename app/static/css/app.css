@@ -185,61 +185,135 @@ textarea {
   width: 100%;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
+/* ---- Taken: kaartjes i.p.v. tabelrijen ---- */
+
+.task-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-th, td {
-  text-align: left;
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--border);
-}
-
-/* Vaste kolombreedtes i.p.v. browser auto-sizing: anders lijnen kolommen niet uit
-   tussen filters/groepen, omdat elke <table> anders zijn breedtes berekent op basis
-   van alleen zijn eigen inhoud (bv. de langste titel in die ene groep). */
-.tasks-table {
-  table-layout: fixed;
-}
-
-.tasks-table col.col-done { width: 32px; }
-.tasks-table col.col-title { width: 32%; }
-.tasks-table col.col-status { width: 12%; }
-.tasks-table col.col-deadline { width: 20%; }
-.tasks-table col.col-tags { width: 26%; }
-.tasks-table col.col-actions { width: 90px; }
-
-.tasks-table td {
-  overflow-wrap: break-word;
-}
-
-/* Iets krapper dan de algemene th/td-padding, en zelf ook nog eens verkleind
-   bij "compact" -- taken staan meestal in een lange lijst, dus rijhoogte
-   telt hier zwaarder mee dan bij een tabel met weinig regels. */
-.tasks-table th,
-.tasks-table td {
-  padding: 3px 8px;
-}
-
-:root[data-density="compact"] .tasks-table th,
-:root[data-density="compact"] .tasks-table td {
-  padding: 1px 6px;
-}
-
-.task-done-cell {
-  text-align: center;
-}
-
-.task-done-cell input[type="checkbox"] {
-  width: auto;
+.task-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
   cursor: pointer;
 }
 
-.task-row-done a {
+.task-card:hover {
+  border-color: var(--accent);
+}
+
+.task-check-form {
+  flex-shrink: 0;
+  display: flex;
+  padding-top: 2px;
+}
+
+.task-check {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: none;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.task-check:hover {
+  border-color: var(--accent);
+}
+
+.task-check:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.task-check:checked::after {
+  content: "✓";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--accent-text);
+}
+
+.task-card-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-card-title-link {
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.task-card-title-link:hover {
+  text-decoration: underline;
+}
+
+.task-card-done .task-card-title-link {
   color: var(--text-muted);
   text-decoration: line-through;
 }
+
+.task-card-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.task-card-status {
+  color: var(--accent);
+}
+
+.task-card-deadline {
+  white-space: nowrap;
+}
+
+.task-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.task-card-delete {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 4px;
+  width: auto;
+}
+
+.task-card-delete:hover {
+  color: var(--danger);
+}
+
+:root[data-density="compact"] .task-card-list { gap: 5px; }
+:root[data-density="compact"] .task-card { padding: 6px 8px; gap: 8px; }
 
 .tag {
   display: inline-block;

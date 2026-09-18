@@ -23,9 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function applyCollapsed(name, isCollapsed) {
     const toggle = document.querySelector(`[data-group-toggle="${CSS.escape(name)}"]`);
-    const table = document.querySelector(`[data-group-block="${CSS.escape(name)}"]`);
-    if (!toggle || !table) return;
-    table.hidden = isCollapsed;
+    const block = document.querySelector(`[data-group-block="${CSS.escape(name)}"]`);
+    if (!toggle || !block) return;
+    block.hidden = isCollapsed;
     const arrow = toggle.querySelector(".task-group-toggle-arrow");
     if (arrow) arrow.textContent = isCollapsed ? "▸" : "▾";
   }
@@ -46,5 +46,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     saveCollapsed(collapsed);
     applyCollapsed(name, isCollapsed);
+  });
+
+  // Hele taakkaart is klikbaar om te bewerken (behalve de checkbox, tags en
+  // de verwijder-knop, die hun eigen gedrag hebben) -- zelfde patroon als
+  // de notitie-/snippet-kaarten.
+  document.addEventListener("click", (event) => {
+    if (event.target.closest("input, button, a, form")) return;
+    const card = event.target.closest(".task-card");
+    if (card) window.location = card.dataset.href;
   });
 });

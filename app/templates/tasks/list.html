@@ -1,64 +1,39 @@
 {% extends "base.html" %}
 {% block title %}Taken - Productivity Suite{% endblock %}
 
-{% macro task_row(task, sort, group_by, active_tags, active_status) %}
-<tr class="{{ 'task-row-done' if task.status.value == 'done' }}">
-  <td class="task-done-cell">
-    <form method="post" action="/tasks/{{ task.id }}/toggle-done">
-      <input type="hidden" name="sort" value="{{ sort }}">
-      <input type="hidden" name="group_by" value="{{ group_by }}">
-      {% for t in active_tags %}<input type="hidden" name="filter_tags" value="{{ t }}">{% endfor %}
-      {% if active_status %}<input type="hidden" name="status_filter" value="{{ active_status }}">{% endif %}
-      <input type="checkbox" onchange="this.form.submit()" title="Taak afronden" {{ 'checked' if task.status.value == 'done' }}>
-    </form>
-  </td>
-  <td>
-    {% if task.priority %}<span class="priority-star" title="Prioriteit">★</span>{% endif %}
-    <a href="/tasks/{{ task.id }}/edit">{{ task.title }}</a>
-  </td>
-  <td>{{ task.status.value }}</td>
-  <td>
-    {% if task.deadline %}
-      {{ task.deadline.isoformat() }}
-      {% if task.deadline_overdue %}<span class="badge-danger">verlopen</span>
-      {% elif task.deadline_warning %}<span class="badge-warning">bijna deadline</span>{% endif %}
-    {% else %}—{% endif %}
+{% macro task_card(task, sort, group_by, active_tags, active_status) %}
+<div class="task-card {{ 'task-card-done' if task.status.value == 'done' }}" data-href="/tasks/{{ task.id }}/edit">
+  <form method="post" action="/tasks/{{ task.id }}/toggle-done" class="task-check-form">
+    <input type="hidden" name="sort" value="{{ sort }}">
+    <input type="hidden" name="group_by" value="{{ group_by }}">
+    {% for t in active_tags %}<input type="hidden" name="filter_tags" value="{{ t }}">{% endfor %}
+    {% if active_status %}<input type="hidden" name="status_filter" value="{{ active_status }}">{% endif %}
+    <input type="checkbox" class="task-check" onchange="this.form.submit()" title="Taak afronden" {{ 'checked' if task.status.value == 'done' }}>
+  </form>
+  <div class="task-card-body">
+    <a href="/tasks/{{ task.id }}/edit" class="task-card-title-link">
+      {% if task.priority %}<span class="priority-star" title="Prioriteit">★</span>{% endif %}
+      {{ task.title }}
+    </a>
+    <div class="task-card-meta">
+      {% for t in task.tags %}<a class="tag" style="{{ t.badge_style }}" href="/tasks?tags={{ t.name }}">{{ t.name }}</a>{% endfor %}
+      {% if task.status.value == 'in_progress' %}<span class="task-card-status">Bezig</span>{% endif %}
+      {% if task.deadline %}
+        <span class="task-card-deadline {{ 'badge-danger' if task.deadline_overdue else 'badge-warning' if task.deadline_warning else '' }}">{{ task.deadline.isoformat() }}</span>
+      {% endif %}
+    </div>
     {% if task.urgency_color %}<div class="deadline-bar" style="background:{{ task.urgency_color }}"></div>{% endif %}
-  </td>
-  <td>
-    {% for t in task.tags %}<a class="tag" style="{{ t.badge_style }}" href="/tasks?tags={{ t.name }}">{{ t.name }}</a>{% endfor %}
-  </td>
-  <td>
+  </div>
+  <div class="task-card-actions">
     <form method="post" action="/tasks/{{ task.id }}/delete" onsubmit="return confirm('Taak verwijderen?')">
       <input type="hidden" name="sort" value="{{ sort }}">
       <input type="hidden" name="group_by" value="{{ group_by }}">
       {% for t in active_tags %}<input type="hidden" name="filter_tags" value="{{ t }}">{% endfor %}
       {% if active_status %}<input type="hidden" name="status_filter" value="{{ active_status }}">{% endif %}
-      <button type="submit" class="btn btn-danger">Verwijder</button>
+      <button type="submit" class="task-card-delete" title="Verwijderen">×</button>
     </form>
-  </td>
-</tr>
-{% endmacro %}
-
-{% macro table_head() %}
-<colgroup>
-  <col class="col-done">
-  <col class="col-title">
-  <col class="col-status">
-  <col class="col-deadline">
-  <col class="col-tags">
-  <col class="col-actions">
-</colgroup>
-<thead>
-  <tr>
-    <th></th>
-    <th>Titel</th>
-    <th>Status</th>
-    <th>Deadline</th>
-    <th>Tags</th>
-    <th></th>
-  </tr>
-</thead>
+  </div>
+</div>
 {% endmacro %}
 
 {% block content %}
@@ -102,23 +77,17 @@
   <button type="button" class="task-group-heading task-group-toggle" data-group-toggle="{{ group_name }}">
     <span class="task-group-toggle-arrow">▾</span> {{ group_name }} <span class="task-group-count">({{ group_tasks | length }})</span>
   </button>
-  <table class="tasks-table" data-group-block="{{ group_name }}">
-    {{ table_head() }}
-    <tbody>
-      {% for task in group_tasks %}{{ task_row(task, sort, group_by, active_tags, active_status) }}{% endfor %}
-    </tbody>
-  </table>
+  <div class="task-card-list" data-group-block="{{ group_name }}">
+    {% for task in group_tasks %}{{ task_card(task, sort, group_by, active_tags, active_status) }}{% endfor %}
+  </div>
   {% endfor %}
 {% else %}
-<table class="tasks-table">
-  {{ table_head() }}
-  <tbody>
-    {% for task in tasks %}{{ task_row(task, sort, group_by, active_tags, active_status) }}
-    {% else %}
-    <tr><td colspan="6">Nog geen taken. Maak er één aan.</td></tr>
-    {% endfor %}
-  </tbody>
-</table>
+<div class="task-card-list">
+  {% for task in tasks %}{{ task_card(task, sort, group_by, active_tags, active_status) }}
+  {% else %}
+  <p>Nog geen taken. Maak er één aan.</p>
+  {% endfor %}
+</div>
 {% endif %}
 <script src="/static/js/tasks-list.js"></script>
 {% endblock %}

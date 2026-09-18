@@ -31,12 +31,15 @@ Gebouwd:
   tag-checkboxes boven de lijst (meerdere tegelijk aan te vinken, OR-logica: een taak met
   minstens één van de aangevinkte tags blijft zichtbaar) — de taakrij zelf krijgt geen
   kleurtint meer op basis van de tag, alleen de tag-badge zelf is gekleurd
-- Taken hebben een **prioriteitsvinkje** (★, sorteert bovenaan de takenlijst), een
-  **snel-afvink-vinkje** (zet de taak direct op "done", of terug naar "todo") en een dunne
-  **deadline-gradiëntbalk** onder de deadline-datum (halve breedte van die cel) die geleidelijk
-  van antraciet naar donkeroranje kleurt naarmate de deadline nadert of al verstreken is
-- Takenlijst-tabellen hebben **vaste kolombreedtes**, zodat ze uitlijnen ongeacht filter,
-  sortering of groepering
+- Taken staan als **kaartjes** in de lijst (i.p.v. tabelrijen): een ronde afvink-cirkel
+  links, vetgedrukte titel met de gekleurde tags eronder, deadline en status rechts in de
+  meta-regel. De hele kaart is klikbaar om te bewerken (net als notities/snippets); de
+  cirkel en de tags hebben hun eigen gedrag en negeren die klik. Een taak met een
+  **prioriteitsvinkje** (★) krijgt een ster voor de titel en sorteert bovenaan de takenlijst;
+  het **afvink-vinkje** zet de taak direct op "done" (doorgestreepte titel, gevulde cirkel) of
+  terug naar "todo"; onder de meta-regel staat een dunne **deadline-gradiëntbalk** die
+  geleidelijk van antraciet naar donkeroranje kleurt naarmate de deadline nadert of al
+  verstreken is
 - **Pomodoro-timer** als "Pomodoro"-menu-item in de sidebar i.p.v. een permanent zichtbaar
   blok: klik erop om een **zwevend, verplaatsbaar, semi-transparant paneel** rechtsonder in
   beeld te openen (instelbare werk-/pauze-duur, optioneel gekoppeld aan een taak, live
@@ -150,16 +153,17 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    controleer dat de waarschuwing verdwijnt.
 2. Nieuwe taak aanmaken met titel, beschrijving (markdown), deadline binnen 3 dagen en tags
    → controleer dat de "bijna deadline"-badge verschijnt op de takenlijst én in het
-   "Komende deadlines"-widgetje in de sidebar.
-3. Taak bewerken en status wijzigen naar "done". Op de takenlijst het snel-afvink-vinkje
-   gebruiken → status wisselt direct tussen "todo" en "done", en de huidige
-   sortering/groepering/filter blijft daarbij behouden (ook na filteren op status/tag).
+   "Komende deadlines"-widgetje in de sidebar. Klik ergens op de taakkaart (niet de cirkel of
+   een tag) → opent de bewerkpagina.
+3. Taak bewerken en status wijzigen naar "done". Op de takenlijst de ronde afvink-cirkel
+   gebruiken → status wisselt direct tussen "todo" en "done" (cirkel vult zich, titel wordt
+   doorgestreept), en de huidige sortering/groepering/filter blijft daarbij behouden (ook na
+   filteren op status/tag).
 4. Taken aanmaken met verschillende tags → controleer dat elke tag een eigen kleur heeft en
-   dat de taakrij zelf geen kleurtint krijgt (alleen de tag-badge is gekleurd). Meerdere
+   dat de taakkaart zelf geen kleurtint krijgt (alleen de tag-badge is gekleurd). Meerdere
    tag-checkboxes boven de lijst aanvinken → filtert op taken met minstens één van die tags.
-   Sorteren op titel/prioriteit/status en groeperen op tag uitproberen, een tag-groep
-   in-/uitklappen (herlaad de pagina en controleer dat de klap-status bewaard is gebleven), en
-   controleren dat de kolommen precies uitlijnen tussen groepen/filters.
+   Sorteren op titel/prioriteit/status en groeperen op tag uitproberen, en een tag-groep
+   in-/uitklappen (herlaad de pagina en controleer dat de klap-status bewaard is gebleven).
 5. Naar Kanban gaan, een swimlane toevoegen (krijgt automatisch eigen Todo/In Progress/Done)
    en daar een eigen kolom aan toevoegen → controleer dat die kolom alleen in díe swimlane
    verschijnt. Een kaart aanmaken met een checklist (`- [ ] item`) → klik een checklist-item
@@ -243,10 +247,12 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 - **Groeperen op tag**: een taak met meerdere tags verschijnt in elke bijbehorende groep
   (geen kunstmatige keuze voor "de hoofdtag"); taken zonder tag komen in een aparte
   "Zonder tag"-groep aan het eind.
-- **Vaste kolombreedtes** (`.tasks-table { table-layout: fixed }` + `<colgroup>`): zonder dit
-  berekent de browser de kolombreedtes per `<table>` op basis van alleen de inhoud van díe
-  tabel, wat de kolommen liet verspringen tussen filters en tussen groepen (elke groep is een
-  eigen `<table>`). Nu staat elke kolombreedte vast, ongeacht wat erin staat.
+- **Taken als kaartjes i.p.v. tabelrijen**: de takenlijst gebruikte eerst een `<table>` per
+  groep met vaste kolombreedtes (`table-layout: fixed` + `<colgroup>`) om uitlijning tussen
+  filters/groepen te garanderen. Dat probleem bestaat niet meer sinds elke taak een losse
+  `.task-card`-`<div>` is (geen kolommen om uit te lijnen) — de kaarten staan in een simpele
+  `.task-card-list` (flex-column), met dezelfde `data-group-block`/`data-group-toggle`-aanpak
+  als de kanban-swimlanes voor het in-/uitklappen van tag-groepen.
 - **Snel-afvink-vinkje**: een losse `POST /tasks/{id}/toggle-done` die alleen de status
   wisselt tussen `todo` en `done` (i.p.v. het hele bewerk-formulier te doorlopen). De huidige
   sortering/groepering/filters worden als hidden fields meegestuurd zodat de redirect

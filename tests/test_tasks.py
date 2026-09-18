@@ -113,14 +113,14 @@ def test_tag_filter_checkboxes_listed_and_checked(logged_in_client):
     assert "checked" in checkbox
 
 
-def test_task_row_has_no_tag_color_tint(logged_in_client):
+def test_task_card_has_no_tag_color_tint(logged_in_client):
     logged_in_client.post(
         "/tasks", data={"title": "Geen tint", "description": "", "deadline": "", "tags": "werk"}
     )
     listing = logged_in_client.get("/tasks").text
-    # De rij zelf (<tr>) mag geen inline achtergrondkleur meer krijgen op basis van
-    # de tag -- de tag-badge en de filter-checkbox mogen wel gekleurd zijn.
-    assert "<tr style=" not in listing
+    # De kaart zelf mag geen inline achtergrondkleur krijgen op basis van de tag --
+    # de tag-badge en de filter-checkbox mogen wel gekleurd zijn.
+    assert not re.search(r'class="task-card[^"]*"[^>]*style="[^"]*hsla', listing)
 
 
 def test_task_group_headings_are_toggle_buttons(logged_in_client):
@@ -132,9 +132,13 @@ def test_task_group_headings_are_toggle_buttons(logged_in_client):
 
 
 def _task_id_for_title(html: str, title: str) -> str:
-    match = re.search(rf'/tasks/(\d+)/edit">{re.escape(title)}</a>', html)
-    assert match, f"Taak met titel {title!r} niet gevonden"
-    return match.group(1)
+    """Zoekt het taak-id horend bij deze titel. Zoekt terug vanaf de titel naar de
+    dichtstbijzijnde voorgaande edit-link, i.p.v. voorwaarts (dat zou per ongeluk
+    het id van een eerdere kaart kunnen pakken als er meerdere zijn)."""
+    idx = html.index(title)
+    matches = list(re.finditer(r'href="/tasks/(\d+)/edit"', html[:idx]))
+    assert matches, f"Taak met titel {title!r} niet gevonden"
+    return matches[-1].group(1)
 
 
 def test_toggle_done_marks_task_done_and_back(logged_in_client):
@@ -146,11 +150,11 @@ def test_toggle_done_marks_task_done_and_back(logged_in_client):
     assert response.status_code == 303
 
     after_done = logged_in_client.get("/tasks").text
-    assert "task-row-done" in after_done
+    assert "task-card-done" in after_done
 
     logged_in_client.post(f"/tasks/{task_id}/toggle-done")
     after_reopen = logged_in_client.get("/tasks").text
-    assert "task-row-done" not in after_reopen
+    assert "task-card-done" not in after_reopen
 
 
 def test_toggle_done_preserves_sort_and_group_by(logged_in_client):
@@ -174,8 +178,8 @@ def test_toggle_done_preserves_sort_and_group_by(logged_in_client):
     logged_in_client.post(f"/tasks/{task_id}/toggle-done")
 
 
-def test_tables_use_fixed_layout_for_stable_alignment(logged_in_client):
-    logged_in_client.post("/tasks", data={"title": "Uitlijning", "description": "", "deadline": "", "tags": "werk"})
-    listing = logged_in_client.get("/tasks?status_filter=todo").text
-    assert "tasks-table" in listing
-    assert 'col class="col-title"' in listing
+def test_task_card_whole_card_is_clickable_to_edit(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Klikbare kaart", "description": "", "deadline": "", "tags": ""})
+    listing = logged_in_client.get("/tasks").text
+    task_id = _task_id_for_title(listing, "Klikbare kaart")
+    assert f'data-href="/tasks/{task_id}/edit"' in listing
