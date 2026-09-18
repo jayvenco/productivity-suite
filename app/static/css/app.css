@@ -339,14 +339,12 @@ textarea {
   margin-right: 2px;
 }
 
-.deadline-bar-inline {
-  display: inline-block;
-  width: 28px;
-  height: 4px;
-  border-radius: 2px;
-  vertical-align: middle;
-  opacity: 0.9;
-  transition: background 0.3s ease;
+.task-card-preview {
+  font-style: italic;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .badge-warning {

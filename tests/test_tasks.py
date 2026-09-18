@@ -34,15 +34,42 @@ def test_priority_task_shown_and_sorted_first(logged_in_client):
     assert listing.index("Belangrijke taak") < listing.index("Normale taak")
 
 
-def test_deadline_bar_color_present_for_near_deadline(logged_in_client):
+def test_deadline_warning_badge_for_near_deadline(logged_in_client):
     near_deadline = (date.today() + timedelta(days=2)).isoformat()
     logged_in_client.post(
         "/tasks",
         data={"title": "Bijna deadline", "description": "", "deadline": near_deadline, "tags": ""},
     )
     listing = logged_in_client.get("/tasks").text
-    assert "deadline-bar" in listing
-    assert "rgb(" in listing
+    assert "badge-warning" in listing
+
+
+def test_task_card_shows_description_preview(logged_in_client):
+    logged_in_client.post(
+        "/tasks",
+        data={
+            "title": "Met beschrijving",
+            "description": "Dit is een langere beschrijving die afgekapt moet worden",
+            "deadline": "",
+            "tags": "",
+        },
+    )
+    listing = logged_in_client.get("/tasks").text
+    assert '<span class="task-card-preview">Dit is een langere b…</span>' in listing
+
+
+def test_task_card_hides_preview_without_description(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Kaart zonder beschrijving", "description": "", "deadline": "", "tags": ""}
+    )
+    listing = logged_in_client.get("/tasks").text
+    # Andere taken in dezelfde lijst kunnen wél een beschrijving (en dus preview)
+    # hebben -- scope de check tot de kaart van déze taak, niet de hele pagina.
+    title_idx = listing.index("Kaart zonder beschrijving")
+    card_start = listing.rindex('<div class="task-card', 0, title_idx)
+    next_card = listing.find('<div class="task-card', title_idx)
+    card_html = listing[card_start : next_card if next_card != -1 else len(listing)]
+    assert "task-card-preview" not in card_html
 
 
 def test_sort_by_title(logged_in_client):

@@ -21,7 +21,9 @@
         {% if task.status.value == 'in_progress' %}<span class="task-card-status">Bezig</span>{% endif %}
         {% if task.deadline %}
           <span class="task-card-deadline {{ 'badge-danger' if task.deadline_overdue else 'badge-warning' if task.deadline_warning else '' }}">{{ task.deadline.isoformat() }}</span>
-          {% if task.urgency_color %}<span class="deadline-bar-inline" style="background:{{ task.urgency_color }}"></span>{% endif %}
+        {% endif %}
+        {% if task.description %}
+          <span class="task-card-preview">{{ task.description[:20] }}{{ '…' if task.description|length > 20 }}</span>
         {% endif %}
       </div>
     </div>

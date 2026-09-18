@@ -37,9 +37,8 @@ Gebouwd:
   cirkel en de tags hebben hun eigen gedrag en negeren die klik. Een taak met een
   **prioriteitsvinkje** (★) krijgt een ster voor de titel en sorteert bovenaan de takenlijst;
   het **afvink-vinkje** zet de taak direct op "done" (doorgestreepte titel, gevulde cirkel) of
-  terug naar "todo"; naast de deadline-datum in diezelfde meta-regel staat een kleine
-  **deadline-gradiëntbalkje** dat geleidelijk van antraciet naar donkeroranje kleurt
-  naarmate de deadline nadert of al verstreken is — titel, tags, deadline en balkje staan
+  terug naar "todo"; heeft de taak een beschrijving, dan staat er een **cursieve preview**
+  (eerste 20 tekens) achteraan diezelfde meta-regel — titel, tags, deadline en preview staan
   allemaal op één regel
 - **Pomodoro-timer** als "Pomodoro"-menu-item in de sidebar i.p.v. een permanent zichtbaar
   blok: klik erop om een **zwevend, verplaatsbaar, semi-transparant paneel** rechtsonder in
@@ -346,10 +345,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   contenteditable-editor zou die regel-gebaseerde herkenning breken. De werkbalk
   (`app/static/js/markdown-toolbar.js`) manipuleert daarom de tekst in een gewone `<textarea>`
   (selectie omwikkelen, regels prefixen, markdown-links invoegen) i.p.v. `execCommand`.
-- **Deadline-gradiëntbalk**: kleur wordt server-side berekend (`Task.urgency_color`) op basis
-  van een venster van 14 dagen — antraciet (`rgb(63,63,70)`) ver van de deadline, lineair naar
-  donkeroranje (`rgb(154,52,18)`) op de deadline zelf, en blijft donkeroranje bij een
-  verstreken deadline (geen aparte roodstand).
+- **Taakkaart-preview i.p.v. deadline-gradiëntbalk**: de eerdere kleurverloop-balk
+  (`Task.urgency_color`, antraciet → donkeroranje) is verwijderd — in plaats daarvan toont de
+  meta-regel, als de taak een beschrijving heeft, de eerste 20 tekens cursief
+  (`task.description[:20]`), zodat je zonder de kaart open te klikken al een idee hebt
+  waar de taak over gaat.
 - **Lichte, additive migraties** (`app/services/migrate.py`): nieuwe kolommen (zoals
   `priority`, `color` en `kanban_columns.swimlane_id`) worden bij het opstarten toegevoegd aan
   een bestaande SQLite-database als ze nog ontbreken. Bij de overstap naar per-swimlane
