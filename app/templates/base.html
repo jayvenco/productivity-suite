@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/static/css/themes/one-dark-pro.css">
   <link rel="stylesheet" href="/static/css/themes/nord.css">
   <link rel="stylesheet" href="/static/css/themes/light.css">
+  <link rel="stylesheet" href="/static/css/themes/macos-light.css">
   <link rel="stylesheet" href="/static/css/themes/nexmail.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -57,7 +58,7 @@
       <a href="/snippets" class="{{ 'active' if request.url.path.startswith('/snippets') }}">Snippets</a>
       <div class="spacer"></div>
       <div class="theme-switcher">
-        {% for theme in ["dracula", "one-dark-pro", "nord", "light", "nexmail"] %}
+        {% for theme in ["dracula", "one-dark-pro", "nord", "light", "nexmail", "macos-light"] %}
         <form method="post" action="/settings/theme">
           <input type="hidden" name="theme" value="{{ theme }}">
           <input type="hidden" name="redirect_to" value="{{ request.url.path }}">

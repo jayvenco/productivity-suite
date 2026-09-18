@@ -8,6 +8,16 @@ def test_set_theme(logged_in_client):
     assert 'data-theme="nexmail"' in page
 
 
+def test_set_macos_light_theme(logged_in_client):
+    response = logged_in_client.post(
+        "/settings/theme", data={"theme": "macos-light", "redirect_to": "/tasks"}, follow_redirects=False
+    )
+    assert response.status_code == 303
+
+    page = logged_in_client.get("/tasks").text
+    assert 'data-theme="macos-light"' in page
+
+
 def test_set_theme_ignores_unknown_value(logged_in_client):
     logged_in_client.post("/settings/theme", data={"theme": "nexmail", "redirect_to": "/tasks"})
     logged_in_client.post("/settings/theme", data={"theme": "geen-bestaand-thema", "redirect_to": "/tasks"})

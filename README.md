@@ -48,9 +48,10 @@ Gebouwd:
   plek zolang je door de app navigeert, en verschijnt automatisch weer als er al een sessie
   loopt; sluiten via het kruisje stopt de timer niet, verbergt 'm alleen. Geschiedenis
   zichtbaar op de taakpagina
-- 5 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
+- 6 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
   achtergrond met signaalgroen accent en het lettertype van nexmail — Space Grotesk voor
-  koppen, IBM Plex Sans voor lopende tekst)
+  koppen, IBM Plex Sans voor lopende tekst), macOS-Light (extra licht, clean/simpel thema
+  naar macOS-stijl: zuiver wit met macOS-systeemblauw als accentkleur)
 - **Weergave-instellingen** (Account → Weergave): los van het thema kiesbaar **lettertype**
   (14 opties — systeemstandaard, de leesletters Inter/Roboto/Open Sans/Lato/Poppins/Nunito/
   Source Sans 3/Merriweather/Fira Sans, en de monospace/code-letters Hack/JetBrains Mono/

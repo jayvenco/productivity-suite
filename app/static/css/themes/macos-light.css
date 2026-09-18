@@ -1,0 +1,17 @@
+/* Extra licht thema naar macOS-stijl (Finder/Systeeminstellingen): zuiver wit,
+   subtiele grijstinten en het systeem-blauw als accent -- bewust rustiger en
+   "clean" dan het bestaande Light-thema (dat een warme oranje accentkleur heeft). */
+:root[data-theme="macos-light"] {
+  --bg: #ffffff;
+  --bg-elevated: #f5f5f7;
+  --bg-hover: #e8e8ed;
+  --border: #d2d2d7;
+  --text: #1d1d1f;
+  --text-muted: #6e6e73;
+  --accent: #007aff;
+  --accent-text: #ffffff;
+  --success: #34c759;
+  --warning: #ff9500;
+  --danger: #ff3b30;
+  --link: #007aff;
+}

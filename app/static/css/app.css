@@ -147,6 +147,7 @@ a {
 .theme-swatch-one-dark-pro { background: #61afef; }
 .theme-swatch-nord { background: #88c0d0; }
 .theme-swatch-light { background: #ea580c; border-color: #ddd9d3; }
+.theme-swatch-macos-light { background: #007aff; border-color: #d2d2d7; }
 .theme-swatch-nexmail { background: #23d19e; }
 
 button, input, select, textarea {
