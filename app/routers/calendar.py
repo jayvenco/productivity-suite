@@ -62,6 +62,64 @@ def _items_by_date(
     return tasks_by_date, events_by_date
 
 
+def _marked_dates(days: list[date], user_id: int, db: Session) -> set[date]:
+    """Dagen binnen dit bereik die een taak-deadline of afspraak hebben --
+    voor de rode stipjes in het mini-kalender-widgetje in de sidebar."""
+    start, end = days[0], days[-1]
+    task_dates = {
+        row[0]
+        for row in db.query(Task.deadline)
+        .filter(Task.user_id == user_id, Task.deadline.isnot(None), Task.deadline >= start, Task.deadline <= end)
+        .all()
+    }
+    event_dates = {
+        row[0]
+        for row in db.query(CalendarEvent.event_date)
+        .filter(CalendarEvent.user_id == user_id, CalendarEvent.event_date >= start, CalendarEvent.event_date <= end)
+        .all()
+    }
+    return task_dates | event_dates
+
+
+@router.get("/widget")
+def calendar_widget(
+    year: int | None = None,
+    month: int | None = None,
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Kleine JSON-feed voor het mini-kalender-widgetje in de sidebar (zelfde
+    opzet als /tasks/upcoming voor de deadlines-widget)."""
+    today = date.today()
+    year = year or today.year
+    month = month or today.month
+    weeks = month_weeks(year, month)
+    days = [d for week in weeks for d in week]
+    marked = _marked_dates(days, user.id, db)
+    prev_year, prev_month = add_months(year, month, -1)
+    next_year, next_month = add_months(year, month, 1)
+
+    return {
+        "label": f"{DUTCH_MONTHS[month - 1]} {year}",
+        "day_labels": DUTCH_WEEKDAYS,
+        "prev": {"year": prev_year, "month": prev_month},
+        "next": {"year": next_year, "month": next_month},
+        "weeks": [
+            [
+                {
+                    "date": d.isoformat(),
+                    "day": d.day,
+                    "in_month": d.month == month,
+                    "is_today": d == today,
+                    "has_items": d in marked,
+                }
+                for d in week
+            ]
+            for week in weeks
+        ],
+    }
+
+
 @router.get("")
 def calendar_view(
     request: Request,

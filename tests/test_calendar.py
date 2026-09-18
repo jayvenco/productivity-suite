@@ -116,3 +116,62 @@ def test_week_dates_returns_monday_to_sunday():
 def test_add_months_handles_year_rollover():
     assert add_months(2026, 12, 1) == (2027, 1)
     assert add_months(2026, 1, -1) == (2025, 12)
+
+
+def test_widget_requires_login(client):
+    response = client.get("/calendar/widget", follow_redirects=False)
+    assert response.status_code == 303
+
+
+def test_widget_returns_month_grid_with_label(logged_in_client):
+    response = logged_in_client.get("/calendar/widget?year=2026&month=3")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["label"] == "maart 2026"
+    assert len(data["day_labels"]) == 7
+    assert all(len(week) == 7 for week in data["weeks"])
+    assert data["prev"] == {"year": 2026, "month": 2}
+    assert data["next"] == {"year": 2026, "month": 4}
+
+
+def test_widget_marks_days_with_task_deadline(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Widget-taak", "description": "", "deadline": "2026-03-12", "tags": ""}
+    )
+    data = logged_in_client.get("/calendar/widget?year=2026&month=3").json()
+    day = next(d for week in data["weeks"] for d in week if d["date"] == "2026-03-12")
+    assert day["has_items"] is True
+
+    other_day = next(d for week in data["weeks"] for d in week if d["date"] == "2026-03-13")
+    assert other_day["has_items"] is False
+
+
+def test_widget_marks_days_with_calendar_event(logged_in_client):
+    logged_in_client.post(
+        "/calendar/events", data={"title": "Widget-event", "event_date": "2026-03-19", "description": "", "tags": ""}
+    )
+    data = logged_in_client.get("/calendar/widget?year=2026&month=3").json()
+    day = next(d for week in data["weeks"] for d in week if d["date"] == "2026-03-19")
+    assert day["has_items"] is True
+
+
+def test_quick_create_task_appears_in_task_list(logged_in_client):
+    response = logged_in_client.post("/tasks/quick", data={"title": "Snel toegevoegd", "deadline": "2026-04-01"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["title"] == "Snel toegevoegd"
+    assert body["deadline"] == "2026-04-01"
+
+    listing = logged_in_client.get("/tasks").text
+    assert "Snel toegevoegd" in listing
+
+
+def test_quick_create_task_without_deadline(logged_in_client):
+    response = logged_in_client.post("/tasks/quick", data={"title": "Zonder deadline"})
+    assert response.status_code == 200
+    assert response.json()["deadline"] is None
+
+
+def test_quick_create_task_requires_title(logged_in_client):
+    response = logged_in_client.post("/tasks/quick", data={"title": "   "})
+    assert response.status_code == 400

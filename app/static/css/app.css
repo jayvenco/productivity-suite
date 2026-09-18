@@ -1338,3 +1338,137 @@ th, td {
 :root[data-density="compact"] .calendar-grid { gap: 4px; }
 :root[data-density="compact"] .calendar-day { padding: 4px; min-height: 70px; }
 :root[data-density="compact"] .calendar-grid-week .calendar-day { min-height: 180px; }
+
+/* ---- Mini-kalender (sidebar) ---- */
+
+.mini-calendar-widget {
+  margin-bottom: 10px;
+}
+
+.mini-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.mini-calendar-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  text-decoration: none;
+  text-transform: capitalize;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini-calendar-label:hover {
+  color: var(--accent);
+}
+
+.mini-calendar-nav {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 4px;
+  width: auto;
+}
+
+.mini-calendar-nav:hover {
+  color: var(--accent);
+}
+
+.mini-calendar-weekdays,
+.mini-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.mini-calendar-weekdays span {
+  font-size: 9px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.mini-calendar-day {
+  position: relative;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 10px;
+  padding: 3px 0;
+  cursor: pointer;
+  border-radius: 3px;
+  width: auto;
+}
+
+.mini-calendar-day:hover {
+  background: var(--bg-hover);
+}
+
+.mini-calendar-day-other-month {
+  color: var(--text-muted);
+  opacity: 0.5;
+}
+
+.mini-calendar-day-today {
+  background: var(--bg-hover);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.mini-calendar-day-selected {
+  outline: 1px solid var(--accent);
+}
+
+.mini-calendar-dot {
+  display: block;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--danger);
+  margin: 1px auto 0;
+}
+
+.mini-calendar-quickadd {
+  margin-top: 6px;
+  padding: 6px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mini-calendar-quickadd[hidden] {
+  display: none;
+}
+
+.mini-calendar-quickadd-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.mini-calendar-quickadd input {
+  padding: 3px 6px;
+}
+
+.mini-calendar-quickadd-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.mini-calendar-quickadd-actions .btn,
+.mini-calendar-quickadd-actions .btn-secondary {
+  flex: 1;
+  font-size: 11px;
+  padding: 3px 6px;
+  text-align: center;
+}

@@ -22,6 +22,24 @@
     <aside class="sidebar">
       <div class="brand">Productivity Suite</div>
 
+      <div class="mini-calendar-widget" id="mini-calendar-widget">
+        <div class="mini-calendar-header">
+          <button type="button" class="mini-calendar-nav" id="mini-calendar-prev" title="Vorige maand" aria-label="Vorige maand">‹</button>
+          <a href="/calendar" class="mini-calendar-label" id="mini-calendar-label" title="Volledige kalender openen">Laden...</a>
+          <button type="button" class="mini-calendar-nav" id="mini-calendar-next" title="Volgende maand" aria-label="Volgende maand">›</button>
+        </div>
+        <div class="mini-calendar-weekdays" id="mini-calendar-weekdays"></div>
+        <div class="mini-calendar-grid" id="mini-calendar-grid"></div>
+        <form class="mini-calendar-quickadd" id="mini-calendar-quickadd" hidden>
+          <div class="mini-calendar-quickadd-date" id="mini-calendar-quickadd-date"></div>
+          <input type="text" id="mini-calendar-quickadd-title" placeholder="Nieuwe taak..." required>
+          <div class="mini-calendar-quickadd-actions">
+            <button type="submit" class="btn">+ Taak</button>
+            <button type="button" class="btn btn-secondary" id="mini-calendar-quickadd-cancel">Annuleren</button>
+          </div>
+        </form>
+      </div>
+
       <div class="deadlines-widget" id="deadlines-widget">
         <div class="sidebar-heading">Komende deadlines</div>
         <ul class="deadlines-list" id="deadlines-list">
@@ -94,6 +112,7 @@
 
   <script src="/static/js/pomodoro.js"></script>
   <script src="/static/js/deadlines.js"></script>
+  <script src="/static/js/mini-calendar.js"></script>
   {% else %}
     {% block content_anon %}{% endblock %}
   {% endif %}

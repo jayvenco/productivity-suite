@@ -134,6 +134,29 @@ def upcoming_deadlines(user: User = Depends(require_user), db: Session = Depends
     ]
 
 
+@router.post("/quick")
+def quick_create_task(
+    title: str = Form(...),
+    deadline: str = Form(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Snel een taak aanmaken vanuit het mini-kalender-widgetje in de sidebar
+    (klik op een dag) -- geeft JSON terug i.p.v. te redirecten, want de widget
+    staat op elke pagina en mag de gebruiker niet wegnavigeren."""
+    clean_title = title.strip()
+    if not clean_title:
+        raise HTTPException(status_code=400, detail="Titel is verplicht")
+    task = Task(
+        user_id=user.id,
+        title=clean_title,
+        deadline=date.fromisoformat(deadline) if deadline else None,
+    )
+    db.add(task)
+    db.commit()
+    return {"id": task.id, "title": task.title, "deadline": deadline or None}
+
+
 @router.get("/new")
 def new_task_form(request: Request, user: User = Depends(require_user)):
     return templates.TemplateResponse(request, "tasks/form.html", {"user": user, "task": None})

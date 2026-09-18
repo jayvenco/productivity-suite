@@ -77,6 +77,11 @@ Gebouwd:
   en, puur ter info, **taken met een deadline** (klikbaar naar de taak, doorgestreept als de
   taak al "done" is). Elke dag heeft een "+"-knop die direct een nieuwe afspraak opent met die
   datum vooringevuld
+- **Mini-kalender in de sidebar**: een compact maandoverzicht op elke pagina, met een **rood
+  stipje** op elke dag die een taak-deadline of afspraak heeft. Klik op een dag om direct
+  (zonder de pagina te verlaten) een **taak aan te maken met die dag als deadline** — verschijnt
+  meteen in de takenlijst en het "Komende deadlines"-widgetje. De maandnaam bovenin is ook een
+  link naar de volledige kalenderpagina (maand-/weekweergave)
 
 Nog niet gebouwd: CI/CD, backup/export-import, spraaknotities, LLM-koppeling.
 
@@ -192,7 +197,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     Maak een taak met een deadline in dezelfde maand → verschijnt ook in de kalender, met een
     andere randkleur dan afspraken, en doorgestreept zodra je 'm op "done" zet. Wissel naar de
     weekweergave en test Vorige/Volgende/Vandaag in beide weergaves.
-12. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
+12. In de sidebar op een lege dag in de mini-kalender klikken (bv. op de Notities-pagina, niet
+    op Taken) → een klein formulier verschijnt met die datum, geen paginawissel. Typ een titel
+    en klik "+ Taak" → een rood stipje verschijnt direct op die dag, en de taak staat na een
+    bezoek aan de takenlijst met de juiste deadline. Blader met de pijltjes naar een andere
+    maand en terug, en klik op de maandnaam bovenin → opent de volledige kalenderpagina op die
+    maand.
+13. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
 
 ## Architectuur
 
@@ -358,3 +369,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   locale ingesteld. Nieuwe/bewerkte afspraken gebruiken dezelfde eigen-pagina-aanpak als
   Taken/Notities/Snippets (`/calendar/events/new`, `?on=<datum>` vult de datum voor) i.p.v.
   een modal per dagcel, wat bij 35-42 cellen per maand een hoop overbodige HTML zou zijn.
+- **Mini-kalender in de sidebar**: staat in `base.html` (dus op elke pagina) en wordt net als
+  het "Komende deadlines"-widgetje via een kleine JSON-feed gevuld (`GET /calendar/widget`,
+  `app/static/js/mini-calendar.js`) i.p.v. server-side in elke route te renderen. De rode
+  stipjes komen uit `_marked_dates()` in `app/routers/calendar.py`: een simpele union van
+  taak-deadlines en afspraak-datums in de zichtbare maand. Snel een taak aanmaken gaat via
+  `POST /tasks/quick`, dat JSON teruggeeft in plaats van te redirecten — de widget staat op
+  élke pagina (ook Kanban, Notities, ...) en mag de gebruiker dus niet wegnavigeren naar
+  `/tasks` na het aanmaken. Na een geslaagde quick-add stuurt de widget een eigen
+  `deadlines:refresh`-DOM-event, waar `deadlines.js` op luistert om zichzelf te verversen
+  zonder dat beide widgets elkaar rechtstreeks hoeven te kennen.
