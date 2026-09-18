@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session, selectinload
 
 from app.auth.dependencies import require_user
 from app.database import get_db
 from app.models.note import Note
+from app.models.tag import Tag
 from app.models.user import User
 from app.services.richtext import sanitize_note_html
 from app.services.tags import resolve_tags
@@ -30,22 +31,34 @@ def _get_note_or_404(db: Session, note_id: int, user_id: int) -> Note:
 @router.get("")
 def list_notes(
     request: Request,
-    tag: str | None = None,
+    tags: list[str] = Query(default=[]),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     query = db.query(Note).options(selectinload(Note.tags)).filter(Note.user_id == user.id)
-    if tag:
-        query = query.filter(Note.tags.any(name=tag))
+    if tags:
+        query = query.filter(Note.tags.any(Tag.name.in_(tags)))
     notes = query.order_by(Note.updated_at.desc()).all()
 
+    all_tags = (
+        db.query(Tag)
+        .join(Tag.notes)
+        .filter(Note.user_id == user.id)
+        .distinct()
+        .order_by(Tag.name)
+        .all()
+    )
+
     return templates.TemplateResponse(
-        request, "notes/list.html", {"user": user, "notes": notes, "active_tag": tag}
+        request, "notes/list.html", {"user": user, "notes": notes, "all_tags": all_tags, "active_tags": tags}
     )
 
 
-def _redirect_to_list(tag_filter: str | None) -> RedirectResponse:
-    return RedirectResponse(f"/notes?tag={tag_filter}" if tag_filter else "/notes", status_code=303)
+def _redirect_to_list(tag_filters: list[str]) -> RedirectResponse:
+    if not tag_filters:
+        return RedirectResponse("/notes", status_code=303)
+    query = "&".join(f"tags={t}" for t in tag_filters)
+    return RedirectResponse(f"/notes?{query}", status_code=303)
 
 
 @router.post("/bulk-delete")
@@ -55,7 +68,7 @@ async def bulk_delete_notes(request: Request, user: User = Depends(require_user)
     if note_ids:
         db.query(Note).filter(Note.id.in_(note_ids), Note.user_id == user.id).delete(synchronize_session=False)
         db.commit()
-    return _redirect_to_list(form.get("tag_filter") or None)
+    return _redirect_to_list(form.getlist("tag_filter"))
 
 
 @router.post("/bulk-tag")
@@ -78,7 +91,7 @@ async def bulk_tag_notes(request: Request, user: User = Depends(require_user), d
                 if t not in note.tags:
                     note.tags.append(t)
         db.commit()
-    return _redirect_to_list(form.get("tag_filter") or None)
+    return _redirect_to_list(form.getlist("tag_filter"))
 
 
 @router.get("/new")

@@ -61,7 +61,9 @@ Gebouwd:
 - **Notities**: lichte rich-text editor met knoppenbalk (vet, cursief, koppen, opsommingen,
   genummerde lijsten, links, code) — geen markdown-syntax typen nodig, wat je ziet is wat er
   opgeslagen wordt. Inhoud is HTML, server-side gesanitized (`bleach`) tegen XSS. Taggable met
-  hetzelfde gedeelde tag-systeem (kleuren, filteren) als taken/kanban. De hele kaart in de
+  hetzelfde gedeelde tag-systeem als taken/kanban, met **aanklikbare tag-checkboxes** boven de
+  lijst om op meerdere tags tegelijk te filteren (OR-logica) — de notitiekaart zelf krijgt
+  geen kleurtint meer op basis van de tag, alleen de tag-badge is gekleurd. De hele kaart in de
   lijstweergave is klikbaar om te bewerken, en een **selectievak per notitie** maakt
   bulk-acties mogelijk: meerdere notities in één keer verwijderen of er samen een tag aan
   toevoegen
@@ -187,8 +189,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 9. Naar Notities gaan, een notitie aanmaken: tekst selecteren en vet/cursief maken via de
    knoppenbalk, een kop toepassen, een lijst en een link toevoegen, plus tags → controleer dat
    de kaart in de lijstweergave de opmaak en gekleurde tags toont (elke tag een andere, bij
-   aanmaak willekeurig gekozen kleur), en dat de kaart een lichte tint krijgt op basis van de
-   eerste tag. Filteren op tag uitproberen. Klik ergens op een kaart (niet alleen de titel) →
+   aanmaak willekeurig gekozen kleur), en dat de kaart zelf géén kleurtint krijgt (alleen de
+   tag-badge is gekleurd). Meerdere tag-checkboxes boven de lijst aanvinken → filtert op
+   notities met minstens één van die tags. Klik ergens op een kaart (niet alleen de titel) →
    opent de bewerkpagina. Vink twee notities aan via het selectievakje → de bulk-balk
    verschijnt bovenaan; voeg een tag toe aan de selectie en controleer dat beide notities 'm
    krijgen zonder bestaande tags te verliezen, en test daarna bulk-verwijderen.
@@ -389,3 +392,12 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   `/tasks` na het aanmaken. Na een geslaagde quick-add stuurt de widget een eigen
   `deadlines:refresh`-DOM-event, waar `deadlines.js` op luistert om zichzelf te verversen
   zonder dat beide widgets elkaar rechtstreeks hoeven te kennen.
+- **Multi-tag filter en geen kleurtint meer op notities**: zelfde aanpak als eerder bij taken
+  — `GET /notes?tags=werk&tags=prive` (herhaalde query-param) i.p.v. het vorige losse
+  `tag`-param, gefilterd met `Note.tags.any(Tag.name.in_(tags))` (OR-logica). De
+  checkbox-lijst toont alleen tags die op een notitie van de gebruiker staan (`Tag` gejoined
+  via `Tag.notes`). De checkboxes zelf staan buiten het bulk-acties-`<form>` (dat zou nesten
+  betekenen) en zijn met het HTML `form`-attribuut gekoppeld aan een eigen, lege
+  `<form id="notes-tag-filter-form">`. `Note.row_tint_style` (de rij-brede kleurtint
+  afgeleid van de eerste tag) is verwijderd, net als eerder bij `Task` — de tag-badges zelf
+  blijven gekleurd.

@@ -2,14 +2,27 @@
 {% block title %}Notities - Productivity Suite{% endblock %}
 {% block content %}
 <div class="toolbar">
-  <h2 style="margin:0">Notities{% if active_tag %} — tag: {{ active_tag }}{% endif %}</h2>
+  <h2 style="margin:0">Notities{% if active_tags %} — tags: {{ active_tags | join(', ') }}{% endif %}</h2>
   <a href="/notes/new" class="btn">+ Nieuwe notitie</a>
 </div>
 
-{% if active_tag %}<a href="/notes" class="btn btn-secondary" style="margin-bottom:12px;display:inline-block">Tag-filter wissen</a>{% endif %}
+{% if all_tags %}
+<div class="task-tag-filter" style="margin-bottom:12px">
+  <span class="task-tag-filter-label">Tags:</span>
+  {% for t in all_tags %}
+  <label class="tag-checkbox" style="{{ t.badge_style }}">
+    <input type="checkbox" form="notes-tag-filter-form" name="tags" value="{{ t.name }}" onchange="this.form.submit()" {{ 'checked' if t.name in active_tags }}>
+    {{ t.name }}
+  </label>
+  {% endfor %}
+</div>
+{% endif %}
+<form method="get" action="/notes" id="notes-tag-filter-form"></form>
+
+{% if active_tags %}<a href="/notes" class="btn btn-secondary" style="margin-bottom:12px;display:inline-block">Tag-filter wissen</a>{% endif %}
 
 <form method="post" id="notes-bulk-form">
-  {% if active_tag %}<input type="hidden" name="tag_filter" value="{{ active_tag }}">{% endif %}
+  {% for t in active_tags %}<input type="hidden" name="tag_filter" value="{{ t }}">{% endfor %}
 
   <div class="notes-bulk-bar" id="notes-bulk-bar" hidden>
     <span id="notes-bulk-count">0 geselecteerd</span>
@@ -20,14 +33,14 @@
 
   <div class="notes-grid">
     {% for note in notes %}
-    <div class="note-card" data-href="/notes/{{ note.id }}/edit" style="{{ note.row_tint_style }}">
+    <div class="note-card" data-href="/notes/{{ note.id }}/edit">
       <div class="note-card-header">
         <input type="checkbox" class="note-select" name="note_ids" value="{{ note.id }}">
         <a href="/notes/{{ note.id }}/edit" class="note-card-title">{{ note.title }}</a>
       </div>
       <div class="note-card-preview">{{ note.content|safe }}</div>
       <div class="note-card-tags">
-        {% for t in note.tags %}<a class="tag" style="{{ t.badge_style }}" href="/notes?tag={{ t.name }}">{{ t.name }}</a>{% endfor %}
+        {% for t in note.tags %}<a class="tag" style="{{ t.badge_style }}" href="/notes?tags={{ t.name }}">{{ t.name }}</a>{% endfor %}
       </div>
     </div>
     {% else %}

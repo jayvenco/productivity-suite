@@ -23,13 +23,3 @@ class Note(Base):
     tags: Mapped[list["Tag"]] = relationship(  # noqa: F821
         "Tag", secondary=note_tags, back_populates="notes"
     )
-
-    @property
-    def row_tint_style(self) -> str:
-        """Lichte tint van de kleur van de eerste tag, zelfde patroon als Task.row_tint_style."""
-        if not self.tags:
-            return ""
-        hue = self.tags[0].hue
-        if hue is None:
-            return ""
-        return f"background-color: hsla({hue}, 60%, 50%, 0.08);"

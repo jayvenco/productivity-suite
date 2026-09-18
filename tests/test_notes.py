@@ -78,9 +78,35 @@ def test_filter_notes_by_tag(logged_in_client):
     logged_in_client.post("/notes", data={"title": "Werknotitie", "content": "", "tags": "werk"})
     logged_in_client.post("/notes", data={"title": "Privenotitie", "content": "", "tags": "prive"})
 
-    filtered = logged_in_client.get("/notes?tag=werk").text
+    filtered = logged_in_client.get("/notes?tags=werk").text
     assert "Werknotitie" in filtered
     assert "Privenotitie" not in filtered
+
+
+def test_filter_notes_by_multiple_tags_is_or(logged_in_client):
+    logged_in_client.post("/notes", data={"title": "Werknotitie", "content": "", "tags": "werk"})
+    logged_in_client.post("/notes", data={"title": "Privenotitie", "content": "", "tags": "prive"})
+    logged_in_client.post("/notes", data={"title": "Sportnotitie", "content": "", "tags": "sport"})
+
+    filtered = logged_in_client.get("/notes?tags=werk&tags=prive").text
+    assert "Werknotitie" in filtered
+    assert "Privenotitie" in filtered
+    assert "Sportnotitie" not in filtered
+
+
+def test_note_tag_filter_checkboxes_listed_and_checked(logged_in_client):
+    logged_in_client.post("/notes", data={"title": "Werknotitie", "content": "", "tags": "werk"})
+
+    page = logged_in_client.get("/notes?tags=werk").text
+    assert 'name="tags" value="werk"' in page
+    checkbox = re.search(r'<input type="checkbox" form="notes-tag-filter-form" name="tags" value="werk"[^>]*>', page).group(0)
+    assert "checked" in checkbox
+
+
+def test_note_card_has_no_tag_color_tint(logged_in_client):
+    logged_in_client.post("/notes", data={"title": "Geen tint", "content": "", "tags": "werk"})
+    listing = logged_in_client.get("/notes").text
+    assert not re.search(r'class="note-card"[^>]*style="[^"]*hsla', listing)
 
 
 def _note_ids_for_titles(html: str, titles: list[str]) -> list[str]:
@@ -123,7 +149,7 @@ def test_bulk_tag_notes(logged_in_client):
     )
     assert response.status_code == 303
 
-    filtered = logged_in_client.get("/notes?tag=gedeeld").text
+    filtered = logged_in_client.get("/notes?tags=gedeeld").text
     assert "Bulktag een" in filtered
     assert "Bulktag twee" in filtered
 
