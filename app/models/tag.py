@@ -39,6 +39,13 @@ snippet_tags = Table(
     Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
 )
 
+event_tags = Table(
+    "event_tags",
+    Base.metadata,
+    Column("event_id", ForeignKey("calendar_events.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
+)
+
 
 class Tag(Base):
     __tablename__ = "tags"
@@ -58,6 +65,9 @@ class Tag(Base):
     )
     snippets: Mapped[list["Snippet"]] = relationship(  # noqa: F821
         "Snippet", secondary=snippet_tags, back_populates="tags"
+    )
+    events: Mapped[list["CalendarEvent"]] = relationship(  # noqa: F821
+        "CalendarEvent", secondary=event_tags, back_populates="tags"
     )
 
     @property

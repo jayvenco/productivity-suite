@@ -1,3 +1,4 @@
+from app.models.calendar_event import CalendarEvent
 from app.models.kanban import KanbanBoard, KanbanCard, KanbanColumn, KanbanSwimlane
 from app.models.note import Note
 from app.models.pomodoro import PomodoroSession
@@ -18,4 +19,5 @@ __all__ = [
     "Note",
     "Snippet",
     "SnippetFile",
+    "CalendarEvent",
 ]

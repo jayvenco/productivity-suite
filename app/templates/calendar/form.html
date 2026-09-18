@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Afspraak bewerken' if event else 'Nieuwe afspraak' }} - Productivity Suite{% endblock %}
+{% block content %}
+<h2>{{ 'Afspraak bewerken' if event else 'Nieuwe afspraak' }}</h2>
+<form method="post" action="{{ '/calendar/events/' ~ event.id if event else '/calendar/events' }}" style="max-width:480px">
+  <div class="field">
+    <label for="title">Titel</label>
+    <input type="text" id="title" name="title" required value="{{ event.title if event else '' }}">
+  </div>
+  <div class="field">
+    <label for="event_date">Datum</label>
+    <input type="date" id="event_date" name="event_date" required
+           value="{{ event.event_date.isoformat() if event else default_date }}">
+  </div>
+  <div class="field">
+    <label for="description">Beschrijving</label>
+    <textarea id="description" name="description" rows="4">{{ event.description if event else '' }}</textarea>
+  </div>
+  <div class="field">
+    <label for="tags">Tags (komma-gescheiden)</label>
+    <input type="text" id="tags" name="tags"
+           value="{{ event.tags | map(attribute='name') | join(', ') if event else '' }}">
+  </div>
+  <button type="submit" class="btn">Opslaan</button>
+  <a href="/calendar" class="btn btn-secondary">Annuleren</a>
+</form>
+{% if event %}
+<form method="post" action="/calendar/events/{{ event.id }}/delete" onsubmit="return confirm('Afspraak verwijderen?')" style="margin-top:8px">
+  <button type="submit" class="btn btn-danger">Verwijder</button>
+</form>
+{% endif %}
+{% endblock %}

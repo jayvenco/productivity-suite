@@ -3,7 +3,7 @@
 Persoonlijke, self-hosted productivity-app (Taken, Kanban, Notities, Kalender, Snippets, Pomodoro).
 Single-container Docker-deployment met SQLite.
 
-## Status: Fase 1 + delen van Fase 2
+## Status: Fase 1 + Fase 2 (kalender toegevoegd)
 
 Gebouwd:
 - Docker-setup (Dockerfile + docker-compose.yml, SQLite-volume onder `./data`)
@@ -71,9 +71,14 @@ Gebouwd:
   bestandsnamen) — klik erop om de code compact binnen die kaart te tonen, i.p.v. een regel
   die over het hele werkscherm uitrekt. Eén zoekveld doorzoekt titel, tag én code-inhoud
   tegelijk, taggable met hetzelfde gedeelde tag-systeem
+- **Kalender** met een **maand-** en **weekweergave** (te wisselen via de knoppen boven het
+  rooster), navigatie met vorige/volgende en een "Vandaag"-knop. Toont twee soorten items door
+  elkaar: **eigen afspraken** (titel, datum, beschrijving, tags — CRUD via `/calendar/events`)
+  en, puur ter info, **taken met een deadline** (klikbaar naar de taak, doorgestreept als de
+  taak al "done" is). Elke dag heeft een "+"-knop die direct een nieuwe afspraak opent met die
+  datum vooringevuld
 
-Nog niet gebouwd: volledige kalenderweergave (maand/week), CI/CD, backup/export-import,
-spraaknotities, LLM-koppeling.
+Nog niet gebouwd: CI/CD, backup/export-import, spraaknotities, LLM-koppeling.
 
 ## Configuratie
 
@@ -140,9 +145,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 3. Taak bewerken en status wijzigen naar "done". Op de takenlijst het snel-afvink-vinkje
    gebruiken → status wisselt direct tussen "todo" en "done", en de huidige
    sortering/groepering/filter blijft daarbij behouden (ook na filteren op status/tag).
-4. Op een tag klikken in de takenlijst → filtert de lijst. Taken aanmaken met verschillende
-   tags → controleer dat elke tag een eigen kleur heeft en dat de taakrij een lichte tint van
-   die kleur krijgt. Sorteren op titel/prioriteit/status en groeperen op tag uitproberen, en
+4. Taken aanmaken met verschillende tags → controleer dat elke tag een eigen kleur heeft en
+   dat de taakrij zelf geen kleurtint krijgt (alleen de tag-badge is gekleurd). Meerdere
+   tag-checkboxes boven de lijst aanvinken → filtert op taken met minstens één van die tags.
+   Sorteren op titel/prioriteit/status en groeperen op tag uitproberen, een tag-groep
+   in-/uitklappen (herlaad de pagina en controleer dat de klap-status bewaard is gebleven), en
    controleren dat de kolommen precies uitlijnen tussen groepen/filters.
 5. Naar Kanban gaan, een swimlane toevoegen (krijgt automatisch eigen Todo/In Progress/Done)
    en daar een eigen kolom aan toevoegen → controleer dat die kolom alleen in díe swimlane
@@ -179,7 +186,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     highlighting te tonen, en nogmaals om weer in te klappen. Zoek op een woord dat alleen in
     de tag van één snippet voorkomt en daarna op een woord dat alleen in de titel voorkomt →
     beide vinden de juiste snippet. Filteren op tag uitproberen.
-11. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
+11. Naar Kalender gaan (maandweergave staat standaard open) → controleer dat vandaag
+    gemarkeerd is. Klik de "+" op een dag om een afspraak toe te voegen (datum staat al
+    vooringevuld) met een titel en tag → verschijnt terug op die dag, gekleurd naar de tag.
+    Maak een taak met een deadline in dezelfde maand → verschijnt ook in de kalender, met een
+    andere randkleur dan afspraken, en doorgestreept zodra je 'm op "done" zet. Wissel naar de
+    weekweergave en test Vorige/Volgende/Vandaag in beide weergaves.
+12. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
 
 ## Architectuur
 
@@ -333,3 +346,15 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   (`Tag.badge_style`) — alleen de rij-brede tint is weg, op verzoek net iets rustiger en
   compacter (`.tasks-table th/td` heeft nu ook een eigen, kleinere padding dan de algemene
   tabel-stijl, en wordt in de compacte weergave nog verder verkleind).
+- **Kalender**: `CalendarEvent` is een geheel losse entiteit (eigen tabel + `event_tags`,
+  zelfde patroon als de andere taggable modellen) — een taak-deadline verschijnt wél in de
+  kalender maar heeft daar geen eigen rij, puur een read-only weergave via een tweede query op
+  `Task.deadline`. De maand-/weekgrid wordt berekend in `app/services/calendar_grid.py`
+  (pure functies, apart getest): `month_weeks()` gebruikt `calendar.Calendar.monthdatescalendar`
+  voor volle ma-zo-weken inclusief de dagen uit de vorige/volgende maand die de eerste/laatste
+  week opvullen (die krijgen de CSS-klasse `calendar-day-other-month` i.p.v. weggelaten te
+  worden). Maandnamen/dagnamen zijn hardcoded Nederlands (`DUTCH_MONTHS`/`DUTCH_WEEKDAYS`)
+  i.p.v. `calendar.month_name` met een locale, want de container heeft geen Nederlandse
+  locale ingesteld. Nieuwe/bewerkte afspraken gebruiken dezelfde eigen-pagina-aanpak als
+  Taken/Notities/Snippets (`/calendar/events/new`, `?on=<datum>` vult de datum voor) i.p.v.
+  een modal per dagcel, wat bij 35-42 cellen per maand een hoop overbodige HTML zou zijn.
