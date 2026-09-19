@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
+
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session, selectinload
@@ -14,6 +16,21 @@ from app.services.tags import resolve_tags
 from app.templating import templates
 
 router = APIRouter(prefix="/notes", tags=["notes"])
+
+TEMP_NOTE_LIFETIME = timedelta(days=7)
+
+
+def _delete_expired_temp_notes(db: Session, user_id: int) -> None:
+    """Tijdelijke notities ("temp") ruimen zichzelf op zodra ze een week oud zijn.
+    Er is bewust geen scheduler/cron in deze self-hosted app; in plaats daarvan
+    wordt dit opportunistisch gedaan bij elk bezoek aan de notitielijst -- die
+    pagina wordt vaak genoeg bezocht om verlopen notities snel te laten
+    verdwijnen, zonder een extra achtergrondproces te hoeven draaien."""
+    cutoff = datetime.now(UTC).replace(tzinfo=None) - TEMP_NOTE_LIFETIME
+    db.query(Note).filter(Note.user_id == user_id, Note.is_temp.is_(True), Note.created_at < cutoff).delete(
+        synchronize_session=False
+    )
+    db.commit()
 
 
 def _get_note_or_404(db: Session, note_id: int, user_id: int) -> Note:
@@ -35,6 +52,7 @@ def list_notes(
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
+    _delete_expired_temp_notes(db, user.id)
     query = db.query(Note).options(selectinload(Note.tags)).filter(Note.user_id == user.id)
     if tags:
         query = query.filter(Note.tags.any(Tag.name.in_(tags)))
@@ -104,10 +122,11 @@ def create_note(
     title: str = Form(...),
     content: str = Form(""),
     tags: str = Form(""),
+    is_temp: bool = Form(False),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
-    note = Note(user_id=user.id, title=title.strip(), content=sanitize_note_html(content))
+    note = Note(user_id=user.id, title=title.strip(), content=sanitize_note_html(content), is_temp=is_temp)
     note.tags = resolve_tags(db, tags)
     db.add(note)
     db.commit()
@@ -128,6 +147,7 @@ def update_note(
     title: str = Form(...),
     content: str = Form(""),
     tags: str = Form(""),
+    is_temp: bool = Form(False),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -135,6 +155,7 @@ def update_note(
     note.title = title.strip()
     note.content = sanitize_note_html(content)
     note.tags = resolve_tags(db, tags)
+    note.is_temp = is_temp
     db.commit()
     return RedirectResponse("/notes", status_code=303)
 

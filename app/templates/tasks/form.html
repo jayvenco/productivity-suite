@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Taak bewerken' if task else 'Nieuwe taak' }} - Productivity Suite{% endblock %}
 {% block content %}
+<div class="form-page">
 <h2>{{ 'Taak bewerken' if task else 'Nieuwe taak' }}</h2>
-<form method="post" action="{{ '/tasks/' ~ task.id if task else '/tasks' }}" style="max-width:480px">
+<form method="post" action="{{ '/tasks/' ~ task.id if task else '/tasks' }}">
   <div class="field">
     <label for="title">Titel</label>
     <input type="text" id="title" name="title" required value="{{ task.title if task else '' }}">
@@ -46,7 +47,7 @@
 </form>
 
 {% if task %}
-<div class="field" style="max-width:480px;margin-top:20px">
+<div class="field" style="margin-top:20px">
   <label>Pomodoro-historie</label>
   <div class="markdown-preview">
     {% set sessions = task.completed_work_sessions %}
@@ -58,4 +59,5 @@
   </div>
 </div>
 {% endif %}
+</div>
 {% endblock %}

@@ -37,6 +37,7 @@
       <div class="note-card-header">
         <input type="checkbox" class="note-select" name="note_ids" value="{{ note.id }}">
         <a href="/notes/{{ note.id }}/edit" class="note-card-title">{{ note.title }}</a>
+        {% if note.is_temp %}<span class="badge-warning" title="Wordt na een week automatisch verwijderd">TEMP</span>{% endif %}
       </div>
       <div class="note-card-preview">{{ note.content|safe }}</div>
       <div class="note-card-tags">

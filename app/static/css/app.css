@@ -188,6 +188,29 @@ textarea {
   width: 100%;
 }
 
+/* ---- Aanmaak-/bewerkpagina's (taken, notities, snippets): bredere, meer
+   gecentreerde kolom met grotere invoervelden, zodat er meer leesbaar is
+   tijdens het invullen op een groot scherm i.p.v. links tegen de sidebar
+   aan geplakt in de volle main-breedte. ---- */
+.form-page {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.form-page input[type="text"],
+.form-page input[type="date"],
+.form-page input[type="password"],
+.form-page select,
+.form-page textarea,
+.form-page .rich-editor {
+  padding: 10px 12px;
+  font-size: 15px;
+}
+
+.form-page .field label {
+  font-size: 13px;
+}
+
 /* ---- Taken: kaartjes i.p.v. tabelrijen ---- */
 
 .task-card-list {
@@ -649,6 +672,14 @@ textarea {
   margin-bottom: 4px;
 }
 
+.add-card-form input[type="text"],
+.add-card-form textarea,
+.card-edit-form.kanban-modal input[type="text"],
+.card-edit-form.kanban-modal textarea {
+  padding: 9px 11px;
+  font-size: 14px;
+}
+
 .card-edit-form {
   margin-top: 6px;
   display: flex;
@@ -678,7 +709,7 @@ textarea {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 560px;
+  width: 640px;
   max-width: 92vw;
   max-height: 85vh;
   overflow-y: auto;

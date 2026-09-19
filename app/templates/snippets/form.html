@@ -19,9 +19,10 @@
 {% endmacro %}
 
 {% block content %}
+<div class="form-page">
 <h2>{{ 'Snippet bewerken' if snippet else 'Nieuwe snippet' }}</h2>
 <form method="post" action="{{ '/snippets/' ~ snippet.id if snippet else '/snippets' }}">
-  <div class="field" style="max-width:600px">
+  <div class="field">
     <label for="title">Titel</label>
     <input type="text" id="title" name="title" required value="{{ snippet.title if snippet else '' }}">
   </div>
@@ -35,7 +36,7 @@
   </div>
   <button type="button" class="btn btn-secondary" id="add-file-btn">+ Bestand toevoegen</button>
 
-  <div class="field" style="max-width:600px;margin-top:16px">
+  <div class="field" style="margin-top:16px">
     <label for="tags">Tags (komma-gescheiden)</label>
     <input type="text" id="tags" name="tags" value="{{ snippet.tags|map(attribute='name')|join(', ') if snippet else '' }}">
   </div>
@@ -49,6 +50,7 @@
   <button type="submit" class="btn btn-danger">Verwijderen</button>
 </form>
 {% endif %}
+</div>
 
 <script src="/static/js/snippets.js"></script>
 {% endblock %}

@@ -71,7 +71,8 @@ Gebouwd:
   geen kleurtint meer op basis van de tag, alleen de tag-badge is gekleurd. De hele kaart in de
   lijstweergave is klikbaar om te bewerken, en een **selectievak per notitie** maakt
   bulk-acties mogelijk: meerdere notities in één keer verwijderen of er samen een tag aan
-  toevoegen
+  toevoegen. Een **"Tijdelijke notitie"-vinkje** markeert een notitie als **temp** (zichtbaar
+  als badge in de lijst) — zo'n notitie wordt automatisch verwijderd zodra ze een week oud is
 - **Code snippets** (ByteStash-stijl): een snippet kan **meerdere bestanden** bevatten (bv.
   `main.py` + `requirements.txt` bij elkaar), elk met een eigen taal voor **syntax
   highlighting** (highlight.js) — de taal wordt **automatisch afgeleid uit de
@@ -122,6 +123,10 @@ Gebouwd:
 - **Quick-add-snelkoppelingen**: vier kleine gekleurde cirkels rechtsonder (op elke pagina) —
   **T**aak, **K**anban, **S**nippet en **N**otitie — die direct doorlinken naar de bijbehorende
   reguliere aanmaakpagina (`/tasks/new`, `/kanban`, `/snippets/new`, `/notes/new`)
+- **Bredere, gecentreerde aanmaak-/bewerkpagina's**: de formulieren voor taken, notities en
+  snippets staan in een gecentreerde kolom (i.p.v. links tegen de sidebar aan) met merkbaar
+  grotere invoervelden, zodat er meer leesbaar is tijdens het invullen op een groot scherm. De
+  kanban-kaart-modal is om dezelfde reden ook iets breder geworden
 
 Nog niet gebouwd: CI/CD, spraaknotities, verdere LLM-koppeling (er is nu wel een API voor
 scripts/agents, zie hieronder).
@@ -226,7 +231,10 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    notities met minstens één van die tags. Klik ergens op een kaart (niet alleen de titel) →
    opent de bewerkpagina. Vink twee notities aan via het selectievakje → de bulk-balk
    verschijnt bovenaan; voeg een tag toe aan de selectie en controleer dat beide notities 'm
-   krijgen zonder bestaande tags te verliezen, en test daarna bulk-verwijderen.
+   krijgen zonder bestaande tags te verliezen, en test daarna bulk-verwijderen. Maak een
+   notitie aan met "Tijdelijke notitie" aangevinkt → de kaart in de lijst toont een
+   "TEMP"-badge (deze wordt pas na een week automatisch verwijderd, bij een bezoek aan de
+   notitielijst).
 10. Naar Snippets gaan, een snippet aanmaken met titel + tags, en via "+ Bestand toevoegen"
     een tweede bestand met een andere taal toevoegen (bv. `main.py` als python en
     `requirements.txt` als plaintext) → controleer dat de kaart in de lijst standaard
@@ -394,6 +402,19 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   meta-regel, als de taak een beschrijving heeft, de eerste 20 tekens cursief
   (`task.description[:20]`), zodat je zonder de kaart open te klikken al een idee hebt
   waar de taak over gaat.
+- **Tijdelijke notities** (`Note.is_temp`): er is bewust geen scheduler/cron in deze
+  self-hosted app opgetuigd voor één simpele opruimtaak. In plaats daarvan ruimt
+  `_delete_expired_temp_notes()` in `app/routers/notes.py` verlopen temp-notities
+  (`created_at` ouder dan `TEMP_NOTE_LIFETIME` = 7 dagen) op **opportunistisch**, bij elk
+  bezoek aan `GET /notes` — die pagina wordt vaak genoeg bezocht om verlopen notities snel te
+  laten verdwijnen zonder een apart achtergrondproces.
+- **Bredere, gecentreerde formulieren** (`.form-page` in `app/static/css/app.css`): een
+  gedeelde wrapper-class (max-breedte 720px, `margin:0 auto`) om de taken-, notitie- en
+  snippet-formulieren, i.p.v. de eerdere losse inline `style="max-width:...px"` per veld.
+  Grotere `padding`/`font-size` op inputs/textareas is ook via die class gescoped, zodat het
+  de rest van de app (bv. kleine tag-filters) niet raakt. De kanban-kaart-modal was al
+  gecentreerd via `position:fixed` + `transform:translate(-50%,-50%)`, dus die kreeg alleen
+  een iets bredere `width` en grotere invoervelden.
 - **Lichte, additive migraties** (`app/services/migrate.py`): nieuwe kolommen (zoals
   `priority`, `color` en `kanban_columns.swimlane_id`) worden bij het opstarten toegevoegd aan
   een bestaande SQLite-database als ze nog ontbreken. Bij de overstap naar per-swimlane

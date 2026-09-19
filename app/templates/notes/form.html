@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Notitie bewerken' if note else 'Nieuwe notitie' }} - Productivity Suite{% endblock %}
 {% block content %}
+<div class="form-page">
 <h2>{{ 'Notitie bewerken' if note else 'Nieuwe notitie' }}</h2>
 <form method="post" action="{{ '/notes/' ~ note.id if note else '/notes' }}" id="note-form">
-  <div class="field" style="max-width:700px">
+  <div class="field">
     <label for="title">Titel</label>
     <input type="text" id="title" name="title" required value="{{ note.title if note else '' }}">
   </div>
 
-  <div class="field" style="max-width:700px">
+  <div class="field">
     <label>Inhoud</label>
     <div class="rich-toolbar" id="rich-toolbar">
       <button type="button" data-cmd="bold" title="Vet"><b>V</b></button>
@@ -28,9 +29,16 @@
     <textarea name="content" id="content" hidden></textarea>
   </div>
 
-  <div class="field" style="max-width:700px">
+  <div class="field">
     <label for="tags">Tags (komma-gescheiden)</label>
     <input type="text" id="tags" name="tags" value="{{ note.tags|map(attribute='name')|join(', ') if note else '' }}">
+  </div>
+
+  <div class="field">
+    <label style="display:flex;align-items:center;gap:6px;color:var(--text)">
+      <input type="checkbox" name="is_temp" value="true" style="width:auto" {{ 'checked' if note and note.is_temp }}>
+      Tijdelijke notitie (wordt na een week automatisch verwijderd)
+    </label>
   </div>
 
   <button type="submit" class="btn">Opslaan</button>
@@ -42,6 +50,7 @@
   <button type="submit" class="btn btn-danger">Verwijderen</button>
 </form>
 {% endif %}
+</div>
 
 <script src="/static/js/notes.js"></script>
 {% endblock %}

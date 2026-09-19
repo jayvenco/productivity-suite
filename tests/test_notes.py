@@ -1,4 +1,8 @@
 import re
+from datetime import UTC, datetime, timedelta
+
+from app.database import SessionLocal
+from app.models.note import Note
 
 
 def test_notes_requires_login(client):
@@ -156,3 +160,43 @@ def test_bulk_tag_notes(logged_in_client):
     # Bestaande tag van de tweede notitie moet behouden blijven.
     listing_after = logged_in_client.get("/notes").text
     assert "bestaand" in listing_after
+
+
+def test_create_temp_note_shows_badge(logged_in_client):
+    logged_in_client.post(
+        "/notes", data={"title": "Tijdelijke notitie", "content": "", "tags": "", "is_temp": "true"}
+    )
+    listing = logged_in_client.get("/notes").text
+    assert "Tijdelijke notitie" in listing
+    assert "TEMP" in listing
+
+
+def test_note_without_temp_checkbox_has_no_badge(logged_in_client):
+    logged_in_client.post("/notes", data={"title": "Gewone notitie", "content": "", "tags": ""})
+    listing = logged_in_client.get("/notes").text
+    title_pos = listing.index("Gewone notitie")
+    header_start = listing.rindex('class="note-card-header"', 0, title_pos)
+    header_end = listing.index("</div>", title_pos)
+    header_html = listing[header_start:header_end]
+    assert "TEMP" not in header_html
+
+
+def test_expired_temp_note_is_deleted_on_list_visit(logged_in_client):
+    logged_in_client.post(
+        "/notes", data={"title": "Verlopen tijdelijke notitie", "content": "", "tags": "", "is_temp": "true"}
+    )
+    with SessionLocal() as db:
+        note = db.query(Note).filter(Note.title == "Verlopen tijdelijke notitie").one()
+        note.created_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(days=8)
+        db.commit()
+
+    listing = logged_in_client.get("/notes").text
+    assert "Verlopen tijdelijke notitie" not in listing
+
+
+def test_recent_temp_note_survives_list_visit(logged_in_client):
+    logged_in_client.post(
+        "/notes", data={"title": "Verse tijdelijke notitie", "content": "", "tags": "", "is_temp": "true"}
+    )
+    listing = logged_in_client.get("/notes").text
+    assert "Verse tijdelijke notitie" in listing
