@@ -41,11 +41,12 @@ Gebouwd:
   (eerste 20 tekens) achteraan diezelfde meta-regel — titel, tags, deadline en preview staan
   allemaal op één regel
 - **Pomodoro-timer** als "Pomodoro"-menu-item in de sidebar i.p.v. een permanent zichtbaar
-  blok: klik erop om een **zwevend, verplaatsbaar, semi-transparant paneel** rechtsonder in
-  beeld te openen (instelbare werk-/pauze-duur, optioneel gekoppeld aan een taak, live
-  aftellende ring-animatie, automatische overgang werk → pauze). Het paneel blijft op zijn
-  plek zolang je door de app navigeert, en verschijnt automatisch weer als er al een sessie
-  loopt; sluiten via het kruisje stopt de timer niet, verbergt 'm alleen. Geschiedenis
+  blok: klik erop om een **grote, ronde, zwevende en verplaatsbare** timer rechtsonder in
+  beeld te openen — 1,5× zo groot als voorheen en 25% transparant, met de klok (aftellende
+  ring + digitale tijd) gecentreerd in het midden van de cirkel (instelbare werk-/pauze-duur,
+  optioneel gekoppeld aan een taak, automatische overgang werk → pauze). Het paneel blijft op
+  zijn plek zolang je door de app navigeert, en verschijnt automatisch weer als er al een
+  sessie loopt; sluiten via het kruisje stopt de timer niet, verbergt 'm alleen. Geschiedenis
   zichtbaar op de taakpagina
 - 6 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
   achtergrond met signaalgroen accent en het lettertype van nexmail — Space Grotesk voor
@@ -119,6 +120,11 @@ Gebouwd:
   kalender, mindmap, instellingen) in één keer **exporteren** als downloadbaar `.db`-bestand,
   en later weer **importeren** om alles terug te zetten — er wordt automatisch eerst een
   veiligheidskopie van de huidige database gemaakt voordat 'm vervangen wordt
+- **Quick-add**: een zwevende ronde `+`-knop linksonder (op elke pagina) die bij een klik
+  waaiert naar vier kleine sneltoetsen — **T**aak, **K**anban-kaart, **S**nippet en **N**otitie.
+  Klik op een van de vier, typ een titel in het verschijnende veldje en druk op "Toevoegen":
+  het item wordt direct aangemaakt zonder de pagina te verlaten (net als de mini-kalender's
+  taak-sneltoets)
 
 Nog niet gebouwd: CI/CD, spraaknotities, verdere LLM-koppeling (er is nu wel een API voor
 scripts/agents, zie hieronder).
@@ -206,13 +212,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    of "Annuleren" om de modal te sluiten zonder op te slaan.
 6. Kaart verslepen naar een andere kolom/swimlane (drag-and-drop) → herlaad de pagina en
    controleer dat de cel-toewijzing bewaard is gebleven.
-7. Klik op "Pomodoro" in de sidebar → het zwevende paneel opent rechtsonder. Sleep het paneel
-   aan de titelbalk naar een andere plek. Start een timer (kies eventueel een taak) →
-   controleer de leeglopende ring, de automatische overgang naar de pauze-fase, en dat
-   navigeren naar een andere pagina het paneel op dezelfde plek en met de lopende timer laat
-   staan. Sluit het paneel via het kruisje en open het opnieuw via het menu → de timer loopt
-   gewoon door. Controleer op de taakpagina dat voltooide werk-sessies meetellen in de
-   Pomodoro-historie.
+7. Klik op "Pomodoro" in de sidebar → de grote ronde, transparante timer opent rechtsonder.
+   Sleep 'm aan de titelbalk naar een andere plek. Start een timer (kies eventueel een taak) →
+   controleer de leeglopende ring rond de digitale tijd, de automatische overgang naar de
+   pauze-fase, en dat navigeren naar een andere pagina het paneel op dezelfde plek en met de
+   lopende timer laat staan. Sluit het paneel via het kruisje en open het opnieuw via het menu
+   → de timer loopt gewoon door. Controleer op de taakpagina dat voltooide werk-sessies
+   meetellen in de Pomodoro-historie.
 8. Thema wisselen via de kleurenbolletjes in de sidebar (incl. het lichte thema) → voorkeur
    blijft na herladen/opnieuw inloggen behouden.
 9. Naar Notities gaan, een notitie aanmaken: tekst selecteren en vet/cursief maken via de
@@ -275,6 +281,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     testtaak weer weg (en staat er een `app.db.before-import-<tijdstip>`-veiligheidskopie in
     de `data`-map).
 17. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
+18. Klik op de zwevende paarse `+`-knop linksonder (op elke pagina) → een waaier met T/K/S/N
+    verschijnt. Klik op "T" → er verschijnt een tekstveldje; typ een titel en klik
+    "Toevoegen" → controleer op `/tasks` dat de taak er staat. Herhaal voor "K" (verschijnt op
+    `/kanban` in de eerste kolom), "S" (verschijnt op `/snippets`) en "N" (verschijnt op
+    `/notes`). Klik ergens buiten de knop om de waaier te sluiten zonder iets aan te maken.
 
 ## Architectuur
 
@@ -453,6 +464,16 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   `/tasks` na het aanmaken. Na een geslaagde quick-add stuurt de widget een eigen
   `deadlines:refresh`-DOM-event, waar `deadlines.js` op luistert om zichzelf te verversen
   zonder dat beide widgets elkaar rechtstreeks hoeven te kennen.
+- **Quick-add-knop**: `app/static/js/quickadd.js` + `#quickadd-float` in `base.html`, los van
+  de mini-kalender-widget. Volgt hetzelfde JSON-i.p.v.-redirect-patroon als `/tasks/quick`:
+  er zijn nu ook `POST /kanban/cards/quick`, `POST /notes/quick` en `POST /snippets/quick`
+  (elk alleen een titel-veld, sensible defaults voor de rest). De kanban-variant hergebruikt
+  `get_or_create_default_cell` uit het nieuwe `app/services/kanban_cells.py` — die functie
+  stond eerst alleen in `app/routers/api.py` (voor de agent-API), maar de sessie-route en de
+  agent-API hebben precies dezelfde "geen swimlane/kolom opgegeven → pak de eerste" behoefte,
+  dus is 'm verplaatst naar een gedeelde service i.p.v. te dupliceren. De "pizza"-waaier
+  (T/K/S/N rond de hoofdknop) is pure CSS met vaste `left`/`bottom`-offsets per
+  `data-type`-knop i.p.v. `sin()`/`cos()` in CSS, voor bredere browserondersteuning.
 - **Multi-tag filter en geen kleurtint meer op notities**: zelfde aanpak als eerder bij taken
   — `GET /notes?tags=werk&tags=prive` (herhaalde query-param) i.p.v. het vorige losse
   `tag`-param, gefilterd met `Note.tags.any(Tag.name.in_(tags))` (OR-logica). De

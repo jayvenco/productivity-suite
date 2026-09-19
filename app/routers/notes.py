@@ -94,6 +94,23 @@ async def bulk_tag_notes(request: Request, user: User = Depends(require_user), d
     return _redirect_to_list(form.getlist("tag_filter"))
 
 
+@router.post("/quick")
+def quick_create_note(
+    title: str = Form(...),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Snel een notitie aanmaken vanuit de zwevende quick-add-knop -- geeft JSON
+    terug, net als quick_create_task, zodat de gebruiker niet wegnavigeert."""
+    clean_title = title.strip()
+    if not clean_title:
+        raise HTTPException(status_code=400, detail="Titel is verplicht")
+    note = Note(user_id=user.id, title=clean_title)
+    db.add(note)
+    db.commit()
+    return {"id": note.id, "title": note.title}
+
+
 @router.get("/new")
 def new_note_form(request: Request, user: User = Depends(require_user)):
     return templates.TemplateResponse(request, "notes/form.html", {"user": user, "note": None})

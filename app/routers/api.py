@@ -14,7 +14,7 @@ from app.models.snippet import Snippet, SnippetFile
 from app.models.task import Task
 from app.models.user import User
 from app.services.richtext import sanitize_note_html
-from app.services.seed import DEFAULT_COLUMNS, DEFAULT_SWIMLANE
+from app.services.kanban_cells import get_or_create_default_cell
 from app.services.tags import resolve_tags
 
 router = APIRouter(prefix="/api/v1", tags=["api"])
@@ -54,32 +54,7 @@ def create_task_api(body: TaskIn, user: User = Depends(require_api_user), db: Se
 
 # ---- Kanban-kaarten ----
 
-
-def _get_or_create_default_cell(db: Session, board: KanbanBoard) -> tuple[KanbanSwimlane, KanbanColumn]:
-    """Zonder opgegeven swimlane/kolom gebruiken we de eerste swimlane en diens
-    eerste kolom -- zodat een agent een kaart kan aanmaken zonder eerst de
-    kanban-structuur te hoeven opvragen."""
-    swimlane = (
-        db.query(KanbanSwimlane)
-        .filter(KanbanSwimlane.board_id == board.id)
-        .order_by(KanbanSwimlane.position)
-        .first()
-    )
-    if swimlane is None:
-        swimlane = KanbanSwimlane(board_id=board.id, name=DEFAULT_SWIMLANE, position=0)
-        db.add(swimlane)
-        db.flush()
-        for position, name in enumerate(DEFAULT_COLUMNS):
-            db.add(KanbanColumn(board_id=board.id, swimlane_id=swimlane.id, name=name, position=position))
-        db.flush()
-
-    column = (
-        db.query(KanbanColumn)
-        .filter(KanbanColumn.swimlane_id == swimlane.id)
-        .order_by(KanbanColumn.position)
-        .first()
-    )
-    return swimlane, column
+_get_or_create_default_cell = get_or_create_default_cell
 
 
 class KanbanCardIn(BaseModel):
