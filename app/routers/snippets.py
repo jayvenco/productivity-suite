@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, selectinload
@@ -81,23 +81,6 @@ def list_snippets(
     return templates.TemplateResponse(
         request, "snippets/list.html", {"user": user, "snippets": snippets, "active_tag": tag, "q": q or ""}
     )
-
-
-@router.post("/quick")
-def quick_create_snippet(
-    title: str = Form(...),
-    user: User = Depends(require_user),
-    db: Session = Depends(get_db),
-):
-    """Snel een lege snippet aanmaken vanuit de zwevende quick-add-knop --
-    bestanden voeg je daarna toe via de bewerkpagina."""
-    clean_title = title.strip()
-    if not clean_title:
-        raise HTTPException(status_code=400, detail="Titel is verplicht")
-    snippet = Snippet(user_id=user.id, title=clean_title)
-    db.add(snippet)
-    db.commit()
-    return {"id": snippet.id, "title": snippet.title}
 
 
 @router.get("/new")

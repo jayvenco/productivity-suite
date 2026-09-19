@@ -17,13 +17,15 @@
         {{ task.title }}
       </a>
       <div class="task-card-meta">
-        {% for t in task.tags %}<a class="tag" style="{{ t.badge_style }}" href="/tasks?tags={{ t.name }}">{{ t.name }}</a>{% endfor %}
         {% if task.status.value == 'in_progress' %}<span class="task-card-status">Bezig</span>{% endif %}
-        {% if task.deadline %}
-          <span class="task-card-deadline {{ 'badge-danger' if task.deadline_overdue else 'badge-warning' if task.deadline_warning else '' }}">{{ task.deadline.isoformat() }}</span>
-        {% endif %}
         {% if task.description %}
           <span class="task-card-preview">{{ task.description[:20] }}{{ '…' if task.description|length > 20 }}</span>
+        {% endif %}
+      </div>
+      <div class="task-card-meta task-card-meta-end">
+        {% for t in task.tags %}<a class="tag" style="{{ t.badge_style }}" href="/tasks?tags={{ t.name }}">{{ t.name }}</a>{% endfor %}
+        {% if task.deadline %}
+          <span class="task-card-deadline {{ 'badge-danger' if task.deadline_overdue else 'badge-warning' if task.deadline_warning else '' }}">{{ task.deadline.isoformat() }}</span>
         {% endif %}
       </div>
     </div>

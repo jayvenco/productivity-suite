@@ -55,8 +55,8 @@
       <a href="/notes" class="{{ 'active' if request.url.path.startswith('/notes') }}">Notities</a>
       <button type="button" id="pomodoro-menu-btn">Pomodoro</button>
       <a href="/snippets" class="{{ 'active' if request.url.path.startswith('/snippets') }}">Snippets</a>
-      <div class="spacer"></div>
       <a href="/calendar" class="{{ 'active' if request.url.path.startswith('/calendar') }}">Kalender</a>
+      <div class="spacer"></div>
       <div class="theme-switcher">
         {% for theme in ["dracula", "one-dark-pro", "nord", "light", "nexmail", "macos-light"] %}
         <form method="post" action="/settings/theme">
@@ -113,25 +113,14 @@
     </div>
   </div>
 
-  <div class="quickadd-float" id="quickadd-float">
-    <div class="quickadd-menu" id="quickadd-menu" hidden>
-      <button type="button" class="quickadd-option" data-type="task" style="--i:0" title="Nieuwe taak">T</button>
-      <button type="button" class="quickadd-option" data-type="kanban" style="--i:1" title="Nieuwe kanban-kaart">K</button>
-      <button type="button" class="quickadd-option" data-type="snippet" style="--i:2" title="Nieuwe snippet">S</button>
-      <button type="button" class="quickadd-option" data-type="note" style="--i:3" title="Nieuwe notitie">N</button>
-    </div>
-    <button type="button" class="quickadd-main-btn" id="quickadd-main-btn" title="Snel toevoegen">+</button>
-    <form class="quickadd-input-form" id="quickadd-input-form" hidden>
-      <input type="text" id="quickadd-input" placeholder="Titel..." required>
-      <div class="quickadd-input-actions">
-        <button type="submit" class="btn">Toevoegen</button>
-        <button type="button" class="btn btn-secondary" id="quickadd-cancel">Annuleren</button>
-      </div>
-    </form>
+  <div class="quickadd-shortcuts">
+    <a href="/tasks/new" class="quickadd-shortcut" data-type="task" title="Nieuwe taak">T</a>
+    <a href="/kanban" class="quickadd-shortcut" data-type="kanban" title="Nieuwe kanban-kaart">K</a>
+    <a href="/snippets/new" class="quickadd-shortcut" data-type="snippet" title="Nieuwe snippet">S</a>
+    <a href="/notes/new" class="quickadd-shortcut" data-type="note" title="Nieuwe notitie">N</a>
   </div>
 
   <script src="/static/js/pomodoro.js"></script>
-  <script src="/static/js/quickadd.js"></script>
   <script src="/static/js/deadlines.js"></script>
   <script src="/static/js/mini-calendar.js"></script>
   {% else %}

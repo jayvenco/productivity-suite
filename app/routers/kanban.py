@@ -9,7 +9,6 @@ from app.database import get_db
 from app.models.kanban import KanbanBoard, KanbanCard, KanbanColumn, KanbanSwimlane
 from app.models.user import User
 from app.services.checklist import toggle_checklist_line
-from app.services.kanban_cells import get_or_create_default_cell
 from app.services.seed import DEFAULT_COLUMNS
 from app.services.tags import resolve_tags
 from app.templating import templates
@@ -89,37 +88,6 @@ def create_column(
     db.add(KanbanColumn(board_id=board.id, swimlane_id=swimlane_id, name=name.strip(), position=position))
     db.commit()
     return RedirectResponse("/kanban", status_code=303)
-
-
-@router.post("/cards/quick")
-def quick_create_card(
-    title: str = Form(...),
-    user: User = Depends(require_user),
-    db: Session = Depends(get_db),
-):
-    """Snel een kaart aanmaken vanuit de zwevende quick-add-knop -- komt in de
-    eerste swimlane/kolom van het bord terecht, net als de agent-API."""
-    clean_title = title.strip()
-    if not clean_title:
-        raise HTTPException(status_code=400, detail="Titel is verplicht")
-    board = _get_board_or_404(db, user.id)
-    swimlane, column = get_or_create_default_cell(db, board)
-
-    max_position = (
-        db.query(KanbanCard)
-        .filter(KanbanCard.column_id == column.id, KanbanCard.swimlane_id == swimlane.id)
-        .count()
-    )
-    card = KanbanCard(
-        board_id=board.id,
-        column_id=column.id,
-        swimlane_id=swimlane.id,
-        title=clean_title,
-        position=max_position,
-    )
-    db.add(card)
-    db.commit()
-    return {"id": card.id, "title": card.title}
 
 
 @router.post("/cards")
