@@ -31,6 +31,10 @@
     </div>
   </div>
   <div class="task-card-actions">
+    {% if task.status.value != 'done' %}
+    <button type="button" class="pomodoro-focus-btn task-card-focus" title="Pomodoro starten voor deze taak"
+            data-task-id="{{ task.id }}" data-task-title="{{ task.title }}">▶</button>
+    {% endif %}
     <form method="post" action="/tasks/{{ task.id }}/delete" onsubmit="return confirm('Taak verwijderen?')">
       <input type="hidden" name="sort" value="{{ sort }}">
       <input type="hidden" name="group_by" value="{{ group_by }}">

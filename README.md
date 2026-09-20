@@ -46,7 +46,9 @@ Gebouwd:
   aftellende ring-animatie in oranje/rood, automatische overgang werk → pauze). Het paneel
   blijft op zijn plek zolang je door de app navigeert, en verschijnt automatisch weer als er al
   een sessie loopt; sluiten via het kruisje stopt de timer niet, verbergt 'm alleen. Geschiedenis
-  zichtbaar op de taakpagina
+  zichtbaar op de taakpagina. Een **"▶" focus-knop** op elke openstaande taak (in de
+  takenlijst en op de bewerkpagina) opent het paneel meteen en **start direct een
+  werk-sessie** voor die taak, zonder eerst zelf een taak uit de keuzelijst te hoeven pakken
 - 6 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
   achtergrond met signaalgroen accent en het lettertype van nexmail — Space Grotesk voor
   koppen, IBM Plex Sans voor lopende tekst), macOS-Light (extra licht, clean/simpel thema
@@ -94,16 +96,19 @@ Gebouwd:
   **+**-knop maakt direct een nieuw, verbonden component aan (een idee uitwerken), de
   **🔗**-knop verbindt met een willekeurig bestaand component (twee losse steekwoorden aan
   elkaar binden, ook niet-hiërarchisch). Klik op een verbindingslijn om 'm te verwijderen
-- **Kalender** met een **maand-** en **weekweergave** (te wisselen via de knoppen boven het
-  rooster), navigatie met vorige/volgende en een "Vandaag"-knop, simpel/strak vormgegeven:
-  één doorlopend raster met dunne lijnen tussen de dagen (geen losse "kaartjes" per dag),
-  vandaag als een gekleurd rond bolletje om het dagnummer, en items als een klein gekleurd
-  stipje + titel i.p.v. een gevulde badge. Toont twee soorten items door elkaar: **eigen
-  afspraken** (titel, datum, beschrijving, tags — CRUD via `/calendar/events`, stipkleur volgt
-  de eerste tag) en, puur ter info, **taken met een deadline** (klikbaar naar de taak,
-  doorgestreept als de taak al "done" is, altijd een geel stipje). Elke dag heeft een
-  "+"-knop (verschijnt bij hover) die direct een nieuwe afspraak opent met die datum
-  vooringevuld
+- **Kalender** (de **standaardpagina** na inloggen) met een **maand-** en **weekweergave**
+  (te wisselen via de knoppen boven het rooster), navigatie met vorige/volgende en een
+  "Vandaag"-knop, simpel/strak vormgegeven: één doorlopend raster met dunne lijnen tussen de
+  dagen (geen losse "kaartjes" per dag), vandaag als een gekleurd rond bolletje om het
+  dagnummer, en items als een klein gekleurd stipje + titel i.p.v. een gevulde badge. Toont
+  twee soorten items door elkaar: **eigen afspraken** (titel, datum, beschrijving, tags — CRUD
+  via `/calendar/events`, stipkleur volgt de eerste tag) en, puur ter info, **taken met een
+  deadline** (klikbaar naar de taak, doorgestreept als de taak al "done" is, altijd een geel
+  stipje). Elke dag heeft een "+"-knop (verschijnt bij hover) die direct een nieuwe afspraak
+  opent met die datum vooringevuld. **Onder de kalender** staat een overzicht van wat er nu
+  loopt: openstaande **hoge-prioriteitstaken**, de **3 meest recente notities** en de **3
+  meest recente kanban-kaarten** — zo zie je in één oogopslag waar je mee bezig bent zonder
+  naar elke pagina apart te navigeren
 - **Mini-kalender in de sidebar**: een compact maandoverzicht op elke pagina, met een **rood
   stipje** op elke dag die een taak-deadline of afspraak heeft. Klik op een dag om direct
   (zonder de pagina te verlaten) een **taak aan te maken met die dag als deadline** — verschijnt
@@ -127,6 +132,10 @@ Gebouwd:
   snippets staan in een gecentreerde kolom (i.p.v. links tegen de sidebar aan) met merkbaar
   grotere invoervelden, zodat er meer leesbaar is tijdens het invullen op een groot scherm. De
   kanban-kaart-modal is om dezelfde reden ook iets breder geworden
+- **Statistieken** (Account, bovenaan): een reeks tegels met simpele productiviteitscijfers —
+  afgeronde taken (en percentage), openstaande hoge-prioriteitstaken, gehaalde deadlines,
+  openstaande verlopen deadlines, aantal gestarte/voltooide pomodoro's, totale focustijd
+  (all-time en deze week), en nieuwe taken/kanban-kaarten/notities per week en per maand
 
 Nog niet gebouwd: CI/CD, spraaknotities, verdere LLM-koppeling (er is nu wel een API voor
 scripts/agents, zie hieronder).
@@ -290,6 +299,20 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     `/tasks/new`. Ga terug en klik op "K" → je komt op `/kanban` (de bordpagina, waar je een
     kaart toevoegt via de "+"-knoppen per kolom). Klik op "S" → `/snippets/new`. Klik op "N" →
     `/notes/new`.
+19. Log opnieuw in (of ga naar `/`) → je komt nu op de Kalender terecht i.p.v. Taken. Maak een
+    taak aan met prioriteit aangevinkt, een notitie en een kanban-kaart → ga naar de Kalender
+    en controleer dat alle drie verschijnen in het overzicht onder het rooster ("Hoge
+    prioriteit", "Recente notities", "Recente kanban-kaarten"). Vink de hoge-prioriteitstaak af
+    → ze verdwijnt uit dat overzicht.
+20. Op een taakkaart in de takenlijst (en op de bewerkpagina van een taak) staat een "▶"-knop
+    → klik erop → het Pomodoro-paneel opent rechtsonder en start meteen een werk-sessie voor
+    die taak (controleer via de taakbewerkpagina dat de Pomodoro-historie deze sessie meetelt
+    zodra ze afloopt/voltooid is). Probeer de knop nogmaals te klikken terwijl er al een sessie
+    loopt → een melding zegt dat je eerst de lopende sessie moet stoppen.
+21. Ga naar Account → bovenaan staat "Statistieken" met tegels voor afgeronde taken, hoge
+    prioriteit, gehaalde/verlopen deadlines, gestarte/voltooide pomodoro's, focustijd, en
+    nieuwe taken/kanban-kaarten/notities per week en maand. Start een pomodoro-sessie en
+    herlaad de pagina → "Pomodoro's opgestart" telt méé.
 
 ## Architectuur
 
@@ -415,6 +438,23 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   de rest van de app (bv. kleine tag-filters) niet raakt. De kanban-kaart-modal was al
   gecentreerd via `position:fixed` + `transform:translate(-50%,-50%)`, dus die kreeg alleen
   een iets bredere `width` en grotere invoervelden.
+- **Kalender als standaardpagina + overzicht** (`app/routers/calendar.py`): `GET /` redirect
+  nu naar `/calendar` i.p.v. `/tasks`. `_overview()` haalt drie kleine lijstjes op (top 3 per
+  categorie, geen paginering) — hoge-prioriteitstaken (`priority=True`, niet "done"), de 3
+  meest recent bijgewerkte notities, en de 3 meest recent aangemaakte kanban-kaarten (via een
+  join op `KanbanBoard.user_id`, want `KanbanCard` heeft geen eigen `user_id`-kolom).
+- **Pomodoro starten vanaf een taak**: de bestaande `#pomodoro-task`-keuzelijst en
+  `startPhase()`-functie in `pomodoro.js` bleken al precies te doen wat nodig was — er is dus
+  geen nieuw backend-endpoint bijgekomen. Een `.pomodoro-focus-btn` (met `data-task-id`) op de
+  taakkaart en de bewerkpagina dispatcht via event-delegation (`document.addEventListener`
+  op `.pomodoro-focus-btn`) meteen een `startPhase("work", ...)`-aanroep met die taak, i.p.v.
+  eerst het paneel te openen en de taak handmatig uit de keuzelijst te kiezen. Loopt er al een
+  sessie, dan waarschuwt een `alert()` i.p.v. de lopende sessie stilzwijgend te vervangen.
+- **Statistieken** (`app/services/stats.py`, `compute_user_stats()`): bewust query-based
+  (COUNT/SUM in SQL) i.p.v. Python-side loops over alle taken/kaarten/notities, zodat dit ook
+  bij veel data snel blijft. "Behaalde deadline" heeft geen eigen "voltooid op"-veld nodig —
+  `updated_at` (dat al bijwerkt bij het afvinken) dient als proxy: gehaald = afgerond met
+  `updated_at`-datum op of vóór de deadline.
 - **Lichte, additive migraties** (`app/services/migrate.py`): nieuwe kolommen (zoals
   `priority`, `color` en `kanban_columns.swimlane_id`) worden bij het opstarten toegevoegd aan
   een bestaande SQLite-database als ze nog ontbreken. Bij de overstap naar per-swimlane

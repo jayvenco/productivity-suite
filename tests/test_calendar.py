@@ -175,3 +175,57 @@ def test_quick_create_task_without_deadline(logged_in_client):
 def test_quick_create_task_requires_title(logged_in_client):
     response = logged_in_client.post("/tasks/quick", data={"title": "   "})
     assert response.status_code == 400
+
+
+def test_home_redirects_to_calendar(logged_in_client):
+    response = logged_in_client.get("/", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/calendar"
+
+
+def test_calendar_overview_shows_high_priority_task(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Hoge prio taak", "description": "", "deadline": "", "tags": "", "priority": "true"}
+    )
+    page = logged_in_client.get("/calendar").text
+    assert "Hoge prio taak" in page
+
+
+def test_calendar_overview_hides_low_priority_task(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Lage prio taak", "description": "", "deadline": "", "tags": ""})
+    page = logged_in_client.get("/calendar").text
+    assert "Lage prio taak" not in page
+
+
+def test_calendar_overview_hides_done_high_priority_task(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Klaar hoge prio", "description": "", "deadline": "", "tags": "", "priority": "true"}
+    )
+    listing = logged_in_client.get("/tasks").text
+    idx = listing.index("Klaar hoge prio")
+    task_id = re.findall(r'href="/tasks/(\d+)/edit"', listing[:idx])[-1]
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+
+    page = logged_in_client.get("/calendar").text
+    assert "Klaar hoge prio" not in page
+
+    # Terugzetten voor eventuele volgende tests in deze module.
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+
+
+def test_calendar_overview_shows_recent_notes(logged_in_client):
+    logged_in_client.post("/notes", data={"title": "Kalendernotitie", "content": "", "tags": ""})
+    page = logged_in_client.get("/calendar").text
+    assert "Kalendernotitie" in page
+
+
+def test_calendar_overview_shows_recent_kanban_card(logged_in_client):
+    board_html = logged_in_client.get("/kanban").text
+    column_id = re.search(r'data-column-id="(\d+)"', board_html).group(1)
+    swimlane_id = re.search(r'data-swimlane-id="(\d+)"', board_html).group(1)
+    logged_in_client.post(
+        "/kanban/cards",
+        data={"column_id": column_id, "swimlane_id": swimlane_id, "title": "Kalenderkaart", "description": ""},
+    )
+    page = logged_in_client.get("/calendar").text
+    assert "Kalenderkaart" in page

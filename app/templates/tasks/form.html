@@ -2,7 +2,13 @@
 {% block title %}{{ 'Taak bewerken' if task else 'Nieuwe taak' }} - Productivity Suite{% endblock %}
 {% block content %}
 <div class="form-page">
-<h2>{{ 'Taak bewerken' if task else 'Nieuwe taak' }}</h2>
+<div class="form-page-header">
+  <h2>{{ 'Taak bewerken' if task else 'Nieuwe taak' }}</h2>
+  {% if task and task.status.value != 'done' %}
+  <button type="button" class="btn pomodoro-focus-btn" title="Pomodoro starten voor deze taak"
+          data-task-id="{{ task.id }}" data-task-title="{{ task.title }}">▶ Pomodoro starten</button>
+  {% endif %}
+</div>
 <form method="post" action="{{ '/tasks/' ~ task.id if task else '/tasks' }}">
   <div class="field">
     <label for="title">Titel</label>

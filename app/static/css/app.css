@@ -348,6 +348,35 @@ textarea {
   color: var(--danger);
 }
 
+.task-card-focus {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  padding: 3px 6px;
+  width: auto;
+}
+
+.task-card-focus:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.form-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.form-page-header h2 {
+  margin: 0;
+}
+
 :root[data-density="compact"] .task-card-list { gap: 2px; }
 :root[data-density="compact"] .task-card { padding: 3px 8px; gap: 6px; }
 
@@ -1528,6 +1557,70 @@ textarea {
   --dot-color: var(--accent);
 }
 
+/* ---- Overzicht onder de kalender: waar loopt het nu op ---- */
+
+.calendar-overview {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.calendar-overview-block {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.calendar-overview-block h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.calendar-overview-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.calendar-overview-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.calendar-overview-list a {
+  color: var(--text);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-overview-list a:hover {
+  text-decoration: underline;
+}
+
+.calendar-overview-meta {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.calendar-overview-empty {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 :root[data-density="compact"] .calendar-toolbar { margin-bottom: 8px; }
 :root[data-density="compact"] .calendar-day { padding: 3px 5px; min-height: 64px; }
 :root[data-density="compact"] .calendar-grid-week .calendar-day { min-height: 180px; }
@@ -1960,3 +2053,35 @@ body.mindmap-editor .mindmap-canvas {
 .quickadd-shortcut[data-type="kanban"] { background: #bd93f9; color: #111; }
 .quickadd-shortcut[data-type="snippet"] { background: #50fa7b; color: #111; }
 .quickadd-shortcut[data-type="note"] { background: #ffb86c; color: #111; }
+
+/* ---- Account: statistieken-tegels ---- */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  max-width: 900px;
+}
+
+.stats-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.stats-card-warning {
+  border-color: var(--danger);
+}
+
+.stats-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.stats-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}

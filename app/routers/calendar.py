@@ -9,7 +9,9 @@ from sqlalchemy.orm import Session, selectinload
 from app.auth.dependencies import require_user
 from app.database import get_db
 from app.models.calendar_event import CalendarEvent
-from app.models.task import Task
+from app.models.kanban import KanbanBoard, KanbanCard
+from app.models.note import Note
+from app.models.task import Task, TaskStatus
 from app.models.user import User
 from app.services.calendar_grid import DUTCH_MONTHS, DUTCH_WEEKDAYS, add_months, month_weeks, week_dates
 from app.services.tags import resolve_tags
@@ -60,6 +62,35 @@ def _items_by_date(
         events_by_date.setdefault(event.event_date, []).append(event)
 
     return tasks_by_date, events_by_date
+
+
+def _overview(user_id: int, db: Session) -> dict:
+    """Snel overzicht onder de kalender: waar loopt het nu op, zonder apart naar
+    Taken/Notities/Kanban te hoeven navigeren. Bewust klein gehouden (top 3 per
+    categorie) -- dit is een samenvatting, geen vervanging van de volle lijsten."""
+    high_priority_tasks = (
+        db.query(Task)
+        .filter(Task.user_id == user_id, Task.priority.is_(True), Task.status != TaskStatus.DONE)
+        .order_by(Task.deadline.is_(None), Task.deadline)
+        .all()
+    )
+    recent_notes = (
+        db.query(Note).filter(Note.user_id == user_id).order_by(Note.updated_at.desc()).limit(3).all()
+    )
+    recent_cards = (
+        db.query(KanbanCard)
+        .options(selectinload(KanbanCard.column))
+        .join(KanbanBoard, KanbanCard.board_id == KanbanBoard.id)
+        .filter(KanbanBoard.user_id == user_id)
+        .order_by(KanbanCard.created_at.desc())
+        .limit(3)
+        .all()
+    )
+    return {
+        "high_priority_tasks": high_priority_tasks,
+        "recent_notes": recent_notes,
+        "recent_cards": recent_cards,
+    }
 
 
 def _marked_dates(days: list[date], user_id: int, db: Session) -> set[date]:
@@ -154,6 +185,7 @@ def calendar_view(
         title = f"{DUTCH_MONTHS[month - 1]} {year}"
 
     tasks_by_date, events_by_date = _items_by_date(days, user.id, db)
+    overview = _overview(user.id, db)
 
     return templates.TemplateResponse(
         request,
@@ -170,6 +202,7 @@ def calendar_view(
             "tasks_by_date": tasks_by_date,
             "events_by_date": events_by_date,
             "day_labels": DUTCH_WEEKDAYS,
+            **overview,
         },
     )
 

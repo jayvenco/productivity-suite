@@ -60,6 +60,31 @@ document.addEventListener("DOMContentLoaded", () => {
     showIdle();
   });
 
+  // ---- Pomodoro direct starten vanaf een taak (taaklijst/-bewerkpagina) ----
+  document.addEventListener("click", (event) => {
+    const btn = event.target.closest(".pomodoro-focus-btn");
+    if (!btn) return;
+    event.preventDefault();
+    startFocusForTask(btn.dataset.taskId, btn.dataset.taskTitle);
+  });
+
+  function startFocusForTask(taskId, taskTitle) {
+    float.hidden = false;
+    menuBtn.classList.add("active");
+
+    if (currentSession) {
+      alert(`Er loopt al een pomodoro-sessie. Stop deze eerst om te focussen op "${taskTitle}".`);
+      return;
+    }
+
+    if ([...taskSelect.options].some((o) => o.value === taskId)) {
+      taskSelect.value = taskId;
+    }
+    const minutes = parseInt(workMinutesInput.value, 10) || 25;
+    saveMinutes();
+    startPhase("work", minutes, taskId);
+  }
+
   async function loadState() {
     const response = await fetch("/pomodoro/state");
     const data = await response.json();

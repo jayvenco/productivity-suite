@@ -52,4 +52,4 @@ app.include_router(api.router)
 def home(request: Request, user: User | None = Depends(get_current_user)):
     if user is None:
         return RedirectResponse("/login", status_code=303)
-    return RedirectResponse("/tasks", status_code=303)
+    return RedirectResponse("/calendar", status_code=303)

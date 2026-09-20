@@ -210,3 +210,33 @@ def test_task_card_whole_card_is_clickable_to_edit(logged_in_client):
     listing = logged_in_client.get("/tasks").text
     task_id = _task_id_for_title(listing, "Klikbare kaart")
     assert f'data-href="/tasks/{task_id}/edit"' in listing
+
+
+def test_open_task_shows_pomodoro_focus_button(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Focustaak", "description": "", "deadline": "", "tags": ""})
+    listing = logged_in_client.get("/tasks").text
+    task_id = _task_id_for_title(listing, "Focustaak")
+    assert f'data-task-id="{task_id}"' in listing
+
+    edit_page = logged_in_client.get(f"/tasks/{task_id}/edit").text
+    assert "Pomodoro starten" in edit_page
+
+
+def test_done_task_hides_pomodoro_focus_button(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Afgeronde taak", "description": "", "deadline": "", "tags": ""})
+    listing = logged_in_client.get("/tasks").text
+    task_id = _task_id_for_title(listing, "Afgeronde taak")
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+
+    listing_after = logged_in_client.get("/tasks").text
+    title_pos = listing_after.index("Afgeronde taak")
+    card_start = listing_after.rindex('class="task-card ', 0, title_pos)
+    card_end = listing_after.index("</div>\n</div>\n", title_pos)
+    card_html = listing_after[card_start:card_end]
+    assert f'data-task-id="{task_id}"' not in card_html
+
+    edit_page = logged_in_client.get(f"/tasks/{task_id}/edit").text
+    assert "Pomodoro starten" not in edit_page
+
+    # Terugzetten voor eventuele volgende tests in deze module.
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")

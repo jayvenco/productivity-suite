@@ -46,4 +46,56 @@
     {% endfor %}
   {% endfor %}
 </div>
+
+<div class="calendar-overview">
+  <div class="calendar-overview-block">
+    <h3>Hoge prioriteit</h3>
+    {% if high_priority_tasks %}
+    <ul class="calendar-overview-list">
+      {% for task in high_priority_tasks %}
+      <li>
+        <a href="/tasks/{{ task.id }}/edit">★ {{ task.title }}</a>
+        {% if task.deadline %}
+        <span class="calendar-overview-meta {{ 'badge-danger' if task.deadline_overdue else 'badge-warning' if task.deadline_warning else '' }}">{{ task.deadline.isoformat() }}</span>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="calendar-overview-empty">Geen openstaande taken met hoge prioriteit.</p>
+    {% endif %}
+  </div>
+
+  <div class="calendar-overview-block">
+    <h3>Recente notities</h3>
+    {% if recent_notes %}
+    <ul class="calendar-overview-list">
+      {% for note in recent_notes %}
+      <li>
+        <a href="/notes/{{ note.id }}/edit">{{ note.title }}</a>
+        {% if note.is_temp %}<span class="badge-warning calendar-overview-meta">TEMP</span>{% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="calendar-overview-empty">Nog geen notities.</p>
+    {% endif %}
+  </div>
+
+  <div class="calendar-overview-block">
+    <h3>Recente kanban-kaarten</h3>
+    {% if recent_cards %}
+    <ul class="calendar-overview-list">
+      {% for card in recent_cards %}
+      <li>
+        <a href="/kanban">{{ card.title }}</a>
+        <span class="calendar-overview-meta">{{ card.column.name }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="calendar-overview-empty">Nog geen kanban-kaarten.</p>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}

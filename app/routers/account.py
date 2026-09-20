@@ -20,6 +20,7 @@ from app.models.user import User
 from app.routers.settings import AVAILABLE_BACKGROUNDS, AVAILABLE_DENSITIES, AVAILABLE_FONT_SIZES, AVAILABLE_FONTS
 from app.services.api_tokens import generate_api_token, hash_api_token
 from app.services.migrate import run_lightweight_migrations
+from app.services.stats import compute_user_stats
 from app.templating import templates
 
 router = APIRouter(prefix="/account", tags=["account"])
@@ -50,18 +51,26 @@ def _appearance_context() -> dict:
     }
 
 
-def _account_context(*, error: str | None = None, success: str | None = None, new_api_token: str | None = None) -> dict:
+def _account_context(
+    db: Session,
+    user_id: int,
+    *,
+    error: str | None = None,
+    success: str | None = None,
+    new_api_token: str | None = None,
+) -> dict:
     return {
         "error": error,
         "success": success,
         "new_api_token": new_api_token,
+        "stats": compute_user_stats(db, user_id),
         **_appearance_context(),
     }
 
 
 @router.get("")
-def account_form(request: Request, user: User = Depends(require_user)):
-    return templates.TemplateResponse(request, "account/form.html", {"user": user, **_account_context()})
+def account_form(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    return templates.TemplateResponse(request, "account/form.html", {"user": user, **_account_context(db, user.id)})
 
 
 @router.post("")
@@ -78,7 +87,7 @@ def update_account(
         return templates.TemplateResponse(
             request,
             "account/form.html",
-            {"user": user, **_account_context(error="Huidig wachtwoord klopt niet")},
+            {"user": user, **_account_context(db, user.id, error="Huidig wachtwoord klopt niet")},
             status_code=401,
         )
 
@@ -86,7 +95,7 @@ def update_account(
         return templates.TemplateResponse(
             request,
             "account/form.html",
-            {"user": user, **_account_context(error="Nieuwe wachtwoorden komen niet overeen")},
+            {"user": user, **_account_context(db, user.id, error="Nieuwe wachtwoorden komen niet overeen")},
             status_code=400,
         )
 
@@ -95,7 +104,7 @@ def update_account(
         return templates.TemplateResponse(
             request,
             "account/form.html",
-            {"user": user, **_account_context(error="Gebruikersnaam is al in gebruik")},
+            {"user": user, **_account_context(db, user.id, error="Gebruikersnaam is al in gebruik")},
             status_code=400,
         )
 
@@ -106,7 +115,7 @@ def update_account(
     db.commit()
 
     return templates.TemplateResponse(
-        request, "account/form.html", {"user": user, **_account_context(success="Opgeslagen")}
+        request, "account/form.html", {"user": user, **_account_context(db, user.id, success="Opgeslagen")}
     )
 
 
@@ -121,7 +130,7 @@ def generate_api_token_route(
     user.api_token_hash = hash_api_token(token)
     db.commit()
     return templates.TemplateResponse(
-        request, "account/form.html", {"user": user, **_account_context(new_api_token=token)}
+        request, "account/form.html", {"user": user, **_account_context(db, user.id, new_api_token=token)}
     )
 
 
@@ -172,7 +181,7 @@ async def import_backup(
         return templates.TemplateResponse(
             request,
             "account/form.html",
-            {"user": user, **_account_context(error="Dit is geen geldig SQLite-databasebestand.")},
+            {"user": user, **_account_context(db, user.id, error="Dit is geen geldig SQLite-databasebestand.")},
             status_code=400,
         )
 
@@ -191,7 +200,7 @@ async def import_backup(
         return templates.TemplateResponse(
             request,
             "account/form.html",
-            {"user": user, **_account_context(error="Bestand kon niet als database gelezen worden.")},
+            {"user": user, **_account_context(db, user.id, error="Bestand kon niet als database gelezen worden.")},
             status_code=400,
         )
 
@@ -200,7 +209,7 @@ async def import_backup(
         return templates.TemplateResponse(
             request,
             "account/form.html",
-            {"user": user, **_account_context(error="Dit lijkt geen Productivity Suite-back-up te zijn.")},
+            {"user": user, **_account_context(db, user.id, error="Dit lijkt geen Productivity Suite-back-up te zijn.")},
             status_code=400,
         )
 
