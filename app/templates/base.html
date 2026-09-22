@@ -23,8 +23,10 @@
 <body class="{% block body_class %}{% endblock %}">
   {% if user %}
   <div class="app-background"></div>
+  <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu openen">☰</button>
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
   <div class="layout">
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
       <div class="brand">Productivity Suite</div>
 
       <div class="mini-calendar-widget" id="mini-calendar-widget">
@@ -150,6 +152,7 @@
 
   <script src="{{ static_url('js/pomodoro.js') }}"></script>
   <script src="{{ static_url('js/quickadd.js') }}"></script>
+  <script src="{{ static_url('js/mobile-nav.js') }}"></script>
   <script src="{{ static_url('js/deadlines.js') }}"></script>
   <script src="{{ static_url('js/mini-calendar.js') }}"></script>
   {% else %}

@@ -169,6 +169,12 @@ Gebouwd:
   gegroepeerd worden rond de tags die ze delen. Kleur per type (taak/notitie/kanban/mindmap/
   tag), klik op een item om het direct te openen, sleep een knooppunt om de layout aan te
   passen. Items zonder tags verschijnen niet in de graaf (ze kunnen met niets linken)
+- **Mobiel-geoptimaliseerd**: onder 768px breedte (telefoon) verandert de sidebar in een
+  **inklapbaar off-canvas menu** — een hamburgerknop linksboven opent het als paneel over de
+  inhoud heen (met achtergrond-overlay, sluit bij een tik ernaast, Escape of het kiezen van
+  een menu-item). De hoofdinhoud wordt volle breedte, de Pomodoro-cirkel en het quick-add-wiel
+  worden kleiner zodat ze op een smal scherm passen, en Kanban-kolommen zijn smaller zodat je
+  makkelijker van kolom naar kolom kunt swipen
 
 Nog niet gebouwd: CI/CD, spraaknotities, verdere LLM-koppeling (er is nu wel een API voor
 scripts/agents, zie hieronder).
@@ -361,6 +367,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     gekleurde knooppunten eromheen (één per type, zie de legenda bovenaan). Sleep een
     knooppunt → het blijft op die plek terwijl de rest zich eromheen herschikt. Klik op een
     item-knooppunt (niet de tag zelf) → je komt op de bewerkpagina van dat item.
+24. Verklein het browservenster (of open op een telefoon) tot onder ~768px breed → de sidebar
+    verdwijnt en een hamburgerknop (☰) verschijnt linksboven. Klik erop → de sidebar klapt
+    open als paneel met een donkere overlay erachter. Klik op een menu-item → je navigeert
+    ernaartoe én het paneel klapt vanzelf weer dicht. Open het opnieuw en tik op de overlay
+    (naast het paneel) → het sluit zonder te navigeren. Controleer op Kanban dat de kolommen
+    smaller zijn en je horizontaal kunt scrollen, en dat de Pomodoro-cirkel en het
+    quick-add-wiel volledig binnen het scherm passen.
 
 ## Architectuur
 
@@ -381,6 +394,17 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   niet bij hoe minimalistisch de rest van de front-end is opgezet. Items zonder tags worden
   serverside al overgeslagen (ze kunnen toch met niets linken), dus de graaf blijft klein
   genoeg voor de O(n²)-afstotingsberekening.
+- **Mobiel navigatiemenu** (`.mobile-menu-btn`/`.sidebar-backdrop` in `base.html`,
+  `app/static/js/mobile-nav.js`, `@media (max-width: 768px)` in `app.css`): een off-canvas
+  sidebar (`transform: translateX(-100%)` → `translateX(0)` bij `.mobile-open`) i.p.v. een
+  responsive herindeling van de bestaande layout — de sidebar-inhoud (mini-kalender,
+  deadlines, thema-kiezer) is best breed en zou een herschikte inline-navigatie op een
+  telefoonscherm onleesbaar maken. Dit was de **eerste responsive/mobiele CSS in de hele
+  app** (voorheen geen enkele `@media`-query) — bewust in één media-query-blok onderaan
+  `app.css` gehouden i.p.v. verspreid door het bestand, zodat het overzichtelijk blijft wat
+  er specifiek voor mobiel anders is. De sidebar sluit zichzelf bij het klikken op een link
+  of formulier-knop erin (bv. een thema kiezen), zodat je na een navigatie niet alsnog het
+  paneel handmatig hoeft dicht te tikken.
 - **Cache-busting voor statische bestanden** (`app/templating.py`, `static_url()`): elke
   `<link>`/`<script>` naar `/static/css/...` of `/static/js/...` gaat via
   `{{ static_url('pad') }}`, dat er een `?v=<bestand-mtime>` achteraan plakt. Zonder dit bleven
