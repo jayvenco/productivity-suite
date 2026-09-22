@@ -44,6 +44,8 @@ h1, h2, h3 {
 :root[data-font="source-sans"]  { --font-sans: "Source Sans 3", sans-serif; --font-heading: "Source Sans 3", sans-serif; }
 :root[data-font="merriweather"] { --font-sans: "Merriweather", serif;       --font-heading: "Merriweather", serif; }
 :root[data-font="fira-sans"]    { --font-sans: "Fira Sans", sans-serif;     --font-heading: "Fira Sans", sans-serif; }
+:root[data-font="dm-sans"]      { --font-sans: "DM Sans", sans-serif;       --font-heading: "DM Sans", sans-serif; }
+:root[data-font="playfair-display"] { --font-sans: "Playfair Display", serif; --font-heading: "Playfair Display", serif; }
 
 /* Monospace-opties -- vooral leuk voor wie de hele UI in een code-font wil. Consolas
    is Microsoft-eigendom en kan niet meegeleverd worden: die regel doet dus niets als
@@ -149,6 +151,7 @@ a {
 .theme-swatch-light { background: #ea580c; border-color: #ddd9d3; }
 .theme-swatch-macos-light { background: #007aff; border-color: #d2d2d7; }
 .theme-swatch-nexmail { background: #23d19e; }
+.theme-swatch-anchor { background: #ef8354; border-color: #3a3f4b; }
 
 button, input, select, textarea {
   font-family: inherit;
@@ -901,11 +904,11 @@ textarea {
 .note-card {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 10px 12px;
+  border-radius: 16px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
   cursor: pointer;
 }
 
@@ -926,7 +929,8 @@ textarea {
 }
 
 .note-card-title {
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 700;
   color: var(--text);
   text-decoration: none;
 }
@@ -936,9 +940,10 @@ textarea {
 }
 
 .note-card-preview {
-  font-size: 12px;
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--text-muted);
-  max-height: 80px;
+  max-height: 90px;
   overflow: hidden;
   position: relative;
 }
@@ -956,7 +961,24 @@ textarea {
 .note-card-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 6px;
+}
+
+.note-card-tags .tag {
+  border-radius: 999px;
+  padding: 2px 10px 2px 8px;
+  margin-right: 0;
+}
+
+.note-card-tags .tag::before {
+  content: "#";
+  opacity: 0.7;
+}
+
+.note-card-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.8;
 }
 
 .notes-bulk-bar {

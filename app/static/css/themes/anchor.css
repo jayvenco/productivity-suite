@@ -1,0 +1,17 @@
+/* Palet 1-op-1 overgenomen van github.com/zhfahim/anchor (web/app/globals.css,
+   ".dark"-blok) -- "Deep Ocean & Sand", donker leigrijs/antraciet met een
+   brandoranje accent. */
+:root[data-theme="anchor"] {
+  --bg: #1c1e26;
+  --bg-elevated: #262a36;
+  --bg-hover: #2d3142;
+  --border: #3a3f4b;
+  --text: #eaeaea;
+  --text-muted: #9ca8b8;
+  --accent: #ef8354;
+  --accent-text: #ffffff;
+  --success: #81c995;
+  --warning: #f2b866;
+  --danger: #fc8181;
+  --link: #ef8354;
+}

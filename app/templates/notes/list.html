@@ -40,9 +40,12 @@
         {% if note.is_temp %}<span class="badge-warning" title="Wordt na een week automatisch verwijderd">TEMP</span>{% endif %}
       </div>
       <div class="note-card-preview">{{ note.content|safe }}</div>
+      {% if note.tags %}
       <div class="note-card-tags">
         {% for t in note.tags %}<a class="tag" style="{{ t.badge_style }}" href="/notes?tags={{ t.name }}">{{ t.name }}</a>{% endfor %}
       </div>
+      {% endif %}
+      <div class="note-card-date">{{ note.updated_at.date().isoformat() }}</div>
     </div>
     {% else %}
     <p>Nog geen notities. Maak er één aan.</p>

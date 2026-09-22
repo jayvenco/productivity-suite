@@ -49,14 +49,17 @@ Gebouwd:
   zichtbaar op de taakpagina. Een **"▶" focus-knop** op elke openstaande taak (in de
   takenlijst en op de bewerkpagina) opent het paneel meteen en **start direct een
   werk-sessie** voor die taak, zonder eerst zelf een taak uit de keuzelijst te hoeven pakken
-- 6 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
+- 7 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
   achtergrond met signaalgroen accent en het lettertype van nexmail — Space Grotesk voor
   koppen, IBM Plex Sans voor lopende tekst), macOS-Light (extra licht, clean/simpel thema
-  naar macOS-stijl: zuiver wit met macOS-systeemblauw als accentkleur)
+  naar macOS-stijl: zuiver wit met macOS-systeemblauw als accentkleur), **Anchor** (donker
+  leigrijs/antraciet met een brandoranje accent — het kleurenpalet 1-op-1 overgenomen van de
+  night-mode van [zhfahim/anchor](https://github.com/zhfahim/anchor) op GitHub)
 - **Weergave-instellingen** (Account → Weergave): los van het thema kiesbaar **lettertype**
-  (14 opties — systeemstandaard, de leesletters Inter/Roboto/Open Sans/Lato/Poppins/Nunito/
-  Source Sans 3/Merriweather/Fira Sans, en de monospace/code-letters Hack/JetBrains Mono/
-  Fira Code/Consolas), **lettergrootte** (13–18px) en **compactheid** (comfortabel/compact,
+  (16 opties — systeemstandaard, de leesletters Inter/Roboto/Open Sans/Lato/Poppins/Nunito/
+  Source Sans 3/Merriweather/Fira Sans/DM Sans, het sierlijke schreefletter Playfair Display,
+  en de monospace/code-letters Hack/JetBrains Mono/Fira Code/Consolas), **lettergrootte**
+  (13–18px) en **compactheid** (comfortabel/compact,
   verkleint de ruimte tussen tekst en elementen door de sidebar, tabellen, kaarten en formulieren).
   Ook een **achtergrondafbeelding** (Geen/Natuur/Bergen/Heelal, self-hosted foto's, geen
   externe API) met een **sterkte-schuifje** (10–70%) — de sidebar en het hoofdvlak worden dan
@@ -74,7 +77,10 @@ Gebouwd:
   lijstweergave is klikbaar om te bewerken, en een **selectievak per notitie** maakt
   bulk-acties mogelijk: meerdere notities in één keer verwijderen of er samen een tag aan
   toevoegen. Een **"Tijdelijke notitie"-vinkje** markeert een notitie als **temp** (zichtbaar
-  als badge in de lijst) — zo'n notitie wordt automatisch verwijderd zodra ze een week oud is
+  als badge in de lijst) — zo'n notitie wordt automatisch verwijderd zodra ze een week oud is.
+  De notitiekaarten zelf zijn herontworpen naar de vormgeving van
+  [zhfahim/anchor](https://github.com/zhfahim/anchor): sterk afgeronde hoeken, volledig
+  ronde tag-pills met een "#"-prefix, en de datum onderaan de kaart
 - **Code snippets** (ByteStash-stijl): een snippet kan **meerdere bestanden** bevatten (bv.
   `main.py` + `requirements.txt` bij elkaar), elk met een eigen taal voor **syntax
   highlighting** (highlight.js) — de taal wordt **automatisch afgeleid uit de
@@ -313,6 +319,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     prioriteit, gehaalde/verlopen deadlines, gestarte/voltooide pomodoro's, focustijd, en
     nieuwe taken/kanban-kaarten/notities per week en maand. Start een pomodoro-sessie en
     herlaad de pagina → "Pomodoro's opgestart" telt méé.
+22. Kies het "Anchor"-thema via de kleurenbolletjes in de sidebar → donker leigrijs met een
+    brandoranje accent. Ga naar Notities → de kaarten zijn sterk afgerond, tags staan als
+    volledig ronde pilletjes met een "#"-prefix, en onderaan elke kaart staat de datum. Ga
+    naar Account → Weergave → Lettertype en kies "Playfair Display" → koppen/titels tonen nu
+    in een sierlijke schreefletter; kies "DM Sans" voor de bijpassende leesletter.
 
 ## Architectuur
 
@@ -455,6 +466,18 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   bij veel data snel blijft. "Behaalde deadline" heeft geen eigen "voltooid op"-veld nodig —
   `updated_at` (dat al bijwerkt bij het afvinken) dient als proxy: gehaald = afgerond met
   `updated_at`-datum op of vóór de deadline.
+- **Anchor-thema en notitiekaart-restyling**: het kleurenpalet (`app/static/css/themes/anchor.css`)
+  is letterlijk overgenomen uit `web/app/globals.css` (het `.dark`-blok) van
+  [zhfahim/anchor](https://github.com/zhfahim/anchor) — dezelfde variabelenamen bestonden al
+  in dit project (`--bg`, `--bg-elevated`, `--accent`, ...), dus was het een kwestie van de
+  hex-waarden 1-op-1 overnemen i.p.v. zelf iets na te bootsen. `--success`/`--warning`/`--link`
+  stonden niet in hun palet (zij gebruiken alleen accent/destructive) en zijn zelf gekozen in
+  dezelfde "Deep Ocean & Sand"-sfeer. DM Sans, Playfair Display en JetBrains Mono zijn hun
+  daadwerkelijke fonts (uit `web/app/layout.tsx`, via `next/font/google`) — JetBrains Mono
+  stond al in de lettertype-lijst, DM Sans en Playfair Display zijn toegevoegd. De
+  notitiekaart-CSS (`.note-card`, `.note-card-tags .tag`) is losstaand van het thema: die
+  vormgeving (afronding, tag-pills, datum) geldt in elk thema, de kleuren komen gewoon uit de
+  bestaande `--bg-elevated`/`--accent`-variabelen van welk thema er ook actief is.
 - **Lichte, additive migraties** (`app/services/migrate.py`): nieuwe kolommen (zoals
   `priority`, `color` en `kanban_columns.swimlane_id`) worden bij het opstarten toegevoegd aan
   een bestaande SQLite-database als ze nog ontbreken. Bij de overstap naar per-swimlane

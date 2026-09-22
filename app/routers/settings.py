@@ -10,7 +10,7 @@ from app.models.user import User
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
-AVAILABLE_THEMES = ["dracula", "one-dark-pro", "nord", "light", "nexmail", "macos-light"]
+AVAILABLE_THEMES = ["dracula", "one-dark-pro", "nord", "light", "nexmail", "macos-light", "anchor"]
 
 # (id, label). id is ook de data-font-waarde die app.css afvangt met
 # [data-font="..."] om --font-sans/--font-heading te zetten.
@@ -25,6 +25,8 @@ AVAILABLE_FONTS = [
     ("source-sans", "Source Sans 3"),
     ("merriweather", "Merriweather"),
     ("fira-sans", "Fira Sans"),
+    ("dm-sans", "DM Sans"),
+    ("playfair-display", "Playfair Display"),
     ("hack", "Hack (monospace)"),
     ("jetbrains-mono", "JetBrains Mono (monospace)"),
     ("fira-code", "Fira Code (monospace)"),

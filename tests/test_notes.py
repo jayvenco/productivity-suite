@@ -200,3 +200,13 @@ def test_recent_temp_note_survives_list_visit(logged_in_client):
     )
     listing = logged_in_client.get("/notes").text
     assert "Verse tijdelijke notitie" in listing
+
+
+def test_note_card_shows_date_and_hash_prefixed_tags(logged_in_client):
+    from datetime import date
+
+    logged_in_client.post("/notes", data={"title": "Kaartstijl-notitie", "content": "", "tags": "werk"})
+    listing = logged_in_client.get("/notes").text
+    assert 'class="note-card-date"' in listing
+    assert date.today().isoformat() in listing
+    assert '<a class="tag"' in listing
