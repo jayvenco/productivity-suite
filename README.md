@@ -41,14 +41,17 @@ Gebouwd:
   (eerste 20 tekens) op de meta-regel. Tags en deadline staan **helemaal rechts** uitgelijnd
   op diezelfde regel (status en preview blijven links, direct na de titel)
 - **Pomodoro-timer** als "Pomodoro"-menu-item in de sidebar i.p.v. een permanent zichtbaar
-  blok: klik erop om een **zwevend, verplaatsbaar, semi-transparant paneel** rechtsonder in
-  beeld te openen (instelbare werk-/pauze-duur, optioneel gekoppeld aan een taak, live
-  aftellende ring-animatie in oranje/rood, automatische overgang werk → pauze). Het paneel
+  blok: klik erop om een **grote, ronde, zwevende en verplaatsbare timer** rechtsonder in
+  beeld te openen — een tomaatje, titel en tagline bovenin, de tijd groot in het midden met
+  "van X min" eronder, **−5 min/+5 min-knoppen** om de werkduur snel bij te stellen, drie
+  **preset-knoppen** (25/5/15 min) voor een directe keuze, en een grote ronde ▶/⏹-knop om te
+  starten/stoppen. De voortgangsring eromheen gloeit oranje (rood tijdens een pauze) en loopt
+  live leeg. Optioneel een taak koppelen via het (compacte) keuzemenu onderin. Het paneel
   blijft op zijn plek zolang je door de app navigeert, en verschijnt automatisch weer als er al
   een sessie loopt; sluiten via het kruisje stopt de timer niet, verbergt 'm alleen. Geschiedenis
   zichtbaar op de taakpagina. Een **"▶" focus-knop** op elke openstaande taak (in de
   takenlijst en op de bewerkpagina) opent het paneel meteen en **start direct een
-  werk-sessie** voor die taak, zonder eerst zelf een taak uit de keuzelijst te hoeven pakken
+  werk-sessie** voor die taak, zonder eerst zelf een taak of duur te hoeven kiezen
 - 7 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
   achtergrond met signaalgroen accent en het lettertype van nexmail — Space Grotesk voor
   koppen, IBM Plex Sans voor lopende tekst), macOS-Light (extra licht, clean/simpel thema
@@ -229,13 +232,16 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    of "Annuleren" om de modal te sluiten zonder op te slaan.
 6. Kaart verslepen naar een andere kolom/swimlane (drag-and-drop) → herlaad de pagina en
    controleer dat de cel-toewijzing bewaard is gebleven.
-7. Klik op "Pomodoro" in de sidebar → het zwevende paneel opent rechtsonder. Sleep het paneel
-   aan de titelbalk naar een andere plek. Start een timer (kies eventueel een taak) →
-   controleer de leeglopende oranje/rode ring, de automatische overgang naar de pauze-fase, en
-   dat navigeren naar een andere pagina het paneel op dezelfde plek en met de lopende timer
-   laat staan. Sluit het paneel via het kruisje en open het opnieuw via het menu → de timer
-   loopt gewoon door. Controleer op de taakpagina dat voltooide werk-sessies meetellen in de
-   Pomodoro-historie.
+7. Klik op "Pomodoro" in de sidebar → de grote ronde timer opent rechtsonder. Sleep 'm aan het
+   bovenste deel (icoon/titel) naar een andere plek. Klik "+"/"−" of een preset (25/5/15 min)
+   om de werkduur te wijzigen → de tijd en "van X min" passen meteen aan. Start de timer
+   (kies eventueel een taak in het keuzemenu onderin) → controleer dat de ring vol en
+   gloeiend oranje wordt, de aanpasknoppen/presets uitgeschakeld raken, en de knop in het
+   midden een stopknop (rood vierkant) wordt. Controleer de automatische overgang naar de
+   pauze-fase (ring wordt groen), en dat navigeren naar een andere pagina het paneel op
+   dezelfde plek en met de lopende timer laat staan. Sluit het paneel via het kruisje en open
+   het opnieuw via het menu → de timer loopt gewoon door. Controleer op de taakpagina dat
+   voltooide werk-sessies meetellen in de Pomodoro-historie.
 8. Thema wisselen via de kleurenbolletjes in de sidebar (incl. het lichte thema) → voorkeur
    blijft na herladen/opnieuw inloggen behouden.
 9. Naar Notities gaan, een notitie aanmaken: tekst selecteren en vet/cursief maken via de
@@ -478,6 +484,14 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   notitiekaart-CSS (`.note-card`, `.note-card-tags .tag`) is losstaand van het thema: die
   vormgeving (afronding, tag-pills, datum) geldt in elk thema, de kleuren komen gewoon uit de
   bestaande `--bg-elevated`/`--accent`-variabelen van welk thema er ook actief is.
+- **Grote ronde Pomodoro-timer**: dezelfde server-kant (`/pomodoro/...`, één sessie per keer,
+  client-side countdown) is ongewijzigd — alleen de front-end (`.pomodoro-float` in
+  `app/templates/base.html`, `app/static/js/pomodoro.js`) is herbouwd naar een cirkel i.p.v.
+  een klein rechthoekig paneel. De losse werk-/pauze-minuten-`<input>`'s zijn vervangen door
+  drie preset-knoppen (25/5/15 min) plus −5/+5-stapknoppen; er is geen apart "Start"/"Stop"-
+  knoppenpaar meer, maar één `#pomodoro-toggle-btn` die van icoon/kleur wisselt. De
+  ring-dashoffset-berekening (`CIRCUMFERENCE`, `stroke-dasharray`/`-dashoffset`) is exact
+  hetzelfde gebleven, alleen `RADIUS` is groter (26 → 90) voor de grotere cirkel.
 - **Lichte, additive migraties** (`app/services/migrate.py`): nieuwe kolommen (zoals
   `priority`, `color` en `kanban_columns.swimlane_id`) worden bij het opstarten toegevoegd aan
   een bestaande SQLite-database als ze nog ontbreken. Bij de overstap naar per-swimlane

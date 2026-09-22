@@ -86,31 +86,39 @@
   </div>
 
   <div class="pomodoro-float" id="pomodoro-float" hidden>
-    <div class="pomodoro-float-header" id="pomodoro-drag-handle">
-      <span>Pomodoro</span>
-      <button type="button" id="pomodoro-close-btn" class="pomodoro-float-close" title="Verbergen">×</button>
-    </div>
-    <div class="pomodoro-float-body">
-      <svg class="pomodoro-ring" viewBox="0 0 60 60">
-        <circle class="pomodoro-ring-bg" cx="30" cy="30" r="26"></circle>
-        <circle class="pomodoro-ring-progress" id="pomodoro-ring-progress" cx="30" cy="30" r="26"></circle>
+    <button type="button" id="pomodoro-close-btn" class="pomodoro-float-close" title="Verbergen">×</button>
+    <div class="pomodoro-circle">
+      <svg class="pomodoro-ring" viewBox="0 0 200 200">
+        <circle class="pomodoro-ring-bg" cx="100" cy="100" r="90"></circle>
+        <circle class="pomodoro-ring-progress" id="pomodoro-ring-progress" cx="100" cy="100" r="90"></circle>
       </svg>
-      <div class="pomodoro-time" id="pomodoro-time">25:00</div>
-      <div class="pomodoro-phase" id="pomodoro-phase">Pomodoro</div>
+      <div class="pomodoro-circle-content">
+        <div class="pomodoro-drag-handle" id="pomodoro-drag-handle">
+          <div class="pomodoro-icon" id="pomodoro-icon">🍅</div>
+          <div class="pomodoro-title">Pomodoro</div>
+          <div class="pomodoro-tagline" id="pomodoro-tagline">Focus vandaag, bereik morgen</div>
+        </div>
 
-      <div class="pomodoro-controls" id="pomodoro-idle-controls">
-        <select id="pomodoro-task">
+        <div class="pomodoro-adjust-row">
+          <button type="button" class="pomodoro-adjust-btn" id="pomodoro-minus-btn" title="-5 min">−</button>
+          <div class="pomodoro-time-block">
+            <div class="pomodoro-time" id="pomodoro-time">25:00</div>
+            <div class="pomodoro-time-total" id="pomodoro-time-total">van 25 min</div>
+          </div>
+          <button type="button" class="pomodoro-adjust-btn" id="pomodoro-plus-btn" title="+5 min">+</button>
+        </div>
+
+        <button type="button" class="pomodoro-toggle-btn" id="pomodoro-toggle-btn" title="Start">▶</button>
+
+        <div class="pomodoro-presets" id="pomodoro-presets">
+          <button type="button" class="pomodoro-preset" data-minutes="25">🍅<span>25 min</span></button>
+          <button type="button" class="pomodoro-preset" data-minutes="5">☕<span>5 min</span></button>
+          <button type="button" class="pomodoro-preset" data-minutes="15">☕<span>15 min</span></button>
+        </div>
+
+        <select id="pomodoro-task" class="pomodoro-task-select">
           <option value="">Geen taak</option>
         </select>
-        <div class="pomodoro-minutes-row">
-          <input type="number" id="pomodoro-work-minutes" min="1" max="180" value="25" title="Werk (minuten)">
-          <input type="number" id="pomodoro-break-minutes" min="1" max="60" value="5" title="Pauze (minuten)">
-        </div>
-        <button type="button" class="btn" id="pomodoro-start-btn" style="width:100%">Start</button>
-      </div>
-
-      <div class="pomodoro-controls" id="pomodoro-active-controls" hidden>
-        <button type="button" class="btn btn-danger" id="pomodoro-stop-btn" style="width:100%">Stop</button>
       </div>
     </div>
   </div>

@@ -1,34 +1,42 @@
-// Zwevend, verplaatsbaar Pomodoro-paneel (rechtsonder in beeld) i.p.v. een vast
-// blok in de sidebar. De server bewaart alleen start-tijd + geplande duur, de
-// countdown-ring wordt hier client-side berekend zodat een refresh niets verliest.
-// Het paneel blijft verborgen totdat je op "Pomodoro" in het menu klikt, of
-// automatisch zichtbaar als er al een sessie loopt (bv. na het wisselen van pagina).
+// Grote ronde, zwevende en verplaatsbare Pomodoro-timer (rechtsonder in beeld)
+// i.p.v. een vast blok in de sidebar. De server bewaart alleen start-tijd +
+// geplande duur, de countdown-ring wordt hier client-side berekend zodat een
+// refresh niets verliest. De cirkel blijft verborgen totdat je op "Pomodoro"
+// in het menu klikt, of automatisch zichtbaar als er al een sessie loopt
+// (bv. na het wisselen van pagina).
 document.addEventListener("DOMContentLoaded", () => {
   const float = document.getElementById("pomodoro-float");
   const menuBtn = document.getElementById("pomodoro-menu-btn");
   if (!float || !menuBtn) return;
 
-  const RADIUS = 26;
+  const RADIUS = 90;
   const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+  const MIN_WORK_MINUTES = 5;
+  const MAX_WORK_MINUTES = 180;
 
   const dragHandle = document.getElementById("pomodoro-drag-handle");
   const closeBtn = document.getElementById("pomodoro-close-btn");
   const ring = document.getElementById("pomodoro-ring-progress");
+  const icon = document.getElementById("pomodoro-icon");
+  const tagline = document.getElementById("pomodoro-tagline");
   const timeLabel = document.getElementById("pomodoro-time");
-  const phaseLabel = document.getElementById("pomodoro-phase");
-  const idleControls = document.getElementById("pomodoro-idle-controls");
-  const activeControls = document.getElementById("pomodoro-active-controls");
+  const timeTotalLabel = document.getElementById("pomodoro-time-total");
+  const minusBtn = document.getElementById("pomodoro-minus-btn");
+  const plusBtn = document.getElementById("pomodoro-plus-btn");
+  const toggleBtn = document.getElementById("pomodoro-toggle-btn");
+  const presetsContainer = document.getElementById("pomodoro-presets");
+  const presetButtons = Array.from(presetsContainer.querySelectorAll(".pomodoro-preset"));
   const taskSelect = document.getElementById("pomodoro-task");
-  const workMinutesInput = document.getElementById("pomodoro-work-minutes");
-  const breakMinutesInput = document.getElementById("pomodoro-break-minutes");
-  const startBtn = document.getElementById("pomodoro-start-btn");
-  const stopBtn = document.getElementById("pomodoro-stop-btn");
+
+  const DEFAULT_TAGLINE = "Focus vandaag, bereik morgen";
 
   ring.style.strokeDasharray = String(CIRCUMFERENCE);
-  ring.style.strokeDashoffset = "0";
+  ring.style.strokeDashoffset = String(CIRCUMFERENCE);
 
   let currentSession = null;
   let intervalId = null;
+  let workMinutes = 25;
+  let breakMinutes = 5;
 
   restoreSavedMinutes();
   restoreFloatPosition();
@@ -46,18 +54,33 @@ document.addEventListener("DOMContentLoaded", () => {
     menuBtn.classList.remove("active");
   });
 
-  startBtn.addEventListener("click", () => {
-    const minutes = parseInt(workMinutesInput.value, 10) || 25;
-    saveMinutes();
-    startPhase("work", minutes, taskSelect.value || null);
+  minusBtn.addEventListener("click", () => {
+    if (currentSession) return;
+    setWorkMinutes(workMinutes - 5);
   });
 
-  stopBtn.addEventListener("click", async () => {
-    if (!currentSession) return;
-    clearInterval(intervalId);
-    await fetch(`/pomodoro/${currentSession.id}/cancel`, { method: "POST" });
-    currentSession = null;
-    showIdle();
+  plusBtn.addEventListener("click", () => {
+    if (currentSession) return;
+    setWorkMinutes(workMinutes + 5);
+  });
+
+  presetsContainer.addEventListener("click", (event) => {
+    if (currentSession) return;
+    const btn = event.target.closest(".pomodoro-preset");
+    if (!btn) return;
+    setWorkMinutes(parseInt(btn.dataset.minutes, 10));
+  });
+
+  toggleBtn.addEventListener("click", async () => {
+    if (currentSession) {
+      clearInterval(intervalId);
+      await fetch(`/pomodoro/${currentSession.id}/cancel`, { method: "POST" });
+      currentSession = null;
+      showIdle();
+    } else {
+      saveMinutes();
+      startPhase("work", workMinutes, taskSelect.value || null);
+    }
   });
 
   // ---- Pomodoro direct starten vanaf een taak (taaklijst/-bewerkpagina) ----
@@ -80,16 +103,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if ([...taskSelect.options].some((o) => o.value === taskId)) {
       taskSelect.value = taskId;
     }
-    const minutes = parseInt(workMinutesInput.value, 10) || 25;
     saveMinutes();
-    startPhase("work", minutes, taskId);
+    startPhase("work", workMinutes, taskId);
   }
 
   async function loadState() {
     const response = await fetch("/pomodoro/state");
     const data = await response.json();
-    workMinutesInput.value = workMinutesInput.value || data.default_work_minutes;
-    breakMinutesInput.value = breakMinutesInput.value || data.default_break_minutes;
+    if (!hasSavedMinutes()) {
+      workMinutes = data.default_work_minutes;
+      breakMinutes = data.default_break_minutes;
+    }
 
     if (data.active) {
       currentSession = data.active;
@@ -158,7 +182,6 @@ document.addEventListener("DOMContentLoaded", () => {
     await fetch(`/pomodoro/${currentSession.id}/finish`, { method: "POST" });
 
     if (finishedPhase === "work") {
-      const breakMinutes = parseInt(breakMinutesInput.value, 10) || 5;
       await startPhase("break", breakMinutes, taskId);
     } else {
       currentSession = null;
@@ -166,28 +189,68 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function setWorkMinutes(minutes) {
+    workMinutes = Math.max(MIN_WORK_MINUTES, Math.min(MAX_WORK_MINUTES, minutes));
+    saveMinutes();
+    renderIdleTime();
+    highlightPreset();
+  }
+
+  function renderIdleTime() {
+    timeLabel.textContent = `${String(workMinutes).padStart(2, "0")}:00`;
+    timeTotalLabel.textContent = `van ${workMinutes} min`;
+  }
+
+  function highlightPreset() {
+    for (const btn of presetButtons) {
+      btn.classList.toggle("active", parseInt(btn.dataset.minutes, 10) === workMinutes);
+    }
+  }
+
+  function setControlsEnabled(enabled) {
+    minusBtn.disabled = !enabled;
+    plusBtn.disabled = !enabled;
+    taskSelect.disabled = !enabled;
+    for (const btn of presetButtons) btn.disabled = !enabled;
+  }
+
   function showIdle() {
-    idleControls.hidden = false;
-    activeControls.hidden = true;
-    phaseLabel.textContent = "Pomodoro";
-    ring.style.strokeDashoffset = "0";
-    const minutes = parseInt(workMinutesInput.value, 10) || 25;
-    timeLabel.textContent = `${String(minutes).padStart(2, "0")}:00`;
+    float.classList.remove("pomodoro-active", "pomodoro-break");
+    icon.textContent = "🍅";
+    tagline.textContent = DEFAULT_TAGLINE;
+    toggleBtn.textContent = "▶";
+    toggleBtn.title = "Start";
+    setControlsEnabled(true);
+    ring.style.strokeDashoffset = String(CIRCUMFERENCE);
+    renderIdleTime();
+    highlightPreset();
   }
 
   function showActive() {
-    idleControls.hidden = true;
-    activeControls.hidden = false;
-    phaseLabel.textContent = currentSession.phase === "work" ? "Focus" : "Pauze";
+    float.classList.add("pomodoro-active");
     float.classList.toggle("pomodoro-break", currentSession.phase === "break");
+    icon.textContent = currentSession.phase === "work" ? "🍅" : "☕";
+    tagline.textContent = currentSession.phase === "work" ? "Focus loopt..." : "Pauze";
+    timeTotalLabel.textContent = `van ${currentSession.planned_minutes} min`;
+    toggleBtn.textContent = "⏹";
+    toggleBtn.title = "Stop";
+    setControlsEnabled(false);
   }
 
   function saveMinutes() {
     try {
-      localStorage.setItem("pomodoro-work-minutes", workMinutesInput.value);
-      localStorage.setItem("pomodoro-break-minutes", breakMinutesInput.value);
+      localStorage.setItem("pomodoro-work-minutes", String(workMinutes));
+      localStorage.setItem("pomodoro-break-minutes", String(breakMinutes));
     } catch (err) {
       // localStorage kan geblokkeerd zijn; timer werkt dan gewoon met de defaults.
+    }
+  }
+
+  function hasSavedMinutes() {
+    try {
+      return localStorage.getItem("pomodoro-work-minutes") !== null;
+    } catch (err) {
+      return false;
     }
   }
 
@@ -195,8 +258,8 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const savedWork = localStorage.getItem("pomodoro-work-minutes");
       const savedBreak = localStorage.getItem("pomodoro-break-minutes");
-      if (savedWork) workMinutesInput.value = savedWork;
-      if (savedBreak) breakMinutesInput.value = savedBreak;
+      if (savedWork) workMinutes = parseInt(savedWork, 10) || workMinutes;
+      if (savedBreak) breakMinutes = parseInt(savedBreak, 10) || breakMinutes;
     } catch (err) {
       // Geen probleem, defaults blijven staan.
     }
