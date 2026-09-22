@@ -764,7 +764,7 @@ textarea {
 .kanban-card {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-left: 4px solid transparent;
+  border-left: 4px solid var(--border);
   border-radius: 12px;
   padding: 9px 11px;
   cursor: grab;
