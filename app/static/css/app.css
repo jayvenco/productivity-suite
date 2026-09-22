@@ -120,9 +120,52 @@ a {
   text-decoration: none;
 }
 
-.sidebar a:hover,
-.sidebar a.active {
+.nav-item {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 10px !important;
+  border-radius: 10px !important;
+  color: var(--text);
+  text-decoration: none;
+  background: none;
+  border: none;
+  font-size: inherit;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
   background: var(--bg-hover);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: normal;
+  flex-shrink: 0;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.nav-item:hover {
+  background: var(--bg-hover);
+}
+
+.nav-item.active {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.nav-item.active .nav-icon {
+  background: var(--accent);
+  color: var(--accent-text);
 }
 
 .sidebar .spacer {
@@ -169,9 +212,19 @@ button, input, select, textarea {
   background: var(--accent);
   color: var(--accent-text);
   border: none;
-  border-radius: 4px;
-  padding: 6px 12px;
+  border-radius: 10px;
+  padding: 6px 14px;
+  font-weight: 600;
   cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.btn:hover {
+  opacity: 0.92;
+}
+
+.btn:active {
+  transform: scale(0.97);
 }
 
 .btn-secondary {
@@ -193,8 +246,8 @@ textarea {
   background: var(--bg-elevated);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 6px 8px;
+  border-radius: 10px;
+  padding: 6px 10px;
   width: 100%;
 }
 
@@ -235,13 +288,16 @@ textarea {
   gap: 8px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 5px 10px;
+  border-radius: 12px;
+  padding: 6px 12px;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.12s ease;
 }
 
 .task-card:hover {
   border-color: var(--accent);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.14);
 }
 
 .task-check-form {
@@ -540,9 +596,10 @@ textarea {
 .login-box {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 16px;
   padding: 24px;
   width: 280px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 .login-box h1 {
@@ -620,15 +677,39 @@ textarea {
 .column {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 14px;
   width: 240px;
   flex-shrink: 0;
-  padding: 8px;
+  padding: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .column-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   font-weight: 600;
-  padding: 4px 4px 8px;
+  padding: 4px 4px 10px;
+}
+
+.column-header-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.column-header-title {
+  flex: 1;
+}
+
+.column-header-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-hover);
+  border-radius: 999px;
+  padding: 1px 7px;
 }
 
 .add-column-form {
@@ -680,12 +761,18 @@ textarea {
 }
 
 .kanban-card {
-  background: var(--bg);
+  background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-left: 4px solid transparent;
-  border-radius: 4px;
-  padding: 6px 8px;
+  border-radius: 12px;
+  padding: 9px 11px;
   cursor: grab;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.12s ease, transform 0.12s ease;
+}
+
+.kanban-card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
 }
 
 .kanban-card.dragging {
@@ -693,7 +780,7 @@ textarea {
 }
 
 .kanban-card .card-title {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .card-actions {
@@ -713,6 +800,21 @@ textarea {
 
 .add-card-form {
   margin-top: 6px;
+}
+
+.add-card-form summary {
+  display: block;
+  list-style: none;
+  cursor: pointer;
+  text-align: center;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 8px;
+  border-radius: 10px;
+}
+
+.add-card-form summary::-webkit-details-marker {
+  display: none;
 }
 
 .add-card-form input {
@@ -1033,9 +1135,10 @@ textarea {
 .snippet-card {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 14px;
   padding: 10px 12px;
   min-width: 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .snippet-card-header {
@@ -1199,25 +1302,7 @@ textarea {
 }
 
 /* ---- Pomodoro: menu-knop + zwevend, verplaatsbaar paneel ---- */
-
-#pomodoro-menu-btn {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: none;
-  padding: 6px 8px;
-  border-radius: 4px;
-  color: var(--text);
-  cursor: pointer;
-  font-size: inherit;
-  font-family: inherit;
-}
-
-#pomodoro-menu-btn:hover,
-#pomodoro-menu-btn.active {
-  background: var(--bg-hover);
-}
+/* #pomodoro-menu-btn layout komt nu van .nav-item (zie sidebar-stijlen hierboven). */
 
 .pomodoro-float {
   position: fixed;
@@ -1460,8 +1545,8 @@ textarea {
 :root[data-density="compact"] .sidebar { padding: 8px 6px; gap: 3px; }
 :root[data-density="compact"] .sidebar-heading { padding: 0 6px; margin-bottom: 2px; }
 :root[data-density="compact"] .nav-disabled,
-:root[data-density="compact"] .sidebar a,
-:root[data-density="compact"] #pomodoro-menu-btn { padding: 4px 6px; }
+:root[data-density="compact"] .sidebar a { padding: 4px 6px; }
+:root[data-density="compact"] .nav-item { padding: 4px 8px !important; }
 :root[data-density="compact"] .sidebar .brand { padding: 3px 6px 8px; }
 :root[data-density="compact"] .main { padding: 20px 24px; }
 :root[data-density="compact"] .theme-switcher { padding: 4px; gap: 3px; }
@@ -1720,8 +1805,9 @@ textarea {
 .calendar-overview-block {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 14px;
   padding: 10px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .calendar-overview-block h3 {
@@ -2295,8 +2381,9 @@ body.mindmap-editor .mindmap-canvas {
 .stats-card {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 14px;
   padding: 10px 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 .stats-card-warning {

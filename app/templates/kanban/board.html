@@ -26,14 +26,19 @@
     </button>
     <div class="board-row">
       {% for column in swimlane.columns %}
+      {% set column_cards = cards_by_cell.get((swimlane.id, column.id), []) %}
       <div class="column" style="{{ swimlane.column_style }}">
-        <div class="column-header">{{ column.name }}</div>
+        <div class="column-header">
+          <span class="column-header-dot" style="background: hsl({{ swimlane.hue }}, 55%, 50%);"></span>
+          <span class="column-header-title">{{ column.name }}</span>
+          <span class="column-header-count">{{ column_cards|length }}</span>
+        </div>
         <div class="card-list" data-column-id="{{ column.id }}" data-swimlane-id="{{ swimlane.id }}">
-          {% for card in cards_by_cell.get((swimlane.id, column.id), []) %}
+          {% for card in column_cards %}
           <div class="kanban-card" draggable="true" data-card-id="{{ card.id }}" {% if card.color %}style="border-left-color: {{ card.color }};"{% endif %}>
             <div class="card-title">{{ card.title }}</div>
             {% if card.description %}<div class="card-description">{{ card.description|checklist_html(card.id)|safe }}</div>{% endif %}
-            {% for t in card.tags %}<span class="tag">{{ t.name }}</span>{% endfor %}
+            {% for t in card.tags %}<span class="tag" style="{{ t.badge_style }}">{{ t.name }}</span>{% endfor %}
             <div class="card-actions">
               <button type="button" class="card-edit-toggle" data-card-id="{{ card.id }}">Bewerken</button>
               <form method="post" action="/kanban/cards/{{ card.id }}/delete" onsubmit="return confirm('Kaart verwijderen?')">
@@ -61,7 +66,7 @@
           {% endfor %}
         </div>
         <details class="add-card-form">
-          <summary>+ Kaart toevoegen</summary>
+          <summary style="background: hsla({{ swimlane.hue }}, 60%, 50%, 0.14); color: hsl({{ swimlane.hue }}, 55%, 55%);">+ Kaart toevoegen</summary>
           <form method="post" action="/kanban/cards">
             <input type="hidden" name="column_id" value="{{ column.id }}">
             <input type="hidden" name="swimlane_id" value="{{ swimlane.id }}">

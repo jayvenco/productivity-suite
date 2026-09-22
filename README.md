@@ -52,12 +52,21 @@ Gebouwd:
   zichtbaar op de taakpagina. Een **"▶" focus-knop** op elke openstaande taak (in de
   takenlijst en op de bewerkpagina) opent het paneel meteen en **start direct een
   werk-sessie** voor die taak, zonder eerst zelf een taak of duur te hoeven kiezen
-- 7 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
+- 8 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
   achtergrond met signaalgroen accent en het lettertype van nexmail — Space Grotesk voor
   koppen, IBM Plex Sans voor lopende tekst), macOS-Light (extra licht, clean/simpel thema
-  naar macOS-stijl: zuiver wit met macOS-systeemblauw als accentkleur), **Anchor** (donker
-  leigrijs/antraciet met een brandoranje accent — het kleurenpalet 1-op-1 overgenomen van de
-  night-mode van [zhfahim/anchor](https://github.com/zhfahim/anchor) op GitHub)
+  naar macOS-stijl: zuiver wit met macOS-systeemblauw als accentkleur), **Anchor** en
+  **Anchor Solid** (donker leigrijs/antraciet met een brandoranje accent — het kleurenpalet
+  1-op-1 overgenomen van de night-mode van [zhfahim/anchor](https://github.com/zhfahim/anchor)
+  op GitHub; Anchor Solid is de volledig ondoorzichtige variant)
+- **Apple-achtige vormtaal**, thema-onafhankelijk: de sidebar-navigatie heeft nu iconen in
+  afgeronde vierkante badges, en de actieve pagina krijgt een gekleurde, volledig afgeronde
+  "pil"-achtergrond (kleur volgt automatisch het actieve thema's accentkleur). Kaarten (taken,
+  kanban, notities, snippets, statistieken, kalender-overzicht) hebben sterker afgeronde
+  hoeken en een zachte schaduw i.p.v. een harde rand; knoppen en invoervelden zijn ook meer
+  afgerond. Het Kanban-bord kreeg een kolomkop met een gekleurd bolletje + aantal-badge, en
+  de "+ Kaart toevoegen"-knop is een zachte, in de swimlane-kleur getinte pil-knop i.p.v. een
+  kale link
 - **Weergave-instellingen** (Account → Weergave): los van het thema kiesbaar **lettertype**
   (16 opties — systeemstandaard, de leesletters Inter/Roboto/Open Sans/Lato/Poppins/Nunito/
   Source Sans 3/Merriweather/Fira Sans/DM Sans, het sierlijke schreefletter Playfair Display,
@@ -577,6 +586,21 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   zelf een aparte positie-berekening nodig heeft. `app/services/kanban_cells.py` (met
   `get_or_create_default_cell`, gedeeld met de agent-API in `app/routers/api.py`) staat hier
   los van en is gewoon blijven staan.
+- **Apple-achtige vormtaal**: bewust géén nieuw thema of losse "Apple-modus", maar een
+  uitbreiding van de bestaande gedeelde classes (`.nav-item`, `.task-card`, `.note-card`,
+  `.kanban-card`, `.column`, `.btn`, inputs) zodat elk van de 8 thema's er automatisch mooier
+  uitziet zonder dat er 8× apart iets aangepast moest worden — alleen `border-radius` en
+  `box-shadow` (geen harde `border` meer op de meeste kaarten) zijn breder toegepast, de
+  thema-kleurvariabelen (`--bg-elevated`, `--accent`, ...) blijven de enige plek waar kleur
+  vandaan komt. De sidebar-navigatie is verbouwd van losse `.sidebar a`-links naar één
+  `.nav-item`-class met een `.nav-icon`-badge; de actieve pil-achtergrond gebruikt
+  `color-mix(in srgb, var(--accent) 16%, transparent)` voor een subtiele, thema-onafhankelijke
+  tint i.p.v. een vast hexgetal. `.nav-item` heeft `!important` op `display`/`padding`/
+  `border-radius` omdat de al bestaande `.sidebar a`-regel (element+class-selector) anders qua
+  CSS-specificiteit zou winnen van de nieuwere, minder specifieke `.nav-item`-class-regel. Het
+  Kanban-kolomkopje krijgt zijn puntkleur via `hsl({{ swimlane.hue }}, ...)` rechtstreeks in de
+  template i.p.v. via `swimlane.column_style` (dat laatste geeft een tint+rand-combinatie
+  bedoeld voor een hele kolom, niet een los bolletje).
 - **Multi-tag filter en geen kleurtint meer op notities**: zelfde aanpak als eerder bij taken
   — `GET /notes?tags=werk&tags=prive` (herhaalde query-param) i.p.v. het vorige losse
   `tag`-param, gefilterd met `Note.tags.any(Tag.name.in_(tags))` (OR-logica). De

@@ -51,13 +51,13 @@
         </ul>
       </div>
 
-      <a href="/tasks" class="{{ 'active' if request.url.path.startswith('/tasks') }}">Taken</a>
-      <a href="/kanban" class="{{ 'active' if request.url.path.startswith('/kanban') }}">Kanban</a>
-      <a href="/mindmap" class="{{ 'active' if request.url.path.startswith('/mindmap') }}">Mindmap</a>
-      <a href="/notes" class="{{ 'active' if request.url.path.startswith('/notes') }}">Notities</a>
-      <button type="button" id="pomodoro-menu-btn">Pomodoro</button>
-      <a href="/snippets" class="{{ 'active' if request.url.path.startswith('/snippets') }}">Snippets</a>
-      <a href="/calendar" class="{{ 'active' if request.url.path.startswith('/calendar') }}">Kalender</a>
+      <a href="/tasks" class="nav-item {{ 'active' if request.url.path.startswith('/tasks') }}"><span class="nav-icon">✓</span>Taken</a>
+      <a href="/kanban" class="nav-item {{ 'active' if request.url.path.startswith('/kanban') }}"><span class="nav-icon">▦</span>Kanban</a>
+      <a href="/mindmap" class="nav-item {{ 'active' if request.url.path.startswith('/mindmap') }}"><span class="nav-icon">◇</span>Mindmap</a>
+      <a href="/notes" class="nav-item {{ 'active' if request.url.path.startswith('/notes') }}"><span class="nav-icon">▤</span>Notities</a>
+      <button type="button" id="pomodoro-menu-btn" class="nav-item"><span class="nav-icon">◷</span>Pomodoro</button>
+      <a href="/snippets" class="nav-item {{ 'active' if request.url.path.startswith('/snippets') }}"><span class="nav-icon">&lt;/&gt;</span>Snippets</a>
+      <a href="/calendar" class="nav-item {{ 'active' if request.url.path.startswith('/calendar') }}"><span class="nav-icon">▢</span>Kalender</a>
       <div class="spacer"></div>
       <div class="theme-switcher">
         {% for theme in ["dracula", "one-dark-pro", "nord", "light", "nexmail", "macos-light", "anchor", "anchor-solid"] %}
@@ -68,8 +68,8 @@
         </form>
         {% endfor %}
       </div>
-      <a href="/account" class="{{ 'active' if request.url.path == '/account' }}">
-        Account{% if user.using_default_password %} <span class="badge-warning">!</span>{% endif %}
+      <a href="/account" class="nav-item {{ 'active' if request.url.path == '/account' }}">
+        <span class="nav-icon">⚙</span>Account{% if user.using_default_password %} <span class="badge-warning">!</span>{% endif %}
       </a>
       <form method="post" action="/logout">
         <button type="submit" class="btn btn-secondary" style="width:100%">Uitloggen</button>
