@@ -229,3 +229,9 @@ def test_calendar_overview_shows_recent_kanban_card(logged_in_client):
     )
     page = logged_in_client.get("/calendar").text
     assert "Kalenderkaart" in page
+
+
+def test_quickadd_wheel_links_to_every_creation_page(logged_in_client):
+    page = logged_in_client.get("/calendar").text
+    for href in ["/notes/new", "/kanban", "/snippets/new", "/tasks/new", "/mindmap"]:
+        assert f'href="{href}" class="quickadd-spoke"' in page

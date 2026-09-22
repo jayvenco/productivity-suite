@@ -134,9 +134,12 @@ Gebouwd:
   kalender, mindmap, instellingen) in één keer **exporteren** als downloadbaar `.db`-bestand,
   en later weer **importeren** om alles terug te zetten — er wordt automatisch eerst een
   veiligheidskopie van de huidige database gemaakt voordat 'm vervangen wordt
-- **Quick-add-snelkoppelingen**: vier kleine gekleurde cirkels rechtsonder (op elke pagina) —
-  **T**aak, **K**anban, **S**nippet en **N**otitie — die direct doorlinken naar de bijbehorende
-  reguliere aanmaakpagina (`/tasks/new`, `/kanban`, `/snippets/new`, `/notes/new`)
+- **Quick-add-wiel**: een ronde hub-knop rechtsonder (op elke pagina, met een 4-stippen-icoon)
+  die bij een klik openklapt naar een **semi-transparant rond menu** met 5 taartpunten —
+  **Notities**, **Kanban**, **Snippets**, **Taken** en **Mindmap** — elk met een eigen icoon en
+  label, die direct doorlinken naar de bijbehorende aanmaakpagina (`/notes/new`, `/kanban`,
+  `/snippets/new`, `/tasks/new`, `/mindmap`). Klik ergens buiten het wiel of druk op Escape om
+  het weer te sluiten
 - **Bredere, gecentreerde aanmaak-/bewerkpagina's**: de formulieren voor taken, notities en
   snippets staan in een gecentreerde kolom (i.p.v. links tegen de sidebar aan) met merkbaar
   grotere invoervelden, zodat er meer leesbaar is tijdens het invullen op een groot scherm. De
@@ -307,10 +310,12 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     testtaak weer weg (en staat er een `app.db.before-import-<tijdstip>`-veiligheidskopie in
     de `data`-map).
 17. Uitloggen en controleren dat alle pagina's terug naar `/login` sturen.
-18. Rechtsonder (op elke pagina) staan vier kleine cirkels T/K/S/N → klik op "T" → je komt op
-    `/tasks/new`. Ga terug en klik op "K" → je komt op `/kanban` (de bordpagina, waar je een
-    kaart toevoegt via de "+"-knoppen per kolom). Klik op "S" → `/snippets/new`. Klik op "N" →
-    `/notes/new`.
+18. Rechtsonder (op elke pagina) staat een ronde knop met vier stippen → klik erop → een
+    semi-transparant rond menu met 5 taartpunten (Notities/Kanban/Snippets/Taken/Mindmap)
+    klapt open. Klik op "Taken" → je komt op `/tasks/new`. Ga terug, open het wiel opnieuw en
+    klik op "Kanban" → `/kanban` (de bordpagina). Herhaal voor "Snippets" (`/snippets/new`),
+    "Notities" (`/notes/new`) en "Mindmap" (`/mindmap`). Open het wiel en klik ergens buiten
+    het wiel (of druk Escape) → het sluit weer zonder te navigeren.
 19. Log opnieuw in (of ga naar `/`) → je komt nu op de Kalender terecht i.p.v. Taken. Maak een
     taak aan met prioriteit aangevinkt, een notitie en een kanban-kaart → ga naar de Kalender
     en controleer dat alle drie verschijnen in het overzicht onder het rooster ("Hoge
@@ -558,13 +563,20 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   `/tasks` na het aanmaken. Na een geslaagde quick-add stuurt de widget een eigen
   `deadlines:refresh`-DOM-event, waar `deadlines.js` op luistert om zichzelf te verversen
   zonder dat beide widgets elkaar rechtstreeks hoeven te kennen.
-- **Quick-add-snelkoppelingen**: `.quickadd-shortcuts` in `base.html` — vier gewone `<a>`-links
-  (geen JS, geen los formulier) die rechtstreeks naar de bestaande aanmaakpagina's linken. Eerst
-  is een variant met een zwevende `+`-knop en een eigen JSON-`/quick`-formulier per entiteit
-  gebouwd (net als `POST /tasks/quick` voor de mini-kalender-widget), maar dat voegde alleen
-  maar een extra stap toe t.o.v. gewoon doorlinken naar de bestaande "nieuw"-pagina — dus is dat
-  weer teruggedraaid. `app/services/kanban_cells.py` (met `get_or_create_default_cell`, gedeeld
-  met de agent-API in `app/routers/api.py`) is wel blijven staan.
+- **Quick-add-wiel**: `.quickadd-wheel-wrap` in `base.html` + `app/static/js/quickadd.js`.
+  De 5 snelkoppelingen zijn gewone `<a>`-links (geen los `/quick`-formulier meer, na eerdere
+  iteraties die dat wel hadden) — het enige JS is het open/dicht togglen van het wiel. De
+  taartpunt-kleuren komen uit één `conic-gradient` (5 gelijke segmenten van 20%, gestart op
+  `-36deg` zodat de segmentgrenzen tussen de iconen vallen i.p.v. er middenin), i.p.v. 5 losse
+  gestileerde `<div>`'s. Elke `.quickadd-spoke` staat gepositioneerd via een vooraf berekende
+  `translate(x, y)` (trigonometrie op 72°-intervallen, radius 100px vanuit het midden) i.p.v.
+  `sin()`/`cos()` in CSS, voor bredere browserondersteuning. `.quickadd-wheel-wrap` is 64×64px
+  als het wiel dicht is (hub plakt in de hoek) en 300×300px als het open is — de hub zelf is
+  altijd gecentreerd in die wrapper (`top:50%;left:50%;transform:translate(-50%,-50%)`), dus
+  schuift vanzelf mee van de hoek naar het midden van het opengeklapte wiel, zonder dat de hub
+  zelf een aparte positie-berekening nodig heeft. `app/services/kanban_cells.py` (met
+  `get_or_create_default_cell`, gedeeld met de agent-API in `app/routers/api.py`) staat hier
+  los van en is gewoon blijven staan.
 - **Multi-tag filter en geen kleurtint meer op notities**: zelfde aanpak als eerder bij taken
   — `GET /notes?tags=werk&tags=prive` (herhaalde query-param) i.p.v. het vorige losse
   `tag`-param, gefilterd met `Note.tags.any(Tag.name.in_(tags))` (OR-logica). De

@@ -123,14 +123,31 @@
     </div>
   </div>
 
-  <div class="quickadd-shortcuts">
-    <a href="/tasks/new" class="quickadd-shortcut" data-type="task" title="Nieuwe taak">T</a>
-    <a href="/kanban" class="quickadd-shortcut" data-type="kanban" title="Nieuwe kanban-kaart">K</a>
-    <a href="/snippets/new" class="quickadd-shortcut" data-type="snippet" title="Nieuwe snippet">S</a>
-    <a href="/notes/new" class="quickadd-shortcut" data-type="note" title="Nieuwe notitie">N</a>
+  <div class="quickadd-wheel-wrap" id="quickadd-wheel-wrap">
+    <div class="quickadd-wheel" id="quickadd-wheel" hidden>
+      <a href="/notes/new" class="quickadd-spoke" data-angle="0" title="Nieuwe notitie">
+        <span class="quickadd-spoke-icon">📝</span><span class="quickadd-spoke-label">Notities</span>
+      </a>
+      <a href="/kanban" class="quickadd-spoke" data-angle="1" title="Nieuwe kanban-kaart">
+        <span class="quickadd-spoke-icon">📋</span><span class="quickadd-spoke-label">Kanban</span>
+      </a>
+      <a href="/snippets/new" class="quickadd-spoke" data-angle="2" title="Nieuwe snippet">
+        <span class="quickadd-spoke-icon">💻</span><span class="quickadd-spoke-label">Snippets</span>
+      </a>
+      <a href="/tasks/new" class="quickadd-spoke" data-angle="3" title="Nieuwe taak">
+        <span class="quickadd-spoke-icon">✅</span><span class="quickadd-spoke-label">Taken</span>
+      </a>
+      <a href="/mindmap" class="quickadd-spoke" data-angle="4" title="Nieuwe mindmap">
+        <span class="quickadd-spoke-icon">🧠</span><span class="quickadd-spoke-label">Mindmap</span>
+      </a>
+    </div>
+    <button type="button" class="quickadd-hub" id="quickadd-hub" title="Snel toevoegen">
+      <span class="quickadd-hub-dots"><span></span><span></span><span></span><span></span></span>
+    </button>
   </div>
 
   <script src="/static/js/pomodoro.js"></script>
+  <script src="/static/js/quickadd.js"></script>
   <script src="/static/js/deadlines.js"></script>
   <script src="/static/js/mini-calendar.js"></script>
   {% else %}
