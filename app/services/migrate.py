@@ -10,6 +10,7 @@ _COLUMNS_TO_ENSURE = {
     "tasks": [("priority", "BOOLEAN DEFAULT 0")],
     "kanban_cards": [("color", "VARCHAR(20)")],
     "kanban_columns": [("swimlane_id", "INTEGER")],
+    "kanban_swimlanes": [("color", "VARCHAR(20)")],
     "notes": [("is_temp", "BOOLEAN DEFAULT 0")],
     "mindmap_boards": [("description", "TEXT DEFAULT ''")],
     "users": [

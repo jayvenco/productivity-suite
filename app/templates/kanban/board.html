@@ -21,15 +21,18 @@
 <div class="board-swimlanes" data-board-id="{{ board.id }}">
   {% for swimlane in board.swimlanes %}
   <section class="swimlane-block" data-swimlane-block="{{ swimlane.id }}">
-    <button type="button" class="swimlane-heading swimlane-toggle" style="{{ swimlane.heading_style }}" data-swimlane-toggle="{{ swimlane.id }}">
-      <span class="swimlane-toggle-arrow">▾</span> {{ swimlane.name }}
-    </button>
+    <div class="swimlane-heading-row">
+      <button type="button" class="swimlane-heading swimlane-toggle" style="{{ swimlane.heading_style }}" data-swimlane-toggle="{{ swimlane.id }}">
+        <span class="swimlane-toggle-arrow">▾</span> {{ swimlane.name }}
+      </button>
+      <input type="color" class="swimlane-color-input" data-swimlane-id="{{ swimlane.id }}" value="{{ swimlane.color or '#6c7086' }}" title="Swimlane-kleur kiezen">
+    </div>
     <div class="board-row">
       {% for column in swimlane.columns %}
       {% set column_cards = cards_by_cell.get((swimlane.id, column.id), []) %}
       <div class="column">
         <div class="column-header">
-          <span class="column-header-dot" style="background: hsl({{ swimlane.hue }}, 55%, 50%);"></span>
+          <span class="column-header-dot" data-swimlane-dot="{{ swimlane.id }}" style="background: {{ swimlane.display_color }};"></span>
           <span class="column-header-title">{{ column.name }}</span>
           <span class="column-header-count">{{ column_cards|length }}</span>
         </div>

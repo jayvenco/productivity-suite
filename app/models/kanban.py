@@ -33,6 +33,7 @@ class KanbanSwimlane(Base):
     board_id: Mapped[int] = mapped_column(ForeignKey("kanban_boards.id", ondelete="CASCADE"), index=True)
     name: Mapped[str] = mapped_column(String(100))
     position: Mapped[int] = mapped_column(Integer, default=0)
+    color: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
     board: Mapped["KanbanBoard"] = relationship(back_populates="swimlanes")
     columns: Mapped[list["KanbanColumn"]] = relationship(
@@ -42,13 +43,19 @@ class KanbanSwimlane(Base):
 
     @property
     def hue(self) -> int:
-        """Stabiele tint per swimlane (op naam), zodat elke swimlane een herkenbare,
-        eigen kolomkleur heeft -- geen los kleurveld nodig, puur van de naam afgeleid."""
+        """Stabiele tint per swimlane (op naam), als er geen eigen kleur is gekozen --
+        zo heeft elke swimlane altijd een herkenbare kleur, ook zonder handmatige keuze."""
         return stable_hue(self.name)
 
     @property
+    def display_color(self) -> str:
+        """De kleur die getoond wordt: de handmatig gekozen kleur, of anders de
+        automatische naam-gebaseerde tint."""
+        return self.color or f"hsl({self.hue}, 55%, 50%)"
+
+    @property
     def heading_style(self) -> str:
-        return f"border-left: 3px solid hsl({self.hue}, 55%, 50%);"
+        return f"border-left: 3px solid {self.display_color};"
 
 
 class KanbanColumn(Base):

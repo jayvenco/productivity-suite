@@ -75,6 +75,30 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Swimlane-kleur: direct opslaan zodra de gebruiker een kleur kiest, en de
+  // kolomkopjes/heading-rand live bijwerken zonder page reload.
+  board.addEventListener("change", async (event) => {
+    const colorInput = event.target.closest(".swimlane-color-input");
+    if (!colorInput) return;
+
+    const swimlaneId = colorInput.dataset.swimlaneId;
+    const color = colorInput.value;
+
+    document
+      .querySelectorAll(`[data-swimlane-dot="${swimlaneId}"]`)
+      .forEach((dot) => (dot.style.background = color));
+    const heading = document.querySelector(
+      `[data-swimlane-toggle="${swimlaneId}"]`
+    );
+    if (heading) heading.style.borderLeft = `3px solid ${color}`;
+
+    await fetch(`/kanban/swimlanes/${swimlaneId}/color`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ color }),
+    });
+  });
+
   // "Bewerken"-knop op een kaart opent het bewerk-formulier als modal (met backdrop).
   const backdrop = document.getElementById("kanban-modal-backdrop");
 

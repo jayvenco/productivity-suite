@@ -72,6 +72,24 @@ def create_swimlane(
     return RedirectResponse("/kanban", status_code=303)
 
 
+@router.post("/swimlanes/{swimlane_id}/color")
+def set_swimlane_color(
+    swimlane_id: int,
+    color: str = Form(""),
+    clear_color: str = Form(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    board = _get_board_or_404(db, user.id)
+    swimlane = db.get(KanbanSwimlane, swimlane_id)
+    if swimlane is None or swimlane.board_id != board.id:
+        raise HTTPException(status_code=404, detail="Swimlane niet gevonden")
+
+    swimlane.color = None if clear_color else (color.strip() or None)
+    db.commit()
+    return RedirectResponse("/kanban", status_code=303)
+
+
 @router.post("/swimlanes/{swimlane_id}/columns")
 def create_column(
     swimlane_id: int,

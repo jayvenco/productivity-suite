@@ -165,6 +165,22 @@ def test_cannot_create_card_with_column_from_other_swimlane(logged_in_client):
     assert response.status_code == 404
 
 
+def test_set_and_clear_swimlane_color(logged_in_client):
+    logged_in_client.post("/kanban/swimlanes", data={"name": "Kleurkeuze lane"})
+    board_html = logged_in_client.get("/kanban").text
+    swimlane_id = _swimlane_id_for_name(board_html, "Kleurkeuze lane")
+
+    logged_in_client.post(f"/kanban/swimlanes/{swimlane_id}/color", data={"color": "#00ff99"})
+    with_color = logged_in_client.get("/kanban").text
+    assert "#00ff99" in with_color
+
+    logged_in_client.post(
+        f"/kanban/swimlanes/{swimlane_id}/color", data={"color": "#00ff99", "clear_color": "true"}
+    )
+    without_color = logged_in_client.get("/kanban").text
+    assert "#00ff99" not in without_color
+
+
 def test_clear_card_color(logged_in_client):
     board_html = logged_in_client.get("/kanban").text
     column_id, swimlane_id = _first_ids(board_html)

@@ -631,13 +631,19 @@ textarea {
   gap: 22px;
 }
 
+.swimlane-heading-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
 .swimlane-heading {
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
   font-size: 12px;
   letter-spacing: 0.04em;
-  margin-bottom: 6px;
   padding-left: 8px;
 }
 
@@ -650,7 +656,8 @@ textarea {
   border-left: 3px solid transparent;
   font-family: inherit;
   cursor: pointer;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
   text-align: left;
 }
 
@@ -659,7 +666,18 @@ textarea {
   font-size: 10px;
 }
 
-.swimlane-collapsed .swimlane-heading {
+.swimlane-color-input {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.swimlane-collapsed .swimlane-heading-row {
   margin-bottom: 0;
 }
 
@@ -1572,7 +1590,7 @@ textarea {
 :root[data-density="compact"] .field { margin-bottom: 6px; }
 :root[data-density="compact"] .field label { margin-bottom: 2px; }
 :root[data-density="compact"] .board-swimlanes { gap: 14px; }
-:root[data-density="compact"] .swimlane-heading { margin-bottom: 4px; }
+:root[data-density="compact"] .swimlane-heading-row { margin-bottom: 4px; }
 :root[data-density="compact"] .board-row { gap: 6px; padding-bottom: 5px; }
 :root[data-density="compact"] .column { padding: 6px; }
 :root[data-density="compact"] .column-header { padding: 3px 3px 5px; }

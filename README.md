@@ -12,9 +12,10 @@ Gebouwd:
 - Taken: CRUD, deadline, status, tags, markdown-beschrijving
 - Sidebar-widget "Komende deadlines" (eerstvolgende 5 taken met deadline)
 - Kanban-bord met **swimlanes** (rijen); elke swimlane heeft haar **eigen kolommen**
-  (start met Backlog/Todo/In Progress/Done, per swimlane onafhankelijk uit te breiden) én een eigen,
-  automatisch toegewezen **accentkleur** op haar kolommen (net als tags — direct herkenbaar
-  welke kolom bij welke swimlane hoort), drag-and-drop tussen kolommen binnen een swimlane,
+  (start met Backlog/Todo/In Progress/Done, per swimlane onafhankelijk uit te breiden) én een
+  **accentkleur** op haar kolommen (net als tags — direct herkenbaar welke kolom bij welke
+  swimlane hoort) — automatisch op naam toegewezen, maar met een kleine **kleurkiezer naast de
+  swimlane-titel** ook zelf te overschrijven, drag-and-drop tussen kolommen binnen een swimlane,
   kaarten los van taken
 - Kanban-kaarten zijn **bewerkbaar** (titel, beschrijving, tags) en kunnen een **accentkleur**
   krijgen (kleurenpicker, zichtbaar als gekleurde rand links op de kaart). Bewerken opent een
@@ -253,7 +254,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    in-/uitklappen (herlaad de pagina en controleer dat de klap-status bewaard is gebleven).
 5. Naar Kanban gaan, een swimlane toevoegen (krijgt automatisch eigen Backlog/Todo/In Progress/Done)
    en daar een eigen kolom aan toevoegen → controleer dat die kolom alleen in díe swimlane
-   verschijnt. Een kaart aanmaken met een checklist (`- [ ] item`) → klik een checklist-item
+   verschijnt. Klik op het kleurbolletje naast de swimlane-titel en kies een kleur → controleer
+   dat de kolomkopjes en de linkerrand van de titel direct meekleuren (geen page reload nodig)
+   en dat de kleur bewaard blijft na herladen. Een kaart aanmaken met een checklist (`- [ ] item`) → klik een checklist-item
    aan en herlaad de pagina om te controleren dat het aangevinkt blijft. Klik "Bewerken" op
    een kaart → een grotere, gecentreerde modal opent met een opmaak-werkbalk. Selecteer tekst
    en klik Vet/Cursief, en probeer de Link-knop (vraagt om een URL) → controleer na opslaan
@@ -429,11 +432,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   op de `Tag` zelf — dus stabiel voor die tag daarna, maar niet voorspelbaar uit de naam. Tags
   die vóór deze functie zijn aangemaakt (met de oude vaste grijstint) worden bij het opstarten
   eenmalig omgezet (`backfill_tag_colors`).
-- **Swimlane-kleuren blijven wél naam-gebaseerd**: `app/services/colors.py::stable_hue()`
-  levert een hash-gebaseerde kleurtint puur berekend uit de swimlane-naam (geen los kleurveld
-  nodig) — bewust anders dan tags, want swimlane-namen zijn vaste categorieën (bv. "Werk"),
-  waar je wilt dat dezelfde naam altijd dezelfde kleur teruggeeft (bv. na het per ongeluk
-  verwijderen en opnieuw aanmaken van een swimlane).
+- **Swimlane-kleuren zijn handmatig instelbaar, met een naam-gebaseerde fallback**: elke
+  swimlane heeft een optioneel `color`-veld (kleine kleurkiezer naast de swimlane-titel,
+  direct opgeslagen via `POST /kanban/swimlanes/{id}/color`, geen page reload nodig). Zolang
+  er geen kleur is gekozen valt `KanbanSwimlane.display_color` terug op
+  `app/services/colors.py::stable_hue()` — een hash-gebaseerde tint puur berekend uit de
+  swimlane-naam, zodat een nieuwe swimlane toch meteen een herkenbare, stabiele kleur heeft
+  (bv. na het per ongeluk verwijderen en opnieuw aanmaken van een swimlane).
 - Rijtinten en kolomaccenten gebruiken telkens een transparante hsla-laag i.p.v. een vaste
   licht/donker kleur, zodat ze in elk thema goed leesbaar blijven.
 - **Groeperen op tag**: een taak met meerdere tags verschijnt in elke bijbehorende groep
