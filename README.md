@@ -352,6 +352,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 - **Frontend**: Server-rendered Jinja2 templates, progressive enhancement met vanilla JS
   (drag-and-drop) en Alpine/HTMX-ready (HTMX is al ingeladen voor latere fasen).
 - **Auth**: Sessie-cookie met `itsdangerous`, wachtwoord-hashing via `passlib[bcrypt]`.
+- **Cache-busting voor statische bestanden** (`app/templating.py`, `static_url()`): elke
+  `<link>`/`<script>` naar `/static/css/...` of `/static/js/...` gaat via
+  `{{ static_url('pad') }}`, dat er een `?v=<bestand-mtime>` achteraan plakt. Zonder dit bleven
+  browsers na een update soms een oude `app.css`/`pomodoro.js` cachen totdat iemand handmatig
+  de cache leegde — met dit systeem verandert de URL vanzelf zodra een bestand wijzigt (nieuwe
+  Docker-image = nieuwe mtimes = nieuwe URL's), dus geen harde refresh meer nodig na
+  `install-unraid.sh`.
 - **Kanban-kaarten** zijn losse entiteiten (geen 1-op-1 met Taken) — een kaart kan optioneel
   naar een taak verwijzen, maar dat is geen vereiste.
 - **Swimlanes en kolommen**: `KanbanColumn` hangt aan een `KanbanSwimlane` (niet meer direct

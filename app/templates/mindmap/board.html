@@ -33,5 +33,5 @@
 <script type="application/json" id="mindmap-edges-data">
   [{% for edge in edges %}{"id": {{ edge.id }}, "from_node_id": {{ edge.from_node_id }}, "to_node_id": {{ edge.to_node_id }}}{{ "," if not loop.last }}{% endfor %}]
 </script>
-<script src="/static/js/mindmap.js"></script>
+<script src="{{ static_url('js/mindmap.js') }}"></script>
 {% endblock %}
