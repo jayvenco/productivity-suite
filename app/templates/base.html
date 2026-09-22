@@ -71,7 +71,7 @@
         {% endfor %}
       </div>
       <a href="/account" class="nav-item {{ 'active' if request.url.path == '/account' }}">
-        <span class="nav-icon">⚙</span>Account{% if user.using_default_password %} <span class="badge-warning">!</span>{% endif %}
+        <span class="nav-icon">⚙</span>Settings{% if user.using_default_password %} <span class="badge-warning">!</span>{% endif %}
       </a>
       <form method="post" action="/logout">
         <button type="submit" class="btn btn-secondary" style="width:100%">Uitloggen</button>
