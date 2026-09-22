@@ -12,7 +12,7 @@ Gebouwd:
 - Taken: CRUD, deadline, status, tags, markdown-beschrijving
 - Sidebar-widget "Komende deadlines" (eerstvolgende 5 taken met deadline)
 - Kanban-bord met **swimlanes** (rijen); elke swimlane heeft haar **eigen kolommen**
-  (start met Todo/In Progress/Done, per swimlane onafhankelijk uit te breiden) én een eigen,
+  (start met Backlog/Todo/In Progress/Done, per swimlane onafhankelijk uit te breiden) én een eigen,
   automatisch toegewezen **accentkleur** op haar kolommen (net als tags — direct herkenbaar
   welke kolom bij welke swimlane hoort), drag-and-drop tussen kolommen binnen een swimlane,
   kaarten los van taken
@@ -52,13 +52,16 @@ Gebouwd:
   zichtbaar op de taakpagina. Een **"▶" focus-knop** op elke openstaande taak (in de
   takenlijst en op de bewerkpagina) opent het paneel meteen en **start direct een
   werk-sessie** voor die taak, zonder eerst zelf een taak of duur te hoeven kiezen
-- 8 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
+- 9 thema's: Dracula, One Dark Pro, Nord, Light (wit met oranje accenten), nexmail (graphite
   achtergrond met signaalgroen accent en het lettertype van nexmail — Space Grotesk voor
   koppen, IBM Plex Sans voor lopende tekst), macOS-Light (extra licht, clean/simpel thema
   naar macOS-stijl: zuiver wit met macOS-systeemblauw als accentkleur), **Anchor** en
   **Anchor Solid** (donker leigrijs/antraciet met een brandoranje accent — het kleurenpalet
   1-op-1 overgenomen van de night-mode van [zhfahim/anchor](https://github.com/zhfahim/anchor)
-  op GitHub; Anchor Solid is de volledig ondoorzichtige variant)
+  op GitHub; Anchor Solid is de volledig ondoorzichtige variant), en **Wit** (in tegenstelling
+  tot Light/macOS-Light is hier ook elke "verhoogde" laag — sidebar, kaarten — exact hetzelfde
+  wit als de achtergrond, met een neutraal zwart accent; kaarten onderscheiden zich alleen via
+  hun rand + zachte schaduw, voor een zo monochroom mogelijke, rustige look)
 - **Apple-achtige vormtaal**, thema-onafhankelijk: de sidebar-navigatie heeft nu iconen in
   afgeronde vierkante badges, en de actieve pagina krijgt een gekleurde, volledig afgeronde
   "pil"-achtergrond (kleur volgt automatisch het actieve thema's accentkleur). Kaarten (taken,
@@ -233,7 +236,7 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
    tag-checkboxes boven de lijst aanvinken → filtert op taken met minstens één van die tags.
    Sorteren op titel/prioriteit/status en groeperen op tag uitproberen, en een tag-groep
    in-/uitklappen (herlaad de pagina en controleer dat de klap-status bewaard is gebleven).
-5. Naar Kanban gaan, een swimlane toevoegen (krijgt automatisch eigen Todo/In Progress/Done)
+5. Naar Kanban gaan, een swimlane toevoegen (krijgt automatisch eigen Backlog/Todo/In Progress/Done)
    en daar een eigen kolom aan toevoegen → controleer dat die kolom alleen in díe swimlane
    verschijnt. Een kaart aanmaken met een checklist (`- [ ] item`) → klik een checklist-item
    aan en herlaad de pagina om te controleren dat het aangevinkt blijft. Klik "Bewerken" op
@@ -363,7 +366,7 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   naar een taak verwijzen, maar dat is geen vereiste.
 - **Swimlanes en kolommen**: `KanbanColumn` hangt aan een `KanbanSwimlane` (niet meer direct
   aan het bord), zodat elke swimlane haar eigen kolommenset heeft. Een nieuwe swimlane krijgt
-  automatisch de standaardkolommen (Todo/In Progress/Done) mee als startpunt, daarna volledig
+  automatisch de standaardkolommen (Backlog/Todo/In Progress/Done) mee als startpunt, daarna volledig
   onafhankelijk aan te passen.
 - **Checklists** op kanban-kaarten zijn gewoon markdown (`- [ ] item`) in de bestaande
   beschrijving — geen apart datamodel; een klik op de checkbox schakelt de regel in de

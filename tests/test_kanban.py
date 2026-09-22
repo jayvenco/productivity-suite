@@ -43,8 +43,11 @@ def test_new_swimlane_gets_distinct_column_color(logged_in_client):
 def test_board_has_seeded_columns_and_swimlane(logged_in_client):
     response = logged_in_client.get("/kanban")
     assert response.status_code == 200
+    assert "Backlog" in response.text
     assert "Todo" in response.text
     assert "Algemeen" in response.text
+    # Backlog hoort vóór Todo te staan (eerste kolom van de Algemeen-swimlane).
+    assert response.text.index("Backlog") < response.text.index(">Todo<")
 
 
 def test_create_card_with_checklist_and_toggle(logged_in_client):

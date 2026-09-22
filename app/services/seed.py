@@ -7,7 +7,7 @@ from app.config import settings
 from app.models.kanban import KanbanBoard, KanbanColumn, KanbanSwimlane
 from app.models.user import User
 
-DEFAULT_COLUMNS = ["Todo", "In Progress", "Done"]
+DEFAULT_COLUMNS = ["Backlog", "Todo", "In Progress", "Done"]
 DEFAULT_SWIMLANE = "Algemeen"
 
 

@@ -1,0 +1,20 @@
+/* Volledig wit thema: in tegenstelling tot Light/macOS-Light (die een lichte
+   grijstint gebruiken voor "verhoogde" vlakken zoals de sidebar en kaarten)
+   is hier --bg-elevated exact hetzelfde wit als --bg -- kaarten/sidebar
+   onderscheiden zich alleen via de rand + zachte schaduw die al overal
+   gebruikt wordt, niet via een grijze vulling. Neutraal zwart als accent
+   i.p.v. een kleur, voor een zo monochroom mogelijke, rustige look. */
+:root[data-theme="white"] {
+  --bg: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-hover: #f4f4f5;
+  --border: #e4e4e7;
+  --text: #18181b;
+  --text-muted: #71717a;
+  --accent: #18181b;
+  --accent-text: #ffffff;
+  --success: #16a34a;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --link: #18181b;
+}
