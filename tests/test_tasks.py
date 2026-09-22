@@ -110,6 +110,14 @@ def test_each_tag_gets_a_distinct_color(logged_in_client):
     assert len(hues) >= 2
 
 
+def test_tag_badge_exposes_hue_as_custom_property(logged_in_client):
+    """badge_style zet --tag-hue i.p.v. een kant-en-klare background-color, zodat
+    een thema (zoals anchor-solid) zelf de transparantie kan overschrijven."""
+    logged_in_client.post("/tasks", data={"title": "Custom-property-test", "description": "", "deadline": "", "tags": "gamma"})
+    listing = logged_in_client.get("/tasks").text
+    assert "--tag-hue:" in listing
+
+
 def test_filter_by_single_tag(logged_in_client):
     logged_in_client.post("/tasks", data={"title": "Werktaak", "description": "", "deadline": "", "tags": "werk"})
     logged_in_client.post("/tasks", data={"title": "Privetaak", "description": "", "deadline": "", "tags": "prive"})

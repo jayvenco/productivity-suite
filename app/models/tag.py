@@ -79,7 +79,12 @@ class Tag(Base):
 
     @property
     def badge_style(self) -> str:
-        """Stijl voor het tag-label zelf: een duidelijk gekleurde rand + lichte vulling."""
+        """Stijl voor het tag-label zelf: een duidelijk gekleurde rand + lichte vulling.
+        Zet de tint als CSS custom property (--tag-hue) i.p.v. een kant-en-klare
+        background-color, zodat een thema (zie .tag[style*="--tag-hue"] in app.css)
+        zelf kan bepalen hoe transparant/solide de vulling is via --tag-alpha/
+        --tag-lightness, zonder dat elke template die badge_style gebruikt hoeft
+        te weten welk thema actief is."""
         if self.hue is None:
             return ""
-        return f"background-color: hsla({self.hue}, 60%, 50%, 0.25); border-color: hsl({self.hue}, 55%, 45%);"
+        return f"--tag-hue: {self.hue}; border-color: hsl({self.hue}, 55%, 45%);"

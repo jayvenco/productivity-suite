@@ -101,9 +101,15 @@ a {
 }
 
 .sidebar .brand {
-  font-weight: 600;
-  padding: 4px 8px 12px;
-  color: var(--accent);
+  display: inline-block;
+  font-weight: 700;
+  /* Vaste kleuren i.p.v. thema-variabelen -- het merk-label moet er in élk
+     thema hetzelfde (oranje op antraciet) uitzien. */
+  color: #ef8354;
+  background: #262a36;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin: 4px 8px 12px;
 }
 
 .sidebar a {
@@ -152,6 +158,7 @@ a {
 .theme-swatch-macos-light { background: #007aff; border-color: #d2d2d7; }
 .theme-swatch-nexmail { background: #23d19e; }
 .theme-swatch-anchor { background: #ef8354; border-color: #3a3f4b; }
+.theme-swatch-anchor-solid { background: #262a36; border-color: #ef8354; }
 
 button, input, select, textarea {
   font-family: inherit;
@@ -391,6 +398,14 @@ textarea {
   padding: 1px 8px;
   font-size: 12px;
   margin-right: 4px;
+}
+
+/* Tags met een tint (badge_style zet --tag-hue) krijgen een gekleurde vulling.
+   --tag-alpha/--tag-lightness zijn niet standaard gezet (dus 0.25/50% via de
+   fallback in hsla()) -- een thema kan ze op root-niveau herdefiniëren om
+   tags overal solide i.p.v. transparant te maken (zie themes/anchor-solid.css). */
+.tag[style*="--tag-hue"] {
+  background-color: hsla(var(--tag-hue), 60%, var(--tag-lightness, 50%), var(--tag-alpha, 0.25));
 }
 
 .priority-star {

@@ -1,0 +1,41 @@
+/* Zelfde palet als Anchor (zie themes/anchor.css), maar dan met een volledig
+   solide/ondoorzichtige laag i.p.v. de transparante elementen elders in de
+   app: tags krijgen een solide (i.p.v. semi-transparante) vulling, en een
+   eventuele achtergrondfoto (Account -> Weergave -> Achtergrond) maakt de
+   sidebar/hoofdvlak niet doorschijnend. Bedoeld als alternatief naast het
+   gewone Anchor-thema voor wie liever een volledig ondoorzichtige layout
+   heeft. */
+:root[data-theme="anchor-solid"] {
+  --bg: #1c1e26;
+  --bg-elevated: #262a36;
+  --bg-hover: #2d3142;
+  --border: #3a3f4b;
+  --text: #eaeaea;
+  --text-muted: #9ca8b8;
+  --accent: #ef8354;
+  --accent-text: #ffffff;
+  --success: #81c995;
+  --warning: #f2b866;
+  --danger: #fc8181;
+  --link: #ef8354;
+
+  --tag-alpha: 1;
+  --tag-lightness: 26%;
+}
+
+:root[data-theme="anchor-solid"] .app-background {
+  display: none !important;
+}
+
+:root[data-theme="anchor-solid"][data-background]:not([data-background="none"]) body {
+  background: var(--bg);
+}
+
+:root[data-theme="anchor-solid"][data-background]:not([data-background="none"]) .sidebar {
+  background: var(--bg-elevated);
+  backdrop-filter: none;
+}
+
+:root[data-theme="anchor-solid"][data-background]:not([data-background="none"]) .main {
+  background: var(--bg);
+}

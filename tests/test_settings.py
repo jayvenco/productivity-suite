@@ -31,6 +31,19 @@ def test_set_anchor_theme(logged_in_client):
     logged_in_client.post("/settings/theme", data={"theme": "dracula", "redirect_to": "/tasks"})
 
 
+def test_set_anchor_solid_theme(logged_in_client):
+    response = logged_in_client.post(
+        "/settings/theme", data={"theme": "anchor-solid", "redirect_to": "/tasks"}, follow_redirects=False
+    )
+    assert response.status_code == 303
+
+    page = logged_in_client.get("/tasks").text
+    assert 'data-theme="anchor-solid"' in page
+
+    # Terugzetten voor eventuele volgende tests in deze module.
+    logged_in_client.post("/settings/theme", data={"theme": "dracula", "redirect_to": "/tasks"})
+
+
 def test_set_dm_sans_and_playfair_display_fonts(logged_in_client):
     for font_id in ["dm-sans", "playfair-display"]:
         response = logged_in_client.post(
