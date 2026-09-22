@@ -68,8 +68,9 @@ Gebouwd:
   kanban, notities, snippets, statistieken, kalender-overzicht) hebben sterker afgeronde
   hoeken en een zachte schaduw i.p.v. een harde rand; knoppen en invoervelden zijn ook meer
   afgerond. Het Kanban-bord kreeg een kolomkop met een gekleurd bolletje + aantal-badge, en
-  de "+ Kaart toevoegen"-knop is een zachte, in de swimlane-kleur getinte pil-knop i.p.v. een
-  kale link
+  de "+ Kaart toevoegen"-knop is een neutrale pil-knop i.p.v. een kale link. De kolom zelf is
+  bewust een **egaal, effen vlak** (geen kleurtint meer) — alleen het bolletje in de kolomkop
+  en de rand van de swimlane-titel verraden nog welke swimlane een kaart bij hoort
 - **Weergave-instellingen** (Account → Weergave): los van het thema kiesbaar **lettertype**
   (16 opties — systeemstandaard, de leesletters Inter/Roboto/Open Sans/Lato/Poppins/Nunito/
   Source Sans 3/Merriweather/Fira Sans/DM Sans, het sierlijke schreefletter Playfair Display,

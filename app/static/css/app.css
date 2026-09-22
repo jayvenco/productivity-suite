@@ -678,10 +678,10 @@ textarea {
 .column {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  width: 240px;
+  border-radius: 16px;
+  width: 260px;
   flex-shrink: 0;
-  padding: 10px;
+  padding: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
@@ -812,6 +812,12 @@ textarea {
   font-size: 12px;
   padding: 8px;
   border-radius: 10px;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+}
+
+.add-card-form summary:hover {
+  color: var(--text);
 }
 
 .add-card-form summary::-webkit-details-marker {

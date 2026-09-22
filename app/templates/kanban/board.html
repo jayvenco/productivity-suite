@@ -27,7 +27,7 @@
     <div class="board-row">
       {% for column in swimlane.columns %}
       {% set column_cards = cards_by_cell.get((swimlane.id, column.id), []) %}
-      <div class="column" style="{{ swimlane.column_style }}">
+      <div class="column">
         <div class="column-header">
           <span class="column-header-dot" style="background: hsl({{ swimlane.hue }}, 55%, 50%);"></span>
           <span class="column-header-title">{{ column.name }}</span>
@@ -66,7 +66,7 @@
           {% endfor %}
         </div>
         <details class="add-card-form">
-          <summary style="background: hsla({{ swimlane.hue }}, 60%, 50%, 0.14); color: hsl({{ swimlane.hue }}, 55%, 55%);">+ Kaart toevoegen</summary>
+          <summary>+ Kaart toevoegen</summary>
           <form method="post" action="/kanban/cards">
             <input type="hidden" name="column_id" value="{{ column.id }}">
             <input type="hidden" name="swimlane_id" value="{{ swimlane.id }}">

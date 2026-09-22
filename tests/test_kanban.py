@@ -29,14 +29,17 @@ def _card_id_for_title(html: str, title: str) -> str:
 
 
 def test_new_swimlane_gets_distinct_column_color(logged_in_client):
+    """Kolommen zelf zijn een egaal vlak (geen kleurtint meer); de swimlane-kleur
+    is nog wel zichtbaar via het kleine bolletje in de kolomkop en de
+    linkerrand van de swimlane-titel."""
     board_html = logged_in_client.get("/kanban").text
-    algemeen_hue = re.search(r"border-top: 3px solid hsl\((\d+),", board_html).group(1)
+    algemeen_hue = re.search(r"border-left: 3px solid hsl\((\d+),", board_html).group(1)
 
     logged_in_client.post("/kanban/swimlanes", data={"name": "Kleurentest lane"})
     board_html_after = logged_in_client.get("/kanban").text
 
-    hues = re.findall(r"border-top: 3px solid hsl\((\d+),", board_html_after)
-    assert len(set(hues)) >= 2, "Nieuwe swimlane heeft geen andere kolomkleur gekregen"
+    hues = re.findall(r"border-left: 3px solid hsl\((\d+),", board_html_after)
+    assert len(set(hues)) >= 2, "Nieuwe swimlane heeft geen andere kleur gekregen"
     assert algemeen_hue in hues
 
 

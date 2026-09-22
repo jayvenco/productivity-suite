@@ -50,13 +50,6 @@ class KanbanSwimlane(Base):
     def heading_style(self) -> str:
         return f"border-left: 3px solid hsl({self.hue}, 55%, 50%);"
 
-    @property
-    def column_style(self) -> str:
-        return (
-            f"background-color: hsla({self.hue}, 60%, 50%, 0.07); "
-            f"border-top: 3px solid hsl({self.hue}, 55%, 50%);"
-        )
-
 
 class KanbanColumn(Base):
     """Een kolom = status (bv. Todo/In Progress/Done), per swimlane aanpasbaar."""
