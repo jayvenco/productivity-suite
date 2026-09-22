@@ -163,6 +163,11 @@ Gebouwd:
   afgeronde taken (en percentage), openstaande hoge-prioriteitstaken, gehaalde deadlines,
   openstaande verlopen deadlines, aantal gestarte/voltooide pomodoro's, totale focustijd
   (all-time en deze week), en nieuwe taken/kanban-kaarten/notities per week en per maand
+- **Graph** (nieuw menu-item "Graph"): een interactieve, sleepbare **taggraaf** — net als de
+  graph-view in Obsidian, maar dan getagde taken/notities/kanban-kaarten/mindmaps die
+  gegroepeerd worden rond de tags die ze delen. Kleur per type (taak/notitie/kanban/mindmap/
+  tag), klik op een item om het direct te openen, sleep een knooppunt om de layout aan te
+  passen. Items zonder tags verschijnen niet in de graaf (ze kunnen met niets linken)
 
 Nog niet gebouwd: CI/CD, spraaknotities, verdere LLM-koppeling (er is nu wel een API voor
 scripts/agents, zie hieronder).
@@ -350,6 +355,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     volledig ronde pilletjes met een "#"-prefix, en onderaan elke kaart staat de datum. Ga
     naar Account → Weergave → Lettertype en kies "Playfair Display" → koppen/titels tonen nu
     in een sierlijke schreefletter; kies "DM Sans" voor de bijpassende leesletter.
+23. Geef een taak, een notitie, een kanban-kaart én een mindmap dezelfde tag (bv. "test") →
+    ga naar "Graph" in de sidebar → er verschijnt een grote grijze tag-knoop "#test" met vier
+    gekleurde knooppunten eromheen (één per type, zie de legenda bovenaan). Sleep een
+    knooppunt → het blijft op die plek terwijl de rest zich eromheen herschikt. Klik op een
+    item-knooppunt (niet de tag zelf) → je komt op de bewerkpagina van dat item.
 
 ## Architectuur
 
@@ -358,6 +368,18 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 - **Frontend**: Server-rendered Jinja2 templates, progressive enhancement met vanilla JS
   (drag-and-drop) en Alpine/HTMX-ready (HTMX is al ingeladen voor latere fasen).
 - **Auth**: Sessie-cookie met `itsdangerous`, wachtwoord-hashing via `passlib[bcrypt]`.
+- **Graph-view** (`app/routers/graph.py`, `app/static/js/graph.js`): een **bipartiete
+  taggraaf** i.p.v. losse item-naar-item-links — dit project heeft geen `[[wiki-links]]`
+  tussen items, dus is de natuurlijke vertaling van "items met dezelfde tag linken" een
+  knooppunt per tag waar elk getagd item een edge naartoe krijgt (`GET /graph/data` bouwt dit
+  simpelweg op met vier losse queries — taken/notities/kanban-kaarten/mindmaps — en een
+  `tag_node()`-helper die per tag-id maar één knooppunt aanmaakt). De layout is een simpele,
+  **dependency-vrije force-directed simulatie op canvas 2D** (afstoting tussen alle
+  knooppuntparen, aantrekking langs edges naar een gewenste lengte, een zachte trek naar het
+  midden) i.p.v. een library als D3/vis.js erbij te halen voor één simpel view — dat paste
+  niet bij hoe minimalistisch de rest van de front-end is opgezet. Items zonder tags worden
+  serverside al overgeslagen (ze kunnen toch met niets linken), dus de graaf blijft klein
+  genoeg voor de O(n²)-afstotingsberekening.
 - **Cache-busting voor statische bestanden** (`app/templating.py`, `static_url()`): elke
   `<link>`/`<script>` naar `/static/css/...` of `/static/js/...` gaat via
   `{{ static_url('pad') }}`, dat er een `?v=<bestand-mtime>` achteraan plakt. Zonder dit bleven

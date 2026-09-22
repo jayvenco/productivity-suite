@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Graph - Productivity Suite{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:2px">Graph</h2>
+<p style="color:var(--text-muted);font-size:12px;margin-top:0;margin-bottom:12px">
+  Taken, notities, kanban-kaarten en mindmaps die dezelfde tag delen, gegroepeerd rond die tag
+  — net als de graph-view in Obsidian. Sleep een knooppunt om het te verplaatsen, klik op een
+  item om het te openen.
+</p>
+
+<div class="graph-legend">
+  <span><i class="graph-dot" style="background:#8be9fd"></i> Taken</span>
+  <span><i class="graph-dot" style="background:#ffb86c"></i> Notities</span>
+  <span><i class="graph-dot" style="background:#bd93f9"></i> Kanban</span>
+  <span><i class="graph-dot" style="background:#50fa7b"></i> Mindmap</span>
+  <span><i class="graph-dot" style="background:#6c7086"></i> Tag</span>
+</div>
+
+<div class="graph-wrap">
+  <canvas id="graph-canvas"></canvas>
+  <p id="graph-empty" class="graph-empty" hidden>
+    Nog geen getagde items om te tonen. Voeg tags toe aan een taak, notitie, kanban-kaart of
+    mindmap, en ze verschijnen hier gegroepeerd rond hun gedeelde tags.
+  </p>
+</div>
+
+<script src="{{ static_url('js/graph.js') }}"></script>
+{% endblock %}
