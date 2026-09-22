@@ -2,25 +2,62 @@
 {% block title %}Mindmaps - Productivity Suite{% endblock %}
 {% block content %}
 <div class="toolbar">
-  <h2 style="margin:0">Mindmaps</h2>
+  <h2 style="margin:0">Mindmaps{% if active_tags %} — tags: {{ active_tags | join(', ') }}{% endif %}</h2>
 </div>
 
 <form method="post" action="/mindmap" class="mindmap-new-form">
   <input type="text" name="name" placeholder="Naam van nieuwe mindmap">
+  <input type="text" name="description" placeholder="Beschrijving (optioneel)">
+  <input type="text" name="tags" placeholder="Tags (komma-gescheiden)">
   <button type="submit" class="btn">+ Nieuwe mindmap</button>
 </form>
 
-<div class="mindmap-list">
+{% if all_tags %}
+<div class="task-tag-filter" style="margin-bottom:12px">
+  <span class="task-tag-filter-label">Tags:</span>
+  {% for t in all_tags %}
+  <label class="tag-checkbox" style="{{ t.badge_style }}">
+    <input type="checkbox" form="mindmap-tag-filter-form" name="tags" value="{{ t.name }}" onchange="this.form.submit()" {{ 'checked' if t.name in active_tags }}>
+    {{ t.name }}
+  </label>
+  {% endfor %}
+</div>
+{% endif %}
+<form method="get" action="/mindmap" id="mindmap-tag-filter-form"></form>
+{% if active_tags %}<a href="/mindmap" class="btn btn-secondary" style="margin-bottom:12px;display:inline-block">Tag-filter wissen</a>{% endif %}
+
+<div class="notes-grid">
   {% for board in boards %}
-  <div class="mindmap-list-item">
-    <a href="/mindmap/{{ board.id }}" class="mindmap-list-title">{{ board.name }}</a>
-    <span class="mindmap-list-count">{{ node_counts.get(board.id, 0) }} componenten</span>
-    <form method="post" action="/mindmap/{{ board.id }}/delete" onsubmit="return confirm('Mindmap &quot;{{ board.name }}&quot; verwijderen? Dit kan niet ongedaan gemaakt worden.')">
-      <button type="submit" class="btn btn-danger">Verwijder</button>
-    </form>
+  <div class="note-card" data-href="/mindmap/{{ board.id }}">
+    <div class="note-card-header">
+      <a href="/mindmap/{{ board.id }}" class="note-card-title">{{ board.name }}</a>
+      <span class="note-card-date" style="margin-left:auto">{{ node_counts.get(board.id, 0) }} componenten</span>
+    </div>
+    {% if board.description %}<div class="note-card-preview">{{ board.description }}</div>{% endif %}
+    {% if board.tags %}
+    <div class="note-card-tags">
+      {% for t in board.tags %}<a class="tag" style="{{ t.badge_style }}" href="/mindmap?tags={{ t.name }}">{{ t.name }}</a>{% endfor %}
+    </div>
+    {% endif %}
+    <details class="mindmap-list-edit">
+      <summary>Bewerken</summary>
+      <form method="post" action="/mindmap/{{ board.id }}/update">
+        <input type="text" name="name" value="{{ board.name }}" required placeholder="Naam">
+        <input type="text" name="description" value="{{ board.description }}" placeholder="Beschrijving">
+        <input type="text" name="tags" value="{{ board.tags|map(attribute='name')|join(', ') }}" placeholder="Tags (komma-gescheiden)">
+        <div class="mindmap-list-edit-actions">
+          <button type="submit" class="btn">Opslaan</button>
+        </div>
+      </form>
+      <form method="post" action="/mindmap/{{ board.id }}/delete" onsubmit="return confirm('Mindmap &quot;{{ board.name }}&quot; verwijderen? Dit kan niet ongedaan gemaakt worden.')">
+        <button type="submit" class="btn btn-danger">Verwijder</button>
+      </form>
+    </details>
   </div>
   {% else %}
   <p>Nog geen mindmaps. Maak er hierboven één aan.</p>
   {% endfor %}
 </div>
+
+<script src="{{ static_url('js/mindmap-list.js') }}"></script>
 {% endblock %}

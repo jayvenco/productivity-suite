@@ -106,8 +106,11 @@ Gebouwd:
   die over het hele werkscherm uitrekt. Eén zoekveld doorzoekt titel, tag én code-inhoud
   tegelijk, taggable met hetzelfde gedeelde tag-systeem
 - **Mindmap**: je kunt **meerdere, losse mindmaps aanmaken en opslaan** (net als notities of
-  snippets, i.p.v. één vast bord) — de lijstpagina toont ze met naam en aantal componenten,
-  en kan je hernoemen/verwijderen. Een mindmap openen (bewerken) schakelt naar een **volledig
+  snippets, i.p.v. één vast bord) — de lijstpagina toont ze als **preview-kaarten** (net als
+  notities): naam, **beschrijving**, aantal componenten en gekleurde **tags**, met
+  **aanklikbare tag-checkboxes** erboven om op tag te filteren. Elke kaart heeft een
+  "Bewerken"-uitklapper om naam/beschrijving/tags aan te passen zonder de mindmap te hoeven
+  openen, en een verwijderknop. Een mindmap openen (bewerken) schakelt naar een **volledig
   scherm** (de sidebar verdwijnt, het canvas vult de hele pagina) met alleen een smalle
   bovenbalk (terug-link, naam bewerken, "+ Component"); teruggaan naar de lijst herstelt de
   normale weergave. Componenten hebben een **dunne rand** in hun eigen kleur en tonen
@@ -651,6 +654,17 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   een lijst, `POST /mindmap` maakt een nieuw bord, en de node-/edge-routes checken
   eigenaarschap via een join naar `MindmapBoard.user_id` in plaats van een vast board-id, dus
   ze werken ongeacht in welke van je mindmaps een component zit.
+- **Mindmap-tags en -beschrijving**: `MindmapBoard.description` (`Text`) en een nieuwe
+  `mindmap_tags`-associatietabel (dezelfde `Tag`, hergebruikt van taken/kanban/notities/
+  snippets/kalender) — een compleet nieuwe tabel heeft geen entry in `_COLUMNS_TO_ENSURE`
+  nodig, want `Base.metadata.create_all()` maakt ontbrekende tabellen bij het opstarten toch
+  al aan; alleen de nieuwe kolom op een bestaande tabel (`description`) moest via een
+  lichtgewicht migratie. De lijstpagina hergebruikt de `.note-card`/`.notes-grid`-CSS (zelfde
+  kaartvormgeving als notities) i.p.v. iets eigens te bouwen. Bewerken van naam/beschrijving/
+  tags gebeurt inline via een `<details>` per kaart i.p.v. een aparte pagina — met een eigen,
+  kleine `mindmap-list.js` (i.p.v. `notes-list.js` hergebruiken), want die laatste navigeert
+  bij elke klik op de kaart weg tenzij het doelwit expliciet is uitgesloten, en een klik op
+  "Bewerken" (`<summary>`) stond daar niet tussen.
 - **Mindmap-editor als "fullscreen"**: geen JavaScript Fullscreen API (die heeft een
   gebruikersgebaar nodig en gedraagt zich onvoorspelbaar in een preview/iframe) — gewoon een
   Jinja-`{% block body_class %}` in `base.html` waarmee `mindmap/board.html` een

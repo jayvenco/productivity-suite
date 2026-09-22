@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy import ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+from app.models.tag import mindmap_tags
 
 
 class MindmapBoard(Base):
@@ -15,12 +16,16 @@ class MindmapBoard(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     name: Mapped[str] = mapped_column(String(100), default="Mindmap")
+    description: Mapped[str] = mapped_column(Text, default="")
 
     nodes: Mapped[list["MindmapNode"]] = relationship(
         back_populates="board", cascade="all, delete-orphan"
     )
     edges: Mapped[list["MindmapEdge"]] = relationship(
         back_populates="board", cascade="all, delete-orphan"
+    )
+    tags: Mapped[list["Tag"]] = relationship(  # noqa: F821
+        "Tag", secondary=mindmap_tags, back_populates="mindmaps"
     )
 
 

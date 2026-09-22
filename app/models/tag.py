@@ -46,6 +46,13 @@ event_tags = Table(
     Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
 )
 
+mindmap_tags = Table(
+    "mindmap_tags",
+    Base.metadata,
+    Column("mindmap_board_id", ForeignKey("mindmap_boards.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
+)
+
 
 class Tag(Base):
     __tablename__ = "tags"
@@ -68,6 +75,9 @@ class Tag(Base):
     )
     events: Mapped[list["CalendarEvent"]] = relationship(  # noqa: F821
         "CalendarEvent", secondary=event_tags, back_populates="tags"
+    )
+    mindmaps: Mapped[list["MindmapBoard"]] = relationship(  # noqa: F821
+        "MindmapBoard", secondary=mindmap_tags, back_populates="tags"
     )
 
     @property

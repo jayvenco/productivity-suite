@@ -2035,49 +2035,40 @@ textarea {
   background: rgba(10, 10, 14, 0.35);
 }
 
-/* ---- Mindmap: lijst van mindmaps ---- */
+/* ---- Mindmap: lijst van mindmaps (kaarten, zelfde stijl als notities) ---- */
 
 .mindmap-new-form {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  max-width: 420px;
+  max-width: 640px;
   margin-bottom: 16px;
 }
 
 .mindmap-new-form input {
   flex: 1;
+  min-width: 140px;
 }
 
-.mindmap-list {
+.mindmap-list-edit {
+  margin-top: 4px;
+}
+
+.mindmap-list-edit summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.mindmap-list-edit form {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-top: 8px;
 }
 
-.mindmap-list-item {
+.mindmap-list-edit-actions {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 12px;
-}
-
-.mindmap-list-title {
-  font-weight: 600;
-  color: var(--text);
-  text-decoration: none;
-}
-
-.mindmap-list-title:hover {
-  text-decoration: underline;
-}
-
-.mindmap-list-count {
-  color: var(--text-muted);
-  font-size: 12px;
-  margin-left: auto;
 }
 
 /* ---- Mindmap: editor (fullscreen tijdens het bewerken) ---- */

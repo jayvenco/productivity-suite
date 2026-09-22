@@ -207,3 +207,52 @@ def test_cannot_edit_nonexistent_node(logged_in_client):
 def test_cannot_view_nonexistent_mindmap(logged_in_client):
     response = logged_in_client.get("/mindmap/999999")
     assert response.status_code == 404
+
+
+def test_create_mindmap_with_description_and_tags(logged_in_client):
+    response = logged_in_client.post(
+        "/mindmap",
+        data={"name": "Projectplan", "description": "Ideeën voor Q1", "tags": "werk, projecten"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+    listing = logged_in_client.get("/mindmap").text
+    assert "Projectplan" in listing
+    assert "Ideeën voor Q1" in listing
+    assert "werk" in listing
+    assert "projecten" in listing
+
+
+def test_update_mindmap_metadata(logged_in_client):
+    board_id = _create_board(logged_in_client, "Oorspronkelijke naam")
+
+    response = logged_in_client.post(
+        f"/mindmap/{board_id}/update",
+        data={"name": "Nieuwe naam", "description": "Bijgewerkte beschrijving", "tags": "planning"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+    listing = logged_in_client.get("/mindmap").text
+    assert "Nieuwe naam" in listing
+    assert "Bijgewerkte beschrijving" in listing
+    assert "planning" in listing
+    assert "Oorspronkelijke naam" not in listing
+
+
+def test_filter_mindmaps_by_tag(logged_in_client):
+    logged_in_client.post("/mindmap", data={"name": "Werk-mindmap", "tags": "werk"})
+    logged_in_client.post("/mindmap", data={"name": "Privé-mindmap", "tags": "prive"})
+
+    filtered = logged_in_client.get("/mindmap?tags=werk").text
+    assert "Werk-mindmap" in filtered
+    assert "Privé-mindmap" not in filtered
+
+
+def test_mindmap_tag_filter_checkboxes_listed_and_checked(logged_in_client):
+    logged_in_client.post("/mindmap", data={"name": "Getagde mindmap", "tags": "belangrijk"})
+
+    page = logged_in_client.get("/mindmap?tags=belangrijk").text
+    assert "belangrijk" in page
+    assert "checked" in page

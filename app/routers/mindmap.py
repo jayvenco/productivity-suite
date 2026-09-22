@@ -1,14 +1,16 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.auth.dependencies import require_user
 from app.database import get_db
 from app.models.mindmap import MindmapBoard, MindmapEdge, MindmapNode
+from app.models.tag import Tag
 from app.models.user import User
+from app.services.tags import resolve_tags
 from app.templating import templates
 
 router = APIRouter(prefix="/mindmap", tags=["mindmap"])
@@ -40,10 +42,21 @@ def _get_node_or_404(db: Session, node_id: int, user_id: int) -> MindmapNode:
 
 
 @router.get("")
-def list_mindmaps(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
-    boards = (
-        db.query(MindmapBoard).filter(MindmapBoard.user_id == user.id).order_by(MindmapBoard.id.desc()).all()
+def list_mindmaps(
+    request: Request,
+    tags: list[str] = Query(default=[]),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    query = (
+        db.query(MindmapBoard)
+        .options(selectinload(MindmapBoard.tags))
+        .filter(MindmapBoard.user_id == user.id)
     )
+    if tags:
+        query = query.filter(MindmapBoard.tags.any(Tag.name.in_(tags)))
+    boards = query.order_by(MindmapBoard.id.desc()).all()
+
     node_counts = dict(
         db.query(MindmapNode.board_id, func.count(MindmapNode.id))
         .join(MindmapBoard, MindmapNode.board_id == MindmapBoard.id)
@@ -51,21 +64,53 @@ def list_mindmaps(request: Request, user: User = Depends(require_user), db: Sess
         .group_by(MindmapNode.board_id)
         .all()
     )
+    all_tags = (
+        db.query(Tag)
+        .join(Tag.mindmaps)
+        .filter(MindmapBoard.user_id == user.id)
+        .distinct()
+        .order_by(Tag.name)
+        .all()
+    )
     return templates.TemplateResponse(
-        request, "mindmap/list.html", {"user": user, "boards": boards, "node_counts": node_counts}
+        request,
+        "mindmap/list.html",
+        {"user": user, "boards": boards, "node_counts": node_counts, "all_tags": all_tags, "active_tags": tags},
     )
 
 
 @router.post("")
 def create_mindmap(
-    name: str = Form(DEFAULT_NAME), user: User = Depends(require_user), db: Session = Depends(get_db)
+    name: str = Form(DEFAULT_NAME),
+    description: str = Form(""),
+    tags: str = Form(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
 ):
-    board = MindmapBoard(user_id=user.id, name=name.strip() or DEFAULT_NAME)
+    board = MindmapBoard(user_id=user.id, name=name.strip() or DEFAULT_NAME, description=description)
+    board.tags = resolve_tags(db, tags)
     db.add(board)
     db.flush()
     db.add(MindmapNode(board_id=board.id, text="Hoofdonderwerp", color=DEFAULT_COLOR, x=40, y=40))
     db.commit()
     return RedirectResponse(f"/mindmap/{board.id}", status_code=303)
+
+
+@router.post("/{board_id}/update")
+def update_mindmap_metadata(
+    board_id: int,
+    name: str = Form(...),
+    description: str = Form(""),
+    tags: str = Form(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    board = _get_board_or_404(db, board_id, user.id)
+    board.name = name.strip() or board.name
+    board.description = description
+    board.tags = resolve_tags(db, tags)
+    db.commit()
+    return RedirectResponse("/mindmap", status_code=303)
 
 
 @router.get("/{board_id}")
