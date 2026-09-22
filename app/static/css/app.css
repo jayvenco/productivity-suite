@@ -1403,7 +1403,9 @@ textarea {
 }
 
 .calendar-today-btn {
+  width: auto;
   padding: 5px 10px;
+  white-space: nowrap;
 }
 
 .calendar-title {
