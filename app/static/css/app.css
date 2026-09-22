@@ -123,7 +123,7 @@ a {
 
 .main {
   flex: 1;
-  padding: 16px 20px;
+  padding: 32px 40px;
   overflow-x: auto;
 }
 
@@ -1314,7 +1314,7 @@ textarea {
 :root[data-density="compact"] .sidebar a,
 :root[data-density="compact"] #pomodoro-menu-btn { padding: 4px 6px; }
 :root[data-density="compact"] .sidebar .brand { padding: 3px 6px 8px; }
-:root[data-density="compact"] .main { padding: 10px 12px; }
+:root[data-density="compact"] .main { padding: 20px 24px; }
 :root[data-density="compact"] .theme-switcher { padding: 4px; gap: 3px; }
 :root[data-density="compact"] .btn { padding: 4px 10px; }
 :root[data-density="compact"] input[type="text"],
