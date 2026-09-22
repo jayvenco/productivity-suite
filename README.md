@@ -165,6 +165,13 @@ Gebouwd:
   afgeronde taken (en percentage), openstaande hoge-prioriteitstaken, gehaalde deadlines,
   openstaande verlopen deadlines, aantal gestarte/voltooide pomodoro's, totale focustijd
   (all-time en deze week), en nieuwe taken/kanban-kaarten/notities per week en per maand
+- **Statistieken-pagina** (nieuw menu-item "Statistieken", `/stats`): dezelfde cijfers, maar nu
+  ook als **gekleurde balkgrafieken** — focustijd per dag (laatste 14 dagen) en per maand
+  (laatste 6 maanden, met een berekend gemiddelde focustijd per dag deze maand), plus
+  **aangemaakt vs. afgerond** (taken + notities + kanban-kaarten aangemaakt, taken afgerond)
+  als gegroepeerde balken per dag/week/maand. Puur CSS-balken met een server-berekend
+  percentage t.o.v. de hoogste waarde in de reeks (`app/services/stats.py::compute_activity_charts`)
+  — geen chart-library nodig, in lijn met de rest van de app
 - **Graph** (nieuw menu-item "Graph"): een interactieve, sleepbare **taggraaf** — net als de
   graph-view in Obsidian, maar dan getagde taken/notities/kanban-kaarten/mindmaps die
   gegroepeerd worden rond de tags die ze delen. Kleur per type (taak/notitie/kanban/mindmap/
@@ -377,6 +384,12 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     (naast het paneel) → het sluit zonder te navigeren. Controleer op Kanban dat de kolommen
     smaller zijn en je horizontaal kunt scrollen, en dat de Pomodoro-cirkel en het
     quick-add-wiel volledig binnen het scherm passen.
+25. Maak een paar taken aan en rond er één af, start en voltooi een Pomodoro-sessie → ga naar
+    "Statistieken" in de sidebar (`/stats`). Controleer dat de tegels bovenaan kloppen
+    (focustijd, gemiddelde per dag deze maand, afgeronde taken), dat de vandaag-kolom in
+    "Focustijd per dag" en in "Aangemaakt vs. afgerond — per dag" een balk toont, en dat de
+    balken in de week-/maandgrafieken meetellen in de juiste periode. Beweeg de muis over een
+    balk → een tooltip met het exacte aantal verschijnt.
 
 ## Architectuur
 

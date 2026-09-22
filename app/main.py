@@ -20,6 +20,7 @@ from app.routers import (
     pomodoro,
     settings as settings_router,
     snippets,
+    stats,
     tasks,
 )
 from app.services.migrate import run_lightweight_migrations
@@ -47,6 +48,7 @@ app.include_router(graph.router)
 app.include_router(pomodoro.router)
 app.include_router(snippets.router)
 app.include_router(settings_router.router)
+app.include_router(stats.router)
 app.include_router(api.router)
 
 

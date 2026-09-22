@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Statistieken - Productivity Suite{% endblock %}
+
+{% macro bar_chart(points, unit='') %}
+<div class="chart-bars">
+  {% for point in points %}
+  <div class="chart-bar-col">
+    <div class="chart-bar-track">
+      <div class="chart-bar" style="height: {{ point.pct }}%" title="{{ point.value }}{{ unit }}"></div>
+    </div>
+    <div class="chart-bar-label">{{ point.label }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro grouped_bar_chart(points) %}
+<div class="chart-bars">
+  {% for point in points %}
+  <div class="chart-bar-col">
+    <div class="chart-bar-track chart-bar-track-grouped">
+      <div class="chart-bar chart-bar-created" style="height: {{ point.created_pct }}%" title="Aangemaakt: {{ point.created }}"></div>
+      <div class="chart-bar chart-bar-done" style="height: {{ point.done_pct }}%" title="Afgerond: {{ point.done }}"></div>
+    </div>
+    <div class="chart-bar-label">{{ point.label }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{% block content %}
+<h2>Statistieken</h2>
+
+<div class="stats-grid" style="margin-bottom:24px">
+  <div class="stats-card">
+    <div class="stats-value">{{ stats.pomodoro.focus_minutes_total }} min</div>
+    <div class="stats-label">Totale focustijd</div>
+  </div>
+  <div class="stats-card">
+    <div class="stats-value">{{ charts.focus_avg_per_day_this_month }} min</div>
+    <div class="stats-label">Gemiddelde focustijd per dag (deze maand)</div>
+  </div>
+  <div class="stats-card">
+    <div class="stats-value">{{ stats.tasks.done }}/{{ stats.tasks.total }}</div>
+    <div class="stats-label">Taken afgerond ({{ stats.tasks.completion_rate }}%)</div>
+  </div>
+</div>
+
+<div class="chart-block">
+  <h3>Focustijd per dag (laatste 14 dagen)</h3>
+  {{ bar_chart(charts.focus_by_day, ' min') }}
+</div>
+
+<div class="chart-block">
+  <h3>Focustijd per maand (laatste 6 maanden)</h3>
+  {{ bar_chart(charts.focus_by_month, ' min') }}
+</div>
+
+<div class="chart-block">
+  <h3>Aangemaakt vs. afgerond — per dag</h3>
+  <div class="chart-legend">
+    <span class="chart-legend-item"><span class="chart-legend-dot chart-legend-created"></span>Aangemaakt</span>
+    <span class="chart-legend-item"><span class="chart-legend-dot chart-legend-done"></span>Afgerond</span>
+  </div>
+  {{ grouped_bar_chart(charts.items_by_day) }}
+</div>
+
+<div class="chart-block">
+  <h3>Aangemaakt vs. afgerond — per week</h3>
+  {{ grouped_bar_chart(charts.items_by_week) }}
+</div>
+
+<div class="chart-block">
+  <h3>Aangemaakt vs. afgerond — per maand</h3>
+  {{ grouped_bar_chart(charts.items_by_month) }}
+</div>
+{% endblock %}
