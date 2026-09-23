@@ -192,8 +192,20 @@ Gebouwd:
   een menu-item). De hoofdinhoud wordt volle breedte, de Pomodoro-cirkel en het quick-add-wiel
   worden kleiner zodat ze op een smal scherm passen, en Kanban-kolommen zijn smaller zodat je
   makkelijker van kolom naar kolom kunt swipen
+- **Voice-notitie (fase 1: opnemen → transcriberen → opslaan)**: een nieuwe 🎤 "Voice"-spaak
+  in het quick-add-wiel opent een opnamepaneel. Opname gebeurt in de browser
+  (`MediaRecorder`), het audiofragment gaat naar `POST /voice/transcribe`, dat het
+  doorstuurt naar een **losse, zelf-gehoste Whisper-container** (bv.
+  `ahmetoner/whisper-asr-webservice`, zie Configuratie hieronder) voor de transcriptie. Je
+  ziet en corrigeert het transcript zelf vóórdat je op "Opslaan als notitie" klikt — dat
+  is bewust de bevestigingsstap, want spraakherkenning gaat af en toe mis. Fase 2 (nog niet
+  gebouwd): ChatGPT laten interpreteren of het transcript een taak/kanban-kaart/notitie
+  moet worden i.p.v. altijd een notitie, met een eigen bevestigingsscherm — de
+  OpenAI-sleutel daarvoor kun je nu alvast instellen via Account → OpenAI API-sleutel
 
-Nog niet gebouwd: CI/CD, spraaknotities, verdere LLM-koppeling (er is nu wel een API voor
+Nog niet gebouwd: CI/CD, slimme voice-commando-interpretatie (taak/kanban/notitie kiezen +
+matchen op bestaande items via ChatGPT — de basis "opnemen → transcriberen → als notitie
+opslaan" werkt al, zie hierboven), verdere LLM-koppeling (er is nu wel een API voor
 scripts/agents, zie hieronder).
 
 ## Configuratie
@@ -202,6 +214,22 @@ Geen `.env`-bestand of omgevingsvariabelen nodig. Bij de eerste start:
 - wordt een sessie-secret-key automatisch gegenereerd en opgeslagen in `data/.secret_key`
   (blijft geldig na herstarts/updates, zolang het data-volume bewaard blijft);
 - wordt een seed-account aangemaakt: gebruikersnaam `admin`, wachtwoord `admin`.
+
+Voor voice-notities heb je een **losse Whisper-container** nodig (draait niet mee in de
+hoofd-image, zie architectuur hieronder). Zet de env var `WHISPER_SERVICE_URL` op de URL
+van die container (default: `http://whisper:9000`). Voorbeeld met de webservice van het
+[`ahmetoner/whisper-asr-webservice`](https://github.com/ahmetoner/whisper-asr-webservice)-project
+(Docker Hub-image heet `onerahmet/openai-whisper-asr-webservice`, andere naam dan de
+GitHub-repo):
+
+```bash
+docker run -d --name whisper -p 9000:9000 \
+  -e ASR_MODEL=base \
+  onerahmet/openai-whisper-asr-webservice:latest
+```
+
+Zonder deze container werkt de rest van de app gewoon door — je krijgt dan alleen een
+duidelijke foutmelding zodra je een voice-notitie probeert op te nemen.
 
 Na de eerste login toont de app een waarschuwing zolang je het standaardwachtwoord
 gebruikt. Wijzig gebruikersnaam/wachtwoord via de **Account**-pagina in de sidebar.
@@ -409,6 +437,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     het thema), zonder dat je de Link-knop of `[tekst](url)` hoefde te gebruiken. Zet dezelfde
     URL ook even tussen backticks (\`www.mondschoon.nl\`) in een taakbeschrijving → controleer
     dat die in de preview gewoon platte code-tekst blijft (niet gelinkt).
+27. Klik op het quick-add-wiel op de nieuwe 🎤 "Voice"-spaak → een opnamepaneel opent. Zonder
+    een draaiende Whisper-container: druk op opnemen, spreek iets in, druk nogmaals om te
+    stoppen → na even wachten verschijnt een duidelijke foutmelding ("Kan de Whisper-service
+    niet bereiken..."). Start daarna een Whisper-container (zie Configuratie hierboven) en
+    herhaal de opname → het transcript verschijnt in een bewerkbaar tekstvak met een
+    voorgestelde titel. Pas het eventueel aan en klik "Opslaan als notitie" → je komt op de
+    notities-pagina en de nieuwe notitie staat er met het (aangepaste) transcript in.
 
 ## Architectuur
 
@@ -785,3 +820,23 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   een oudere appversie (bv. van vóór de mindmap- of achtergrond-kolommen) automatisch
   bijgewerkt wordt naar het huidige schema. De sessie van de gebruiker wijst na een import
   niet meer zeker naar een geldige rij, dus wordt er teruggestuurd naar `/login`.
+- **Voice-notitie als losse container, niet ingebakken**: Whisper-modellen zijn zwaar
+  (CPU/RAM, extra Python-dependencies) en horen niet thuis in de lichte hoofd-image die het
+  hele "single-container Docker"-uitgangspunt van deze app draagt. In plaats daarvan praat
+  `app/routers/voice.py` via `httpx` met een losse, zelf-gehoste Whisper-webservice
+  (`WHISPER_SERVICE_URL`, zie Configuratie) — dezelfde reden waarom er geen lokaal LLM
+  ingebakken zit voor de latere commando-interpretatie. Is die container niet bereikbaar,
+  dan geeft de route een duidelijke 503 met uitleg i.p.v. een generieke serverfout.
+- **Fase 1 bewust beperkt tot "altijd een notitie"**: spraak wordt nu altijd een gewone
+  notitie (hergebruikt de bestaande `/notes`-route en `sanitize_note_html`), zonder
+  automatische keuze tussen taak/kanban-kaart/snippet en zonder matching op bestaande
+  items — dat is de geplande fase 2 (ChatGPT-interpretatie + eigen bevestigingsscherm, zie
+  BACKLOG.md). Het bewerkbare transcript-tekstvak vóór opslaan is de bevestigingsstap van
+  fase 1: spraakherkenning gaat af en toe mis, en dit voorkomt dat een verkeerd verstane
+  zin direct als notitie wordt opgeslagen.
+- **`openai_api_key` bewust leesbaar opgeslagen, niet gehasht**: in tegenstelling tot
+  `api_token_hash` (die de app alleen hoeft te *vergelijken*) moet de OpenAI-sleutel straks
+  weer teruggelezen kunnen worden om 'm mee te sturen bij calls naar de OpenAI API — een
+  hash is daarvoor onbruikbaar. Blijft binnen de eigen SQLite-database en wordt nooit naar
+  de browser teruggestuurd (alleen de laatste 4 tekens, ter herkenning welke sleutel actief
+  is).

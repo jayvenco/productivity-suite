@@ -21,15 +21,24 @@ aan is.
 (via `VACUUM INTO`, dus veilig naast een lopende app), met automatische veiligheidskopie en
 schema-update bij het importeren van een oudere back-up.
 
-**Voice-opname → taken/notities/etc. (Whisper + ChatGPT)**: een microfoonknop (bv. in het
-quick-add-wiel) die een audiofragment opneemt, laat transcriberen via de OpenAI Whisper-API,
-en de tekst vervolgens laat interpreteren door ChatGPT (structured output/JSON: welke actie —
-taak/notitie/kanban-kaart/snippet — met welke velden). De uitvoering hergebruikt de bestaande
-create-routes/services (dezelfde die de agent-API al gebruikt), dus geen herbouw van de
-kernlogica nodig — vooral een nieuwe route (`POST /voice/command`) + opname-UI + een
-bevestigingsstapje ("Ik heb begrepen: taak 'X' aanmaken — klopt dat?") vóór het echt opslaat,
-want STT + AI-interpretatie gaat af en toe mis. Kosten: verwaarloosbaar voor persoonlijk
-gebruik (Whisper ~€0,006/min + een kleine ChatGPT-prompt per commando). Alternatief voor
-Whisper-API: lokaal `faster-whisper` op de Unraid-server (gratis, geen API-kosten, wel meer
-CPU/RAM-gebruik en een extra dependency in de Docker-image) — kan later als upgrade als
-volledig gratis/offline gewenst is.
+**Voice-opname → taken/notities/etc. (Whisper + ChatGPT) — fase 1 opgelost, fase 2 nog niet**:
+
+~~Fase 1~~ — opgelost: een 🎤 "Voice"-spaak in het quick-add-wiel opent een opnamepaneel
+(`MediaRecorder` in de browser). Het audiofragment gaat naar `POST /voice/transcribe`
+(`app/routers/voice.py`), dat 'm doorstuurt naar een **losse, zelf-gehoste Whisper-container**
+(`WHISPER_SERVICE_URL`, standaard `ahmetoner/whisper-asr-webservice` — bewust niet de
+betaalde OpenAI Whisper-API, en niet ingebakken in de hoofd-image, zie README →
+Architectuur). Het transcript verschijnt bewerkbaar in een tekstvak (de bevestigingsstap)
+en wordt bij "Opslaan als notitie" altijd als gewone notitie opgeslagen
+(hergebruikt de bestaande `/notes`-route). Een OpenAI API-sleutel is al instelbaar via
+Account → OpenAI API-sleutel, klaar voor fase 2.
+
+**Fase 2 (nog te bouwen)**: de tekst laten interpreteren door ChatGPT (structured
+output/JSON: welke actie — taak/notitie/kanban-kaart/snippet, evt. verwijzend naar een
+bestaand item — met welke velden) i.p.v. altijd een notitie. De uitvoering hergebruikt de
+bestaande create-routes/services (dezelfde die de agent-API al gebruikt), dus geen herbouw
+van de kernlogica nodig — vooral een nieuwe interpretatie-stap + een eigen
+bevestigingsscherm ("Ik heb begrepen: taak 'X' aanmaken — klopt dat?") vóór het écht wordt
+uitgevoerd, want AI-interpretatie gaat af en toe mis. Kosten: verwaarloosbaar voor
+persoonlijk gebruik (een kleine ChatGPT-prompt per commando; transcriptie zelf is al gratis
+via de lokale Whisper-container).

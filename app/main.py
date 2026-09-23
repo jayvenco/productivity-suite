@@ -22,6 +22,7 @@ from app.routers import (
     snippets,
     stats,
     tasks,
+    voice,
 )
 from app.services.migrate import run_lightweight_migrations
 from app.services.seed import seed_default_user_and_board
@@ -49,6 +50,7 @@ app.include_router(pomodoro.router)
 app.include_router(snippets.router)
 app.include_router(settings_router.router)
 app.include_router(stats.router)
+app.include_router(voice.router)
 app.include_router(api.router)
 
 

@@ -89,6 +89,20 @@ def test_stats_reflect_task_completion_and_priority(logged_in_client):
     logged_in_client.post(f"/tasks/{task_id}/toggle-done")
 
 
+def test_openai_key_save_show_masked_and_clear(logged_in_client):
+    account_page = logged_in_client.get("/account").text
+    assert "Nog geen sleutel ingesteld" in account_page
+
+    logged_in_client.post("/account/openai-key", data={"openai_api_key": "sk-testsleutel1234"})
+    after_save = logged_in_client.get("/account").text
+    assert "eindigt op ...1234" in after_save
+    assert "sk-testsleutel1234" not in after_save
+
+    logged_in_client.post("/account/openai-key/clear")
+    after_clear = logged_in_client.get("/account").text
+    assert "Nog geen sleutel ingesteld" in after_clear
+
+
 def test_stats_deadline_met_when_completed_on_time(logged_in_client):
     with SessionLocal() as db:
         user = db.query(User).filter(User.username == "admin").first()

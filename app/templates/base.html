@@ -139,10 +139,13 @@
       <a href="/snippets/new" class="quickadd-spoke" data-angle="2" title="Nieuwe snippet">
         <span class="quickadd-spoke-icon">💻</span><span class="quickadd-spoke-label">Snippets</span>
       </a>
-      <a href="/tasks/new" class="quickadd-spoke" data-angle="3" title="Nieuwe taak">
+      <button type="button" id="voice-spoke-btn" class="quickadd-spoke" data-angle="3" title="Voice-notitie opnemen">
+        <span class="quickadd-spoke-icon">🎤</span><span class="quickadd-spoke-label">Voice</span>
+      </button>
+      <a href="/tasks/new" class="quickadd-spoke" data-angle="4" title="Nieuwe taak">
         <span class="quickadd-spoke-icon">✅</span><span class="quickadd-spoke-label">Taken</span>
       </a>
-      <a href="/mindmap" class="quickadd-spoke" data-angle="4" title="Nieuwe mindmap">
+      <a href="/mindmap" class="quickadd-spoke" data-angle="5" title="Nieuwe mindmap">
         <span class="quickadd-spoke-icon">🧠</span><span class="quickadd-spoke-label">Mindmap</span>
       </a>
     </div>
@@ -151,8 +154,39 @@
     </button>
   </div>
 
+  <div class="voice-modal-backdrop" id="voice-modal-backdrop" hidden></div>
+  <div class="voice-recorder-panel" id="voice-recorder-panel" hidden>
+    <button type="button" class="voice-recorder-close" id="voice-recorder-close" title="Sluiten">×</button>
+    <h3>Voice-notitie</h3>
+
+    <div class="voice-recorder-status" id="voice-recorder-status">Druk op opnemen en spreek je notitie in.</div>
+
+    <div class="voice-recorder-controls">
+      <button type="button" class="voice-recorder-record-btn" id="voice-recorder-record-btn" title="Opnemen">
+        <span id="voice-recorder-record-icon">⏺</span>
+      </button>
+      <div class="voice-recorder-timer" id="voice-recorder-timer" hidden>00:00</div>
+    </div>
+
+    <div class="voice-recorder-result" id="voice-recorder-result" hidden>
+      <div class="field">
+        <label for="voice-recorder-title">Titel</label>
+        <input type="text" id="voice-recorder-title" placeholder="Voice-notitie">
+      </div>
+      <div class="field">
+        <label for="voice-recorder-transcript">Transcript (controleer/pas aan vóór opslaan)</label>
+        <textarea id="voice-recorder-transcript" rows="6"></textarea>
+      </div>
+      <div class="voice-recorder-actions">
+        <button type="button" class="btn" id="voice-recorder-save-btn">Opslaan als notitie</button>
+        <button type="button" class="btn btn-secondary" id="voice-recorder-retry-btn">Opnieuw opnemen</button>
+      </div>
+    </div>
+  </div>
+
   <script src="{{ static_url('js/pomodoro.js') }}"></script>
   <script src="{{ static_url('js/quickadd.js') }}"></script>
+  <script src="{{ static_url('js/voice.js') }}"></script>
   <script src="{{ static_url('js/mobile-nav.js') }}"></script>
   <script src="{{ static_url('js/deadlines.js') }}"></script>
   <script src="{{ static_url('js/mini-calendar.js') }}"></script>

@@ -141,6 +141,28 @@ def revoke_api_token_route(user: User = Depends(require_user), db: Session = Dep
     return RedirectResponse("/account", status_code=303)
 
 
+# ---- OpenAI API-sleutel (voor voice-commando-interpretatie, zie app/routers/voice.py) ----
+
+
+@router.post("/openai-key")
+def save_openai_key(
+    openai_api_key: str = Form(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    if openai_api_key.strip():
+        user.openai_api_key = openai_api_key.strip()
+        db.commit()
+    return RedirectResponse("/account", status_code=303)
+
+
+@router.post("/openai-key/clear")
+def clear_openai_key(user: User = Depends(require_user), db: Session = Depends(get_db)):
+    user.openai_api_key = None
+    db.commit()
+    return RedirectResponse("/account", status_code=303)
+
+
 # ---- Backup (export/import van de hele SQLite-database) ----
 
 

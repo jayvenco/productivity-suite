@@ -27,4 +27,9 @@ class User(Base):
     # SHA-256-hash van het API-token (nooit het token zelf) -- zelfde patroon als
     # password_hash. None zolang er geen token gegenereerd is.
     api_token_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # In tegenstelling tot api_token_hash bewust WEL leesbaar opgeslagen (niet gehasht):
+    # de app moet 'm zelf meesturen bij calls naar de OpenAI API voor de
+    # voice-commando-interpretatie, dus een hash (die je niet kunt terugdraaien) volstaat
+    # hier niet. Blijft binnen de eigen SQLite-database, wordt nooit naar de client gestuurd.
+    openai_api_key: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

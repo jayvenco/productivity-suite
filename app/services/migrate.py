@@ -20,6 +20,7 @@ _COLUMNS_TO_ENSURE = {
         ("background", "VARCHAR(30) DEFAULT 'none'"),
         ("background_opacity", "INTEGER DEFAULT 30"),
         ("api_token_hash", "VARCHAR(64)"),
+        ("openai_api_key", "VARCHAR(255)"),
     ],
 }
 

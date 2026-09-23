@@ -49,6 +49,11 @@ class Settings(BaseSettings):
     pomodoro_work_minutes: int = 25
     pomodoro_break_minutes: int = 5
 
+    # Losse, self-hosted Whisper-container (bv. onedr0p/whisper-asr-webservice) voor
+    # lokale spraak-naar-tekst -- overridebaar via WHISPER_SERVICE_URL env var, zodat
+    # de container-naam/poort op Unraid vrij te kiezen is zonder codewijziging.
+    whisper_service_url: str = "http://whisper:9000"
+
 
 settings = Settings()
 settings.secret_key = _load_or_create_secret_key()

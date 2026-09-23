@@ -138,6 +138,30 @@
 </form>
 {% endif %}
 
+<h2 style="margin-top:28px">OpenAI API-sleutel</h2>
+<p style="color:var(--text-muted);font-size:12px;max-width:480px">
+  Nodig voor de interpretatie van voice-commando's (spraak → taak/notitie/kanban-kaart).
+  De sleutel wordt alleen gebruikt om zelf calls naar de OpenAI API te doen en nooit
+  naar de browser teruggestuurd.
+</p>
+{% if user.openai_api_key %}
+<p style="color:var(--text-muted);font-size:12px">Er is een sleutel ingesteld (eindigt op ...{{ user.openai_api_key[-4:] }}).</p>
+{% else %}
+<p style="color:var(--text-muted);font-size:12px">Nog geen sleutel ingesteld.</p>
+{% endif %}
+<form method="post" action="/account/openai-key" style="max-width:420px;display:flex;gap:8px;align-items:flex-end">
+  <div class="field" style="flex:1;margin-bottom:0">
+    <label for="openai_api_key">Nieuwe sleutel</label>
+    <input type="password" id="openai_api_key" name="openai_api_key" placeholder="sk-..." autocomplete="off">
+  </div>
+  <button type="submit" class="btn">Opslaan</button>
+</form>
+{% if user.openai_api_key %}
+<form method="post" action="/account/openai-key/clear" style="display:inline;margin-top:8px" onsubmit="return confirm('Sleutel verwijderen? Voice-commando-interpretatie werkt dan niet meer totdat je een nieuwe invoert.')">
+  <button type="submit" class="btn btn-danger">Sleutel wissen</button>
+</form>
+{% endif %}
+
 <h2 style="margin-top:28px">Backup</h2>
 <p style="color:var(--text-muted);font-size:12px;max-width:480px">
   Exporteert/importeert de hele database (taken, kanban, notities, snippets, kalender,
