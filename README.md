@@ -169,9 +169,13 @@ Gebouwd:
   ook als **gekleurde balkgrafieken** — focustijd per dag (laatste 14 dagen) en per maand
   (laatste 6 maanden, met een berekend gemiddelde focustijd per dag deze maand), plus
   **aangemaakt vs. afgerond** (taken + notities + kanban-kaarten aangemaakt, taken afgerond)
-  als gegroepeerde balken per dag/week/maand. Puur CSS-balken met een server-berekend
-  percentage t.o.v. de hoogste waarde in de reeks (`app/services/stats.py::compute_activity_charts`)
-  — geen chart-library nodig, in lijn met de rest van de app
+  als gegroepeerde balken per dag/week/maand. Elke grafiek toont ook een **gestippelde
+  gemiddelde-lijn** op dezelfde schaal als de balken (bij de gegroepeerde grafieken één lijn
+  per reeks, met het exacte gemiddelde in de legenda zodat de labels nooit over elkaar heen
+  vallen ook als beide gemiddeldes dicht bij elkaar liggen). Puur CSS-balken met een
+  server-berekend percentage t.o.v. de hoogste waarde in de reeks
+  (`app/services/stats.py::compute_activity_charts`) — geen chart-library nodig, in lijn met
+  de rest van de app
 - **Graph** (nieuw menu-item "Graph"): een interactieve, sleepbare **taggraaf** — net als de
   graph-view in Obsidian, maar dan getagde taken/notities/kanban-kaarten/mindmaps die
   gegroepeerd worden rond de tags die ze delen. Kleur per type (taak/notitie/kanban/mindmap/
@@ -389,7 +393,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     (focustijd, gemiddelde per dag deze maand, afgeronde taken), dat de vandaag-kolom in
     "Focustijd per dag" en in "Aangemaakt vs. afgerond — per dag" een balk toont, en dat de
     balken in de week-/maandgrafieken meetellen in de juiste periode. Beweeg de muis over een
-    balk → een tooltip met het exacte aantal verschijnt.
+    balk → een tooltip met het exacte aantal verschijnt. Controleer dat elke grafiek een
+    gestippelde gemiddelde-lijn toont (bij "Focustijd" één lijn met een "Gem. ..."-label erop,
+    bij "Aangemaakt vs. afgerond" twee lijnen — de exacte gemiddeldes staan in de legenda
+    erboven i.p.v. als label op de lijn, zodat ze nooit overlappen als beide gemiddeldes
+    dicht bij elkaar liggen).
 
 ## Architectuur
 

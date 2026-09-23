@@ -2465,30 +2465,31 @@ body.mindmap-editor .mindmap-canvas {
 .chart-legend-created { background: var(--accent); }
 .chart-legend-done { background: var(--success); }
 
-.chart-bars {
+.chart-track {
+  position: relative;
+  height: 110px;
+  min-width: max-content;
+  margin-top: 18px;
+}
+
+.chart-bars-row {
   display: flex;
   align-items: flex-end;
   gap: 10px;
-  height: 130px;
-  min-width: max-content;
-  padding-top: 8px;
+  width: 100%;
+  height: 100%;
 }
 
 .chart-bar-col {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  width: 28px;
-}
-
-.chart-bar-track {
-  display: flex;
   align-items: flex-end;
   justify-content: center;
+  width: 28px;
+  height: 100%;
+}
+
+.chart-bar-col-grouped {
   gap: 3px;
-  width: 100%;
-  height: 100px;
 }
 
 .chart-bar {
@@ -2499,17 +2500,56 @@ body.mindmap-editor .mindmap-canvas {
   transition: height 0.2s ease;
 }
 
-.chart-bar-track-grouped .chart-bar {
+.chart-bar-col-grouped .chart-bar {
   width: 10px;
 }
 
 .chart-bar-created { background: var(--accent); }
 .chart-bar-done { background: var(--success); }
 
-.chart-bar-label {
+.chart-labels-row {
+  display: flex;
+  gap: 10px;
+  min-width: max-content;
+  margin-top: 6px;
+}
+
+.chart-labels-row .chart-bar-label {
+  width: 28px;
+  flex-shrink: 0;
+  text-align: center;
   font-size: 10px;
   color: var(--text-muted);
   white-space: nowrap;
+}
+
+.chart-average-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--text-muted);
+  z-index: 1;
+}
+
+.chart-average-line span {
+  position: absolute;
+  right: 0;
+  top: -16px;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: var(--bg-elevated);
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+.chart-average-line-created {
+  border-top-color: color-mix(in srgb, var(--accent) 55%, var(--bg-elevated));
+  cursor: help;
+}
+
+.chart-average-line-done {
+  border-top-color: color-mix(in srgb, var(--success) 55%, var(--bg-elevated));
+  cursor: help;
 }
 
 /* ---- Graph: bipartiete taggraaf (taken/notities/kanban/mindmap <-> tags) ---- */

@@ -1,30 +1,50 @@
 {% extends "base.html" %}
 {% block title %}Statistieken - Productivity Suite{% endblock %}
 
-{% macro bar_chart(points, unit='') %}
-<div class="chart-bars">
-  {% for point in points %}
-  <div class="chart-bar-col">
-    <div class="chart-bar-track">
-      <div class="chart-bar" style="height: {{ point.pct }}%" title="{{ point.value }}{{ unit }}"></div>
-    </div>
-    <div class="chart-bar-label">{{ point.label }}</div>
+{% macro bar_chart(chart, unit='') %}
+<div class="chart-track">
+  <div class="chart-average-line" style="bottom: {{ chart.avg_pct }}%">
+    <span>Gem. {{ chart.avg }}{{ unit }}</span>
   </div>
+  <div class="chart-bars-row">
+    {% for point in chart.points %}
+    <div class="chart-bar-col">
+      <div class="chart-bar" style="height: {{ point.pct }}%" title="{{ point.label }}: {{ point.value }}{{ unit }}"></div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<div class="chart-labels-row">
+  {% for point in chart.points %}
+  <div class="chart-bar-label">{{ point.label }}</div>
   {% endfor %}
 </div>
 {% endmacro %}
 
-{% macro grouped_bar_chart(points) %}
-<div class="chart-bars">
-  {% for point in points %}
-  <div class="chart-bar-col">
-    <div class="chart-bar-track chart-bar-track-grouped">
+{% macro grouped_bar_chart(chart) %}
+<div class="chart-track">
+  <div class="chart-average-line chart-average-line-created" style="bottom: {{ chart.avg_created_pct }}%" title="Gemiddeld aangemaakt: {{ chart.avg_created }}"></div>
+  <div class="chart-average-line chart-average-line-done" style="bottom: {{ chart.avg_done_pct }}%" title="Gemiddeld afgerond: {{ chart.avg_done }}"></div>
+  <div class="chart-bars-row">
+    {% for point in chart.points %}
+    <div class="chart-bar-col chart-bar-col-grouped">
       <div class="chart-bar chart-bar-created" style="height: {{ point.created_pct }}%" title="Aangemaakt: {{ point.created }}"></div>
       <div class="chart-bar chart-bar-done" style="height: {{ point.done_pct }}%" title="Afgerond: {{ point.done }}"></div>
     </div>
-    <div class="chart-bar-label">{{ point.label }}</div>
+    {% endfor %}
   </div>
+</div>
+<div class="chart-labels-row">
+  {% for point in chart.points %}
+  <div class="chart-bar-label">{{ point.label }}</div>
   {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro chart_legend(chart) %}
+<div class="chart-legend">
+  <span class="chart-legend-item"><span class="chart-legend-dot chart-legend-created"></span>Aangemaakt (gem. {{ chart.avg_created }})</span>
+  <span class="chart-legend-item"><span class="chart-legend-dot chart-legend-done"></span>Afgerond (gem. {{ chart.avg_done }})</span>
 </div>
 {% endmacro %}
 
@@ -41,6 +61,14 @@
     <div class="stats-label">Gemiddelde focustijd per dag (deze maand)</div>
   </div>
   <div class="stats-card">
+    <div class="stats-value">{{ charts.focus_by_day.avg }} min</div>
+    <div class="stats-label">Gemiddelde focustijd per dag (laatste 14 dagen)</div>
+  </div>
+  <div class="stats-card">
+    <div class="stats-value">{{ charts.items_by_week.avg_created }} / {{ charts.items_by_week.avg_done }}</div>
+    <div class="stats-label">Gemiddeld aangemaakt / afgerond per week</div>
+  </div>
+  <div class="stats-card">
     <div class="stats-value">{{ stats.tasks.done }}/{{ stats.tasks.total }}</div>
     <div class="stats-label">Taken afgerond ({{ stats.tasks.completion_rate }}%)</div>
   </div>
@@ -48,6 +76,7 @@
 
 <div class="chart-block">
   <h3>Focustijd per dag (laatste 14 dagen)</h3>
+  <p class="chart-note">De stippellijn toont het gemiddelde over deze periode.</p>
   {{ bar_chart(charts.focus_by_day, ' min') }}
 </div>
 
@@ -58,20 +87,19 @@
 
 <div class="chart-block">
   <h3>Aangemaakt vs. afgerond — per dag</h3>
-  <div class="chart-legend">
-    <span class="chart-legend-item"><span class="chart-legend-dot chart-legend-created"></span>Aangemaakt</span>
-    <span class="chart-legend-item"><span class="chart-legend-dot chart-legend-done"></span>Afgerond</span>
-  </div>
+  {{ chart_legend(charts.items_by_day) }}
   {{ grouped_bar_chart(charts.items_by_day) }}
 </div>
 
 <div class="chart-block">
   <h3>Aangemaakt vs. afgerond — per week</h3>
+  {{ chart_legend(charts.items_by_week) }}
   {{ grouped_bar_chart(charts.items_by_week) }}
 </div>
 
 <div class="chart-block">
   <h3>Aangemaakt vs. afgerond — per maand</h3>
+  {{ chart_legend(charts.items_by_month) }}
   {{ grouped_bar_chart(charts.items_by_month) }}
 </div>
 {% endblock %}

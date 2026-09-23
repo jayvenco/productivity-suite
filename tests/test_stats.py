@@ -16,13 +16,24 @@ def test_stats_page_loads_with_charts(logged_in_client):
     assert "Focustijd per dag" in response.text
     assert "Focustijd per maand" in response.text
     assert "Aangemaakt vs. afgerond" in response.text
+    assert "Gem." in response.text  # gemiddelde-lijn op de grafieken
+
+
+def test_chart_average_matches_manual_calculation(logged_in_client):
+    with SessionLocal() as db:
+        user = db.query(User).filter(User.username == "admin").first()
+        charts = compute_activity_charts(db, user.id)
+
+    day_points = charts["items_by_day"]["points"]
+    expected_avg_created = round(sum(p["created"] for p in day_points) / len(day_points), 1)
+    assert charts["items_by_day"]["avg_created"] == expected_avg_created
 
 
 def test_created_task_increments_todays_created_bar(logged_in_client):
     with SessionLocal() as db:
         user = db.query(User).filter(User.username == "admin").first()
         before = compute_activity_charts(db, user.id)
-    before_today = before["items_by_day"][-1]["created"]
+    before_today = before["items_by_day"]["points"][-1]["created"]
 
     logged_in_client.post(
         "/tasks", data={"title": "Statistiek-test taak", "description": "", "deadline": "", "tags": ""}
@@ -33,7 +44,7 @@ def test_created_task_increments_todays_created_bar(logged_in_client):
 
     with SessionLocal() as db:
         after = compute_activity_charts(db, user.id)
-    assert after["items_by_day"][-1]["created"] == before_today + 1
+    assert after["items_by_day"]["points"][-1]["created"] == before_today + 1
 
     logged_in_client.post(f"/tasks/{task_id}/delete")
 
@@ -49,11 +60,11 @@ def test_done_task_increments_todays_done_bar(logged_in_client):
     with SessionLocal() as db:
         user = db.query(User).filter(User.username == "admin").first()
         before = compute_activity_charts(db, user.id)
-    before_today = before["items_by_day"][-1]["done"]
+    before_today = before["items_by_day"]["points"][-1]["done"]
 
     logged_in_client.post(f"/tasks/{task_id}/toggle-done")
     with SessionLocal() as db:
         after = compute_activity_charts(db, user.id)
-    assert after["items_by_day"][-1]["done"] == before_today + 1
+    assert after["items_by_day"]["points"][-1]["done"] == before_today + 1
 
     logged_in_client.post(f"/tasks/{task_id}/delete")

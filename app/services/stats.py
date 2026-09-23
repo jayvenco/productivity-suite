@@ -164,20 +164,34 @@ def _last_n_months(n: int, today: date) -> list[tuple[int, int]]:
     return list(reversed(months))
 
 
-def _bars(buckets: dict, keys: list, *, label_fn) -> list[dict]:
-    """Zet een {key: aantal}-mapping om naar een lijst chart-punten met een
-    percentage t.o.v. de hoogste waarde in de reeks -- zodat de template puur
-    op basis van `pct` de balkhoogte kan zetten, zonder zelf te hoeven rekenen."""
+def _pct(value: float, max_value: float) -> int:
+    return round((value / max_value) * 100) if max_value else 0
+
+
+def _bars(buckets: dict, keys: list, *, label_fn) -> dict:
+    """Zet een {key: aantal}-mapping om naar chart-punten met een percentage
+    t.o.v. de hoogste waarde in de reeks -- zodat de template puur op basis
+    van `pct` de balkhoogte kan zetten -- plus het gemiddelde van de reeks
+    (zowel als getal als als `avg_pct`, zodat een gemiddelde-lijn op dezelfde
+    schaal als de balken getekend kan worden)."""
     values = [buckets[key] for key in keys]
     max_value = max(values) if values else 0
-    return [
-        {"label": label_fn(key), "value": buckets[key], "pct": round((buckets[key] / max_value) * 100) if max_value else 0}
-        for key in keys
-    ]
+    avg = round(sum(values) / len(values), 1) if values else 0
+    return {
+        "points": [
+            {"label": label_fn(key), "value": buckets[key], "pct": _pct(buckets[key], max_value)} for key in keys
+        ],
+        "avg": avg,
+        "avg_pct": _pct(avg, max_value),
+    }
 
 
-def _grouped_bars(created: dict, done: dict, keys: list, *, label_fn) -> list[dict]:
+def _grouped_bars(created: dict, done: dict, keys: list, *, label_fn) -> dict:
     max_value = max([*created.values(), *done.values()]) if keys else 0
+    created_values = [created[key] for key in keys]
+    done_values = [done[key] for key in keys]
+    avg_created = round(sum(created_values) / len(created_values), 1) if created_values else 0
+    avg_done = round(sum(done_values) / len(done_values), 1) if done_values else 0
     points = []
     for key in keys:
         c, d = created[key], done[key]
@@ -186,11 +200,17 @@ def _grouped_bars(created: dict, done: dict, keys: list, *, label_fn) -> list[di
                 "label": label_fn(key),
                 "created": c,
                 "done": d,
-                "created_pct": round((c / max_value) * 100) if max_value else 0,
-                "done_pct": round((d / max_value) * 100) if max_value else 0,
+                "created_pct": _pct(c, max_value),
+                "done_pct": _pct(d, max_value),
             }
         )
-    return points
+    return {
+        "points": points,
+        "avg_created": avg_created,
+        "avg_created_pct": _pct(avg_created, max_value),
+        "avg_done": avg_done,
+        "avg_done_pct": _pct(avg_done, max_value),
+    }
 
 
 def compute_activity_charts(db: Session, user_id: int) -> dict:
