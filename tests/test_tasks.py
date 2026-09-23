@@ -16,6 +16,24 @@ def test_create_and_list_task(logged_in_client):
     assert "werk" in listing.text
 
 
+def test_bare_url_in_description_is_auto_linked(logged_in_client):
+    logged_in_client.post(
+        "/tasks",
+        data={
+            "title": "Linktest taak",
+            "description": "Zie www.mondschoon.nl voor meer info",
+            "deadline": "",
+            "tags": "",
+        },
+    )
+    listing = logged_in_client.get("/tasks").text
+    idx = listing.rindex("Linktest taak")
+    task_id = re.findall(r'href="/tasks/(\d+)/edit"', listing[:idx])[-1]
+
+    edit_page = logged_in_client.get(f"/tasks/{task_id}/edit").text
+    assert '<a href="http://www.mondschoon.nl"' in edit_page
+
+
 def test_task_requires_login(client):
     response = client.get("/tasks", follow_redirects=False)
     assert response.status_code == 303

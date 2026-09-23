@@ -90,6 +90,23 @@ def test_create_swimlane(logged_in_client):
     assert "Werk" in board_html
 
 
+def test_bare_url_in_card_description_is_auto_linked(logged_in_client):
+    board_html = logged_in_client.get("/kanban").text
+    column_id, swimlane_id = _first_ids(board_html)
+
+    logged_in_client.post(
+        "/kanban/cards",
+        data={
+            "column_id": column_id,
+            "swimlane_id": swimlane_id,
+            "title": "Linktest kaart",
+            "description": "Zie www.mondschoon.nl voor meer info",
+        },
+    )
+    board_html_after = logged_in_client.get("/kanban").text
+    assert '<a href="http://www.mondschoon.nl"' in board_html_after
+
+
 def test_edit_card_title_description_tags_and_color(logged_in_client):
     board_html = logged_in_client.get("/kanban").text
     column_id, swimlane_id = _first_ids(board_html)

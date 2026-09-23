@@ -24,6 +24,11 @@ Gebouwd:
   een klikbare markdown-link van maakt)
 - Checklists in kaartbeschrijvingen (`- [ ] item`) — aanklikbaar, direct persistent; een
   "☑ Item"-knop op de werkbalk voegt de syntax voor je toe
+- **Kale URL's worden automatisch klikbare links**, in taken-, kanban- en notitiebeschrijvingen —
+  je hoeft geen `[tekst](url)`-syntax of de Link-knop te gebruiken; `www.mondschoon.nl`,
+  `mondschoon.nl` en `https://mondschoon.nl/pagina` worden allemaal herkend zodra je ze plakt
+  of typt, zolang ze niet al in een code-blok of bestaande link staan
+  (`bleach.linkify`, toegepast na de markdown-rendering resp. bij het opslaan van een notitie)
 - Gedeeld tag-systeem (taken + kanban-kaarten): elke tag krijgt automatisch een eigen,
   stabiele kleur; **sorteren** (deadline/titel/prioriteit/status) en **groeperen op tag**
   (dat is hier ook het "project"-alternatief — er is geen apart projectveld, tags dienen als
@@ -398,6 +403,12 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     bij "Aangemaakt vs. afgerond" twee lijnen — de exacte gemiddeldes staan in de legenda
     erboven i.p.v. als label op de lijn, zodat ze nooit overlappen als beide gemiddeldes
     dicht bij elkaar liggen).
+26. Typ in een notitie, een taakbeschrijving én een kanban-kaartbeschrijving een kale URL
+    zonder markdown-syntax, bv. "zie www.mondschoon.nl voor info" → sla op en controleer dat
+    de URL overal automatisch een klikbare link is geworden (blauw/onderstreept al naar gelang
+    het thema), zonder dat je de Link-knop of `[tekst](url)` hoefde te gebruiken. Zet dezelfde
+    URL ook even tussen backticks (\`www.mondschoon.nl\`) in een taakbeschrijving → controleer
+    dat die in de preview gewoon platte code-tekst blijft (niet gelinkt).
 
 ## Architectuur
 

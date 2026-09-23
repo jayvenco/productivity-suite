@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 
+import bleach
 import markdown as md
 from fastapi.templating import Jinja2Templates
 
@@ -14,10 +15,14 @@ _STATIC_DIR = BASE_DIR / "app" / "static"
 
 
 def render_markdown(text: str) -> str:
-    """Basis tekstverwerking: vet, cursief, lijsten, headers, links, code-blokken."""
+    """Basis tekstverwerking: vet, cursief, lijsten, headers, links, code-blokken.
+    Kale URL's (met of zonder www./schema) die niet als `[tekst](url)` zijn
+    getypt, worden na de markdown-conversie alsnog automatisch aanklikbaar
+    gemaakt -- code-blokken/inline code blijven bewust platte tekst."""
     if not text:
         return ""
-    return md.markdown(text, extensions=["extra", "nl2br"])
+    html = md.markdown(text, extensions=["extra", "nl2br"])
+    return bleach.linkify(html, parse_email=False, skip_tags=["code", "pre"])
 
 
 def render_card_description(description: str, card_id: int) -> str:

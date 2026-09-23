@@ -45,6 +45,19 @@ def test_note_html_is_sanitized(logged_in_client):
     assert "Hallo" in listing
 
 
+def test_bare_url_in_note_is_auto_linked(logged_in_client):
+    logged_in_client.post(
+        "/notes",
+        data={
+            "title": "Linktest",
+            "content": "<p>Kijk eens op www.mondschoon.nl voor meer info.</p>",
+            "tags": "",
+        },
+    )
+    listing = logged_in_client.get("/notes").text
+    assert '<a href="http://www.mondschoon.nl"' in listing
+
+
 def test_edit_note(logged_in_client):
     logged_in_client.post("/notes", data={"title": "Origineel", "content": "<p>tekst</p>", "tags": ""})
     listing = logged_in_client.get("/notes").text
