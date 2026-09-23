@@ -53,12 +53,12 @@ def test_change_password_wrong_current_password(logged_in_client):
     assert response.status_code == 401
 
 
-def test_account_page_shows_statistics_section(logged_in_client):
+def test_account_page_no_longer_shows_statistics_section(logged_in_client):
+    """Statistieken zijn verplaatst naar de eigen /stats-pagina (zie test_stats.py)."""
     response = logged_in_client.get("/account")
     assert response.status_code == 200
-    assert "Statistieken" in response.text
-    assert "Pomodoro's opgestart" in response.text
-    assert "Deadlines gehaald" in response.text
+    assert "stats-grid" not in response.text
+    assert "Pomodoro's opgestart" not in response.text
 
 
 def test_stats_reflect_task_completion_and_priority(logged_in_client):
@@ -101,6 +101,46 @@ def test_openai_key_save_show_masked_and_clear(logged_in_client):
     logged_in_client.post("/account/openai-key/clear")
     after_clear = logged_in_client.get("/account").text
     assert "Nog geen sleutel ingesteld" in after_clear
+
+
+def test_openai_key_test_requires_a_key(logged_in_client):
+    response = logged_in_client.post("/account/openai-key/test", data={"openai_api_key": ""})
+    assert response.status_code == 200
+    assert response.json() == {"valid": False, "message": "Vul eerst een sleutel in."}
+
+
+def test_openai_key_test_reports_valid_key(logged_in_client):
+    from unittest.mock import AsyncMock, MagicMock, patch
+
+    fake_response = MagicMock()
+    fake_response.status_code = 200
+    fake_client = AsyncMock()
+    fake_client.__aenter__.return_value = fake_client
+    fake_client.__aexit__.return_value = False
+    fake_client.get.return_value = fake_response
+
+    with patch("app.routers.account.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post("/account/openai-key/test", data={"openai_api_key": "sk-echtesleutel"})
+    assert response.status_code == 200
+    assert response.json() == {"valid": True, "message": "Sleutel werkt."}
+
+
+def test_openai_key_test_reports_invalid_key(logged_in_client):
+    from unittest.mock import AsyncMock, MagicMock, patch
+
+    fake_response = MagicMock()
+    fake_response.status_code = 401
+    fake_client = AsyncMock()
+    fake_client.__aenter__.return_value = fake_client
+    fake_client.__aexit__.return_value = False
+    fake_client.get.return_value = fake_response
+
+    with patch("app.routers.account.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post("/account/openai-key/test", data={"openai_api_key": "sk-fout"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["valid"] is False
+    assert "401" in data["message"]
 
 
 def test_stats_deadline_met_when_completed_on_time(logged_in_client):

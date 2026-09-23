@@ -7,6 +7,7 @@ import tempfile
 from datetime import datetime
 from pathlib import Path
 
+import httpx
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile
 from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy.orm import Session
@@ -20,7 +21,6 @@ from app.models.user import User
 from app.routers.settings import AVAILABLE_BACKGROUNDS, AVAILABLE_DENSITIES, AVAILABLE_FONT_SIZES, AVAILABLE_FONTS
 from app.services.api_tokens import generate_api_token, hash_api_token
 from app.services.migrate import run_lightweight_migrations
-from app.services.stats import compute_user_stats
 from app.templating import templates
 
 router = APIRouter(prefix="/account", tags=["account"])
@@ -63,7 +63,6 @@ def _account_context(
         "error": error,
         "success": success,
         "new_api_token": new_api_token,
-        "stats": compute_user_stats(db, user_id),
         **_appearance_context(),
     }
 
@@ -161,6 +160,32 @@ def clear_openai_key(user: User = Depends(require_user), db: Session = Depends(g
     user.openai_api_key = None
     db.commit()
     return RedirectResponse("/account", status_code=303)
+
+
+@router.post("/openai-key/test")
+async def test_openai_key(openai_api_key: str = Form(""), user: User = Depends(require_user)) -> dict:
+    """Test de sleutel die in het formulierveld staat (nog niet per se opgeslagen) tegen
+    de OpenAI API, i.p.v. altijd de al-opgeslagen sleutel -- zo kun je een nieuwe sleutel
+    controleren vóórdat je 'm opslaat. Gebruikt het lichtste mogelijke endpoint
+    (modellen opvragen) zodat testen geen tokens/kosten met zich meebrengt."""
+    key = openai_api_key.strip() or (user.openai_api_key or "")
+    if not key:
+        return {"valid": False, "message": "Vul eerst een sleutel in."}
+
+    try:
+        async with httpx.AsyncClient(timeout=15) as http_client:
+            response = await http_client.get(
+                "https://api.openai.com/v1/models",
+                headers={"Authorization": f"Bearer {key}"},
+            )
+    except httpx.HTTPError:
+        return {"valid": False, "message": "Kon geen verbinding maken met de OpenAI API."}
+
+    if response.status_code == 200:
+        return {"valid": True, "message": "Sleutel werkt."}
+    if response.status_code == 401:
+        return {"valid": False, "message": "Ongeldige sleutel (401 Unauthorized)."}
+    return {"valid": False, "message": f"OpenAI gaf een foutmelding ({response.status_code})."}
 
 
 # ---- Backup (export/import van de hele SQLite-database) ----

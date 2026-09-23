@@ -166,12 +166,11 @@ Gebouwd:
   snippets staan in een gecentreerde kolom (i.p.v. links tegen de sidebar aan) met merkbaar
   grotere invoervelden, zodat er meer leesbaar is tijdens het invullen op een groot scherm. De
   kanban-kaart-modal is om dezelfde reden ook iets breder geworden
-- **Statistieken** (Account, bovenaan): een reeks tegels met simpele productiviteitscijfers —
-  afgeronde taken (en percentage), openstaande hoge-prioriteitstaken, gehaalde deadlines,
-  openstaande verlopen deadlines, aantal gestarte/voltooide pomodoro's, totale focustijd
-  (all-time en deze week), en nieuwe taken/kanban-kaarten/notities per week en per maand
-- **Statistieken-pagina** (nieuw menu-item "Statistieken", `/stats`): dezelfde cijfers, maar nu
-  ook als **gekleurde balkgrafieken** — focustijd per dag (laatste 14 dagen) en per maand
+- **Statistieken-pagina** (menu-item "Statistieken", `/stats`): een reeks tegels met simpele
+  productiviteitscijfers — afgeronde taken (en percentage), openstaande
+  hoge-prioriteitstaken, gehaalde deadlines, openstaande verlopen deadlines, aantal
+  gestarte/voltooide pomodoro's, totale focustijd, en nieuwe taken/kanban-kaarten/notities
+  per week en per maand — plus **gekleurde balkgrafieken** — focustijd per dag (laatste 14 dagen) en per maand
   (laatste 6 maanden, met een berekend gemiddelde focustijd per dag deze maand), plus
   **aangemaakt vs. afgerond** (taken + notities + kanban-kaarten aangemaakt, taken afgerond)
   als gegroepeerde balken per dag/week/maand. Elke grafiek toont ook een **gestippelde
@@ -201,7 +200,10 @@ Gebouwd:
   is bewust de bevestigingsstap, want spraakherkenning gaat af en toe mis. Fase 2 (nog niet
   gebouwd): ChatGPT laten interpreteren of het transcript een taak/kanban-kaart/notitie
   moet worden i.p.v. altijd een notitie, met een eigen bevestigingsscherm — de
-  OpenAI-sleutel daarvoor kun je nu alvast instellen via Account → OpenAI API-sleutel
+  OpenAI-sleutel daarvoor kun je nu alvast instellen via Account → OpenAI API-sleutel, met
+  een **"Sleutel testen"-knop** die de zojuist ingevulde (nog niet per se opgeslagen)
+  sleutel direct tegen `GET https://api.openai.com/v1/models` test en meldt of 'm werkt —
+  zonder dat je eerst hoeft op te slaan of ergens anders hoeft te controleren
 
 Nog niet gebouwd: CI/CD, slimme voice-commando-interpretatie (taak/kanban/notitie kiezen +
 matchen op bestaande items via ChatGPT — de basis "opnemen → transcriberen → als notitie
@@ -400,10 +402,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     die taak (controleer via de taakbewerkpagina dat de Pomodoro-historie deze sessie meetelt
     zodra ze afloopt/voltooid is). Probeer de knop nogmaals te klikken terwijl er al een sessie
     loopt → een melding zegt dat je eerst de lopende sessie moet stoppen.
-21. Ga naar Account → bovenaan staat "Statistieken" met tegels voor afgeronde taken, hoge
+21. Ga naar "Statistieken" in de sidebar (`/stats`) → tegels voor afgeronde taken, hoge
     prioriteit, gehaalde/verlopen deadlines, gestarte/voltooide pomodoro's, focustijd, en
     nieuwe taken/kanban-kaarten/notities per week en maand. Start een pomodoro-sessie en
-    herlaad de pagina → "Pomodoro's opgestart" telt méé.
+    herlaad de pagina → "Pomodoro's opgestart" telt méé. Controleer ook dat Account/Settings
+    zelf geen statistieken-sectie meer toont (die is hierheen verplaatst).
 22. Kies het "Anchor"-thema via de kleurenbolletjes in de sidebar → donker leigrijs met een
     brandoranje accent. Ga naar Notities → de kaarten zijn sterk afgerond, tags staan als
     volledig ronde pilletjes met een "#"-prefix, en onderaan elke kaart staat de datum. Ga
@@ -444,6 +447,12 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     herhaal de opname → het transcript verschijnt in een bewerkbaar tekstvak met een
     voorgestelde titel. Pas het eventueel aan en klik "Opslaan als notitie" → je komt op de
     notities-pagina en de nieuwe notitie staat er met het (aangepaste) transcript in.
+28. Ga naar Account → OpenAI API-sleutel. Klik "Sleutel testen" zonder iets in te vullen →
+    "Vul eerst een sleutel in." verschijnt in rood. Typ een willekeurige/onechte sleutel
+    (bv. "sk-test") en klik nogmaals → na een korte call naar de echte OpenAI API verschijnt
+    "Ongeldige sleutel (401 Unauthorized)." Vul je eigen echte OpenAI-sleutel in en test
+    opnieuw → "Sleutel werkt." in groen. Sla de sleutel op en controleer dat "Sleutel
+    testen" ook zonder iets in het veld te typen werkt (test dan de al-opgeslagen sleutel).
 
 ## Architectuur
 

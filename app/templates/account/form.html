@@ -10,47 +10,7 @@
 </div>
 {% endif %}
 
-<h2 style="margin-top:0">Statistieken</h2>
-<div class="stats-grid">
-  <div class="stats-card">
-    <div class="stats-value">{{ stats.tasks.done }}/{{ stats.tasks.total }}</div>
-    <div class="stats-label">Taken afgerond ({{ stats.tasks.completion_rate }}%)</div>
-  </div>
-  <div class="stats-card">
-    <div class="stats-value">{{ stats.tasks.high_priority_open }}</div>
-    <div class="stats-label">Openstaande hoge-prioriteit taken</div>
-  </div>
-  <div class="stats-card">
-    <div class="stats-value">{{ stats.tasks.deadlines_met }}</div>
-    <div class="stats-label">Deadlines gehaald</div>
-  </div>
-  <div class="stats-card {{ 'stats-card-warning' if stats.tasks.deadlines_overdue_open }}">
-    <div class="stats-value">{{ stats.tasks.deadlines_overdue_open }}</div>
-    <div class="stats-label">Openstaande, verlopen deadlines</div>
-  </div>
-  <div class="stats-card">
-    <div class="stats-value">{{ stats.pomodoro.sessions_started }}</div>
-    <div class="stats-label">Pomodoro's opgestart ({{ stats.pomodoro.sessions_completed }} voltooid)</div>
-  </div>
-  <div class="stats-card">
-    <div class="stats-value">{{ stats.pomodoro.focus_minutes_total }} min</div>
-    <div class="stats-label">Totale focustijd ({{ stats.pomodoro.focus_minutes_this_week }} min deze week)</div>
-  </div>
-  <div class="stats-card">
-    <div class="stats-value">{{ stats.tasks.created_this_week }} / {{ stats.tasks.created_this_month }}</div>
-    <div class="stats-label">Nieuwe taken (week / maand)</div>
-  </div>
-  <div class="stats-card">
-    <div class="stats-value">{{ stats.kanban.created_this_week }} / {{ stats.kanban.created_this_month }}</div>
-    <div class="stats-label">Nieuwe kanban-kaarten (week / maand)</div>
-  </div>
-  <div class="stats-card">
-    <div class="stats-value">{{ stats.notes.created_this_week }} / {{ stats.notes.created_this_month }}</div>
-    <div class="stats-label">Nieuwe notities (week / maand)</div>
-  </div>
-</div>
-
-<h2 style="margin-top:28px">Inloggegevens</h2>
+<h2 style="margin-top:0">Inloggegevens</h2>
 <form method="post" action="/account" style="max-width:360px">
   <div class="field">
     <label for="current_password">Huidig wachtwoord</label>
@@ -149,13 +109,15 @@
 {% else %}
 <p style="color:var(--text-muted);font-size:12px">Nog geen sleutel ingesteld.</p>
 {% endif %}
-<form method="post" action="/account/openai-key" style="max-width:420px;display:flex;gap:8px;align-items:flex-end">
+<form method="post" action="/account/openai-key" id="openai-key-form" style="max-width:480px;display:flex;gap:8px;align-items:flex-end">
   <div class="field" style="flex:1;margin-bottom:0">
     <label for="openai_api_key">Nieuwe sleutel</label>
     <input type="password" id="openai_api_key" name="openai_api_key" placeholder="sk-..." autocomplete="off">
   </div>
+  <button type="button" class="btn btn-secondary" id="openai-key-test-btn">Sleutel testen</button>
   <button type="submit" class="btn">Opslaan</button>
 </form>
+<p id="openai-key-test-result" style="font-size:12px;margin-top:6px"></p>
 {% if user.openai_api_key %}
 <form method="post" action="/account/openai-key/clear" style="display:inline;margin-top:8px" onsubmit="return confirm('Sleutel verwijderen? Voice-commando-interpretatie werkt dan niet meer totdat je een nieuwe invoert.')">
   <button type="submit" class="btn btn-danger">Sleutel wissen</button>
@@ -178,4 +140,6 @@
   </div>
   <button type="submit" class="btn btn-danger">Importeren</button>
 </form>
+
+<script src="{{ static_url('js/account.js') }}"></script>
 {% endblock %}
