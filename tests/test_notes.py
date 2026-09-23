@@ -45,6 +45,39 @@ def test_note_html_is_sanitized(logged_in_client):
     assert "Hallo" in listing
 
 
+def test_notes_list_shows_sort_and_view_controls(logged_in_client):
+    page = logged_in_client.get("/notes").text
+    assert 'name="sort"' in page
+    assert 'data-view="grid"' in page
+    assert 'data-view="list"' in page
+
+
+def test_notes_can_be_sorted_by_title(logged_in_client):
+    logged_in_client.post("/notes", data={"title": "ZZZ Sorteertest", "content": "", "tags": ""})
+    logged_in_client.post("/notes", data={"title": "AAA Sorteertest", "content": "", "tags": ""})
+
+    page = logged_in_client.get("/notes?sort=title").text
+    assert page.index("AAA Sorteertest") < page.index("ZZZ Sorteertest")
+
+
+def test_notes_default_sort_is_most_recently_updated(logged_in_client):
+    """updated_at heeft in SQLite secondeprecisie, dus twee notities die binnen
+    dezelfde seconde worden aangemaakt sorteren niet betrouwbaar op aanmaaktijd --
+    de timestamps worden hier daarom direct gezet i.p.v. op een sleep te vertrouwen."""
+    logged_in_client.post("/notes", data={"title": "Oudste sorteertest", "content": "", "tags": ""})
+    logged_in_client.post("/notes", data={"title": "Nieuwste sorteertest", "content": "", "tags": ""})
+
+    with SessionLocal() as db:
+        oldest = db.query(Note).filter(Note.title == "Oudste sorteertest").first()
+        newest = db.query(Note).filter(Note.title == "Nieuwste sorteertest").first()
+        oldest.updated_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(days=1)
+        newest.updated_at = datetime.now(UTC).replace(tzinfo=None)
+        db.commit()
+
+    page = logged_in_client.get("/notes").text
+    assert page.index("Nieuwste sorteertest") < page.index("Oudste sorteertest")
+
+
 def test_bare_url_in_note_is_auto_linked(logged_in_client):
     logged_in_client.post(
         "/notes",

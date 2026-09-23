@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
@@ -18,6 +19,12 @@ from app.templating import templates
 router = APIRouter(prefix="/notes", tags=["notes"])
 
 TEMP_NOTE_LIFETIME = timedelta(days=7)
+
+_SORT_OPTIONS = {
+    "updated": (Note.updated_at.desc(),),
+    "title": (Note.title.asc(),),
+    "created": (Note.created_at.desc(),),
+}
 
 
 def _delete_expired_temp_notes(db: Session, user_id: int) -> None:
@@ -49,14 +56,16 @@ def _get_note_or_404(db: Session, note_id: int, user_id: int) -> Note:
 def list_notes(
     request: Request,
     tags: list[str] = Query(default=[]),
+    sort: str = "updated",
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     _delete_expired_temp_notes(db, user.id)
+    sort = sort if sort in _SORT_OPTIONS else "updated"
     query = db.query(Note).options(selectinload(Note.tags)).filter(Note.user_id == user.id)
     if tags:
         query = query.filter(Note.tags.any(Tag.name.in_(tags)))
-    notes = query.order_by(Note.updated_at.desc()).all()
+    notes = query.order_by(*_SORT_OPTIONS[sort]).all()
 
     all_tags = (
         db.query(Tag)
@@ -68,15 +77,17 @@ def list_notes(
     )
 
     return templates.TemplateResponse(
-        request, "notes/list.html", {"user": user, "notes": notes, "all_tags": all_tags, "active_tags": tags}
+        request,
+        "notes/list.html",
+        {"user": user, "notes": notes, "all_tags": all_tags, "active_tags": tags, "sort": sort},
     )
 
 
-def _redirect_to_list(tag_filters: list[str]) -> RedirectResponse:
-    if not tag_filters:
-        return RedirectResponse("/notes", status_code=303)
-    query = "&".join(f"tags={t}" for t in tag_filters)
-    return RedirectResponse(f"/notes?{query}", status_code=303)
+def _redirect_to_list(tag_filters: list[str], sort: str = "updated") -> RedirectResponse:
+    params: dict[str, str | list[str]] = {"sort": sort}
+    if tag_filters:
+        params["tags"] = tag_filters
+    return RedirectResponse(f"/notes?{urlencode(params, doseq=True)}", status_code=303)
 
 
 @router.post("/bulk-delete")
@@ -86,7 +97,7 @@ async def bulk_delete_notes(request: Request, user: User = Depends(require_user)
     if note_ids:
         db.query(Note).filter(Note.id.in_(note_ids), Note.user_id == user.id).delete(synchronize_session=False)
         db.commit()
-    return _redirect_to_list(form.getlist("tag_filter"))
+    return _redirect_to_list(form.getlist("tag_filter"), form.get("sort", "updated"))
 
 
 @router.post("/bulk-tag")
@@ -109,7 +120,7 @@ async def bulk_tag_notes(request: Request, user: User = Depends(require_user), d
                 if t not in note.tags:
                     note.tags.append(t)
         db.commit()
-    return _redirect_to_list(form.getlist("tag_filter"))
+    return _redirect_to_list(form.getlist("tag_filter"), form.get("sort", "updated"))
 
 
 @router.get("/new")

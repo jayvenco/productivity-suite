@@ -6,6 +6,21 @@
   <a href="/notes/new" class="btn">+ Nieuwe notitie</a>
 </div>
 
+<div class="notes-toolbar">
+  <label class="notes-sort-label">
+    Sorteren op
+    <select form="notes-tag-filter-form" name="sort" onchange="this.form.submit()">
+      <option value="updated" {{ 'selected' if sort == 'updated' }}>Laatst gewijzigd</option>
+      <option value="title" {{ 'selected' if sort == 'title' }}>Titel</option>
+      <option value="created" {{ 'selected' if sort == 'created' }}>Aangemaakt</option>
+    </select>
+  </label>
+  <div class="notes-view-toggle" id="notes-view-toggle" role="group" aria-label="Weergave">
+    <button type="button" class="notes-view-btn" data-view="grid" title="Raster">▦ Raster</button>
+    <button type="button" class="notes-view-btn" data-view="list" title="Lijst">☰ Lijst</button>
+  </div>
+</div>
+
 {% if all_tags %}
 <div class="task-tag-filter" style="margin-bottom:12px">
   <span class="task-tag-filter-label">Tags:</span>
@@ -19,10 +34,11 @@
 {% endif %}
 <form method="get" action="/notes" id="notes-tag-filter-form"></form>
 
-{% if active_tags %}<a href="/notes" class="btn btn-secondary" style="margin-bottom:12px;display:inline-block">Tag-filter wissen</a>{% endif %}
+{% if active_tags %}<a href="/notes?sort={{ sort }}" class="btn btn-secondary" style="margin-bottom:12px;display:inline-block">Tag-filter wissen</a>{% endif %}
 
 <form method="post" id="notes-bulk-form">
   {% for t in active_tags %}<input type="hidden" name="tag_filter" value="{{ t }}">{% endfor %}
+  <input type="hidden" name="sort" value="{{ sort }}">
 
   <div class="notes-bulk-bar" id="notes-bulk-bar" hidden>
     <span id="notes-bulk-count">0 geselecteerd</span>
@@ -31,7 +47,7 @@
     <button type="submit" formaction="/notes/bulk-delete" class="btn btn-danger" onclick="return confirm('Geselecteerde notities verwijderen?')">Verwijderen</button>
   </div>
 
-  <div class="notes-grid">
+  <div class="notes-grid" id="notes-grid">
     {% for note in notes %}
     <div class="note-card" data-href="/notes/{{ note.id }}/edit">
       <div class="note-card-header">

@@ -100,6 +100,12 @@ Gebouwd:
   bulk-acties mogelijk: meerdere notities in één keer verwijderen of er samen een tag aan
   toevoegen. Een **"Tijdelijke notitie"-vinkje** markeert een notitie als **temp** (zichtbaar
   als badge in de lijst) — zo'n notitie wordt automatisch verwijderd zodra ze een week oud is.
+- **Notities sorteren + raster-/lijstweergave**: een "Sorteren op"-keuzelijst (laatst
+  gewijzigd / titel / aangemaakt, server-side, blijft staan bij tag-filteren en bulk-acties)
+  en een **▦ Raster / ☰ Lijst-schakelaar** ernaast. Lijstweergave toont elke notitie als
+  compacte rij (titel, tags, datum) i.p.v. een kaart — puur client-side CSS/JS (geen extra
+  server-call), gekozen weergave onthouden in `localStorage` zodat ze blijft staan bij een
+  volgend bezoek
   De notitiekaarten zelf zijn herontworpen naar de vormgeving van
   [zhfahim/anchor](https://github.com/zhfahim/anchor): sterk afgeronde hoeken, volledig
   ronde tag-pills met een "#"-prefix, en de datum onderaan de kaart
@@ -453,6 +459,12 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     "Ongeldige sleutel (401 Unauthorized)." Vul je eigen echte OpenAI-sleutel in en test
     opnieuw → "Sleutel werkt." in groen. Sla de sleutel op en controleer dat "Sleutel
     testen" ook zonder iets in het veld te typen werkt (test dan de al-opgeslagen sleutel).
+29. Maak een paar notities aan met duidelijk verschillende titels → ga naar Notities en klik
+    "☰ Lijst" → de kaarten worden compacte rijen (titel, tags, datum). Herlaad de pagina →
+    de lijstweergave blijft staan (localStorage). Kies bij "Sorteren op" → "Titel" →
+    controleer dat de notities alfabetisch gesorteerd staan, ook nog in lijstweergave. Vink
+    een tag aan om te filteren → de sortering blijft "Titel". Klik terug naar "▦ Raster" →
+    de kaartweergave komt terug.
 
 ## Architectuur
 
