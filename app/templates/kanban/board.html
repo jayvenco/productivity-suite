@@ -41,7 +41,6 @@
           <div class="kanban-card" draggable="true" data-card-id="{{ card.id }}" {% if card.color %}style="border-left-color: {{ card.color }};"{% endif %}>
             <div class="card-title">{{ card.title }}</div>
             {% if card.description %}<div class="card-description">{{ card.description|checklist_html(card.id)|safe }}</div>{% endif %}
-            {% for t in card.tags %}<span class="tag" style="{{ t.badge_style }}">{{ t.name }}</span>{% endfor %}
             <div class="card-actions">
               <button type="button" class="card-edit-toggle" data-card-id="{{ card.id }}">Bewerken</button>
               <form method="post" action="/kanban/cards/{{ card.id }}/delete" onsubmit="return confirm('Kaart verwijderen?')">

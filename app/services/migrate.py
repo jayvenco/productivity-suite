@@ -40,6 +40,36 @@ def run_lightweight_migrations(engine: Engine) -> None:
         if added_swimlane_id_column:
             _backfill_column_swimlanes(conn)
 
+        _cleanup_orphaned_tag_associations(conn)
+
+
+# (koppeltabel, kolom die naar het getagde item wijst, tabel van dat item) -- vóór
+# `PRAGMA foreign_keys=ON` (zie app/database.py) kon een bulk-delete (Query.delete(),
+# gaat buiten de ORM om) een rij hier laten staan nadat het getagde item allang weg was;
+# zodra SQLite hetzelfde id later hergebruikte voor een nieuwe, ongerelateerde rij "erfde"
+# die er per ongeluk de oude tags van. Draait bij elke start opnieuw (goedkoop, en
+# idempotent op een schone database) zodat ook al bestaande installaties hiervan herstellen.
+_TAG_ASSOCIATION_TABLES = [
+    ("task_tags", "task_id", "tasks"),
+    ("card_tags", "card_id", "kanban_cards"),
+    ("note_tags", "note_id", "notes"),
+    ("snippet_tags", "snippet_id", "snippets"),
+    ("event_tags", "event_id", "calendar_events"),
+    ("mindmap_tags", "mindmap_board_id", "mindmap_boards"),
+]
+
+
+def _cleanup_orphaned_tag_associations(conn) -> None:
+    existing_tables = {row[0] for row in conn.execute(text("SELECT name FROM sqlite_master WHERE type='table'"))}
+    for assoc_table, fk_column, parent_table in _TAG_ASSOCIATION_TABLES:
+        if assoc_table not in existing_tables or parent_table not in existing_tables:
+            continue
+        conn.execute(
+            text(
+                f"DELETE FROM {assoc_table} WHERE {fk_column} NOT IN (SELECT id FROM {parent_table})"  # noqa: S608
+            )
+        )
+
 
 def _backfill_column_swimlanes(conn) -> None:
     """Kolommen zaten vóór deze migratie direct aan het bord vast, niet aan een

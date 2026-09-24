@@ -108,7 +108,11 @@ def test_edit_note(logged_in_client):
     listing_after = logged_in_client.get("/notes").text
     assert "Bijgewerkt" in listing_after
     assert "Origineel" not in listing_after
-    assert "belangrijk" in listing_after
+
+    # Tags staan bewust niet meer in het overzicht (ruimtebesparing), maar wel in het
+    # edit-formulier zelf.
+    edit_page = logged_in_client.get(f"/notes/{note_id}/edit").text
+    assert 'value="belangrijk"' in edit_page
 
 
 def test_delete_note(logged_in_client):
@@ -122,6 +126,27 @@ def test_delete_note(logged_in_client):
 
     listing_after = logged_in_client.get("/notes").text
     assert "Te verwijderen" not in listing_after
+
+
+def test_bulk_delete_note_removes_orphaned_tag_associations(logged_in_client):
+    """Regressietest: bulk-delete gebruikt Query.delete(), dat buiten de ORM om gaat.
+    Zonder PRAGMA foreign_keys=ON (zie app/database.py) bleef een rij in note_tags
+    achter nadat de notitie al weg was -- die kon later aan een nieuwe, ongerelateerde
+    rij "vastplakken" zodra SQLite hetzelfde id hergebruikte."""
+    from sqlalchemy import text
+
+    from app.database import engine
+
+    logged_in_client.post("/notes", data={"title": "Wees-tag-test", "content": "", "tags": "weestest"})
+    listing = logged_in_client.get("/notes").text
+    idx = listing.rindex("Wees-tag-test")
+    note_id = re.findall(r'href="/notes/(\d+)/edit"', listing[:idx])[-1]
+
+    logged_in_client.post("/notes/bulk-delete", data={"note_ids": [note_id]})
+
+    with engine.connect() as conn:
+        rows = conn.execute(text("SELECT * FROM note_tags WHERE note_id = :id"), {"id": note_id}).fetchall()
+    assert rows == []
 
 
 def test_filter_notes_by_tag(logged_in_client):
@@ -204,8 +229,8 @@ def test_bulk_tag_notes(logged_in_client):
     assert "Bulktag twee" in filtered
 
     # Bestaande tag van de tweede notitie moet behouden blijven.
-    listing_after = logged_in_client.get("/notes").text
-    assert "bestaand" in listing_after
+    edit_page = logged_in_client.get(f"/notes/{ids[1]}/edit").text
+    assert "bestaand" in edit_page
 
 
 def test_create_temp_note_shows_badge(logged_in_client):
@@ -248,11 +273,19 @@ def test_recent_temp_note_survives_list_visit(logged_in_client):
     assert "Verse tijdelijke notitie" in listing
 
 
-def test_note_card_shows_date_and_hash_prefixed_tags(logged_in_client):
+def test_note_card_shows_date_but_not_tags(logged_in_client):
+    """Tags staan bewust niet meer op de notitiekaart in het overzicht (ruimtebesparing bij
+    veel notities) -- alleen nog zichtbaar/aanpasbaar in het edit-formulier zelf."""
     from datetime import date
 
     logged_in_client.post("/notes", data={"title": "Kaartstijl-notitie", "content": "", "tags": "werk"})
     listing = logged_in_client.get("/notes").text
     assert 'class="note-card-date"' in listing
     assert date.today().isoformat() in listing
-    assert '<a class="tag"' in listing
+    assert '<a class="tag"' not in listing
+    assert 'class="note-card-tags"' not in listing
+
+    idx = listing.rindex("Kaartstijl-notitie")
+    note_id = re.findall(r'href="/notes/(\d+)/edit"', listing[:idx])[-1]
+    edit_page = logged_in_client.get(f"/notes/{note_id}/edit").text
+    assert 'value="werk"' in edit_page

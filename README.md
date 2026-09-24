@@ -21,7 +21,9 @@ Gebouwd:
   krijgen (kleurenpicker, zichtbaar als gekleurde rand links op de kaart). Bewerken opent een
   **grotere, gecentreerde modal** (i.p.v. inline in de smalle kolom) met een **opmaak-werkbalk**
   (vet, cursief, kop, opsomming, code, en een link-knop die een URL + linktekst vraagt en er
-  een klikbare markdown-link van maakt)
+  een klikbare markdown-link van maakt). **Tags staan niet op de kaart zelf op het bord** —
+  ruimtebesparing op een bord met veel kaarten — maar wél in het tags-veld van deze
+  bewerk-modal
 - Checklists in kaartbeschrijvingen (`- [ ] item`) — aanklikbaar, direct persistent; een
   "☑ Item"-knop op de werkbalk voegt de syntax voor je toe
 - **Kale URL's worden automatisch klikbare links**, in taken-, kanban- en notitiebeschrijvingen —
@@ -94,8 +96,9 @@ Gebouwd:
   genummerde lijsten, links, code) — geen markdown-syntax typen nodig, wat je ziet is wat er
   opgeslagen wordt. Inhoud is HTML, server-side gesanitized (`bleach`) tegen XSS. Taggable met
   hetzelfde gedeelde tag-systeem als taken/kanban, met **aanklikbare tag-checkboxes** boven de
-  lijst om op meerdere tags tegelijk te filteren (OR-logica) — de notitiekaart zelf krijgt
-  geen kleurtint meer op basis van de tag, alleen de tag-badge is gekleurd. De hele kaart in de
+  lijst om op meerdere tags tegelijk te filteren (OR-logica). **Tags staan niet meer op de
+  notitiekaart zelf** in het overzicht (raster/lijst) — dat bespaart ruimte bij veel notities
+  — maar wél zichtbaar en aanpasbaar in het "Tags"-veld van het edit-formulier. De hele kaart in de
   lijstweergave is klikbaar om te bewerken, en een **selectievak per notitie** maakt
   bulk-acties mogelijk: meerdere notities in één keer verwijderen of er samen een tag aan
   toevoegen. Een **"Tijdelijke notitie"-vinkje** markeert een notitie als **temp** (zichtbaar
@@ -460,11 +463,18 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     opnieuw → "Sleutel werkt." in groen. Sla de sleutel op en controleer dat "Sleutel
     testen" ook zonder iets in het veld te typen werkt (test dan de al-opgeslagen sleutel).
 29. Maak een paar notities aan met duidelijk verschillende titels → ga naar Notities en klik
-    "☰ Lijst" → de kaarten worden compacte rijen (titel, tags, datum). Herlaad de pagina →
+    "☰ Lijst" → de kaarten worden compacte rijen (titel, datum). Herlaad de pagina →
     de lijstweergave blijft staan (localStorage). Kies bij "Sorteren op" → "Titel" →
     controleer dat de notities alfabetisch gesorteerd staan, ook nog in lijstweergave. Vink
     een tag aan om te filteren → de sortering blijft "Titel". Klik terug naar "▦ Raster" →
     de kaartweergave komt terug.
+30. Maak een notitie én een kanban-kaart aan met een paar tags → controleer dat er nergens
+    een tag-badge op de notitiekaart (raster én lijst) of op de kanban-kaart op het bord
+    verschijnt. Open de notitie om te bewerken → de tags staan gewoon in het "Tags"-veld.
+    Klik "Bewerken" op de kanban-kaart → de tags staan in het tags-veld van de modal. Maak
+    daarna een notitie aan, bulk-verwijder 'm meteen, en maak direct een nieuwe notitie aan
+    met andere tags → controleer dat die nieuwe notitie **niet** de tags van de verwijderde
+    notitie heeft overgenomen (regressietest voor de foreign-key-bugfix hieronder).
 
 ## Architectuur
 
@@ -861,3 +871,23 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   hash is daarvoor onbruikbaar. Blijft binnen de eigen SQLite-database en wordt nooit naar
   de browser teruggestuurd (alleen de laatste 4 tekens, ter herkenning welke sleutel actief
   is).
+- **Tags weg uit de overzichten, wel in het edit-scherm**: de tag-badges op notitiekaarten
+  (raster/lijst) en kanban-kaarten (bord) zijn verwijderd om ruimte te besparen bij veel
+  items in één overzicht — de bestaande tag-filter (notities) en het tags-veld in het
+  bewerkformulier/-modal blijven de manier om tags te zien/wijzigen. De onderliggende
+  tag-koppelingen en de gedeelde-tag-infrastructuur (`resolve_tags`, `badge_style`, de
+  Graph-pagina) zijn ongewijzigd — dit is puur een weergavewijziging.
+- **BUGFIX — `PRAGMA foreign_keys=ON` (`app/database.py`)**: bij het bouwen van de
+  bovenstaande wijziging bleek dat SQLite `ondelete="CASCADE"`/"SET NULL" op
+  ForeignKey-kolommen (overal in `app/models/*.py`) gewoon **negeert** tenzij
+  foreign-key-afdwinging per connectie expliciet wordt aangezet. Zonder deze pragma liet
+  een bulk-delete (`Query.delete()`, dat buiten de ORM-cascade om gaat — bv.
+  `bulk_delete_notes` en het opruimen van verlopen tijdelijke notities) een rij in de
+  tag-koppeltabel (`note_tags` e.d.) achter nadat het getagde item al weg was. Zodra SQLite
+  later hetzelfde primary-key-id hergebruikte voor een nieuwe, ongerelateerde rij (normaal
+  gedrag bij een INTEGER PRIMARY KEY zonder AUTOINCREMENT), "erfde" die nieuwe rij per
+  ongeluk de oude tags — precies zo ontdekt tijdens het handmatig testen van deze feature.
+  Nu wordt de pragma bij elke connectie gezet (`event.listens_for(engine, "connect")`), én
+  ruimt `app/services/migrate.py::_cleanup_orphaned_tag_associations` bij elke start
+  eenmalig eventuele al bestaande wees-rijen op (voor installaties die deze bug al
+  hebben meegemaakt vóór deze fix).
