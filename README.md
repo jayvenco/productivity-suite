@@ -124,8 +124,11 @@ Gebouwd:
   bestandsnamen) — klik op de titel om de code te bekijken in een **bijna-volledig-scherm
   paneel** (i.p.v. een klein regeltje binnen de kaart), met **regelnummers**
   (highlightjs-line-numbers.js) naast de syntax highlighting, voor een stuk betere
-  leesbaarheid bij langere snippets. Eén zoekveld doorzoekt titel, tag én code-inhoud
-  tegelijk, taggable met hetzelfde gedeelde tag-systeem
+  leesbaarheid bij langere snippets. In dat paneel kun je de code ook direct **bewerken**
+  ("Bewerken" → tekstvak(-ken) per bestand → "Opslaan" of "Annuleren") zonder naar het
+  volledige bewerkformulier te hoeven — handig voor een snelle correctie, terwijl
+  titel/tags/bestand-toevoegen nog steeds via "Bewerken" op de kaart zelf gaat. Eén zoekveld
+  doorzoekt titel, tag én code-inhoud tegelijk, taggable met hetzelfde gedeelde tag-systeem
 - **Mindmap**: je kunt **meerdere, losse mindmaps aanmaken en opslaan** (net als notities of
   snippets, i.p.v. één vast bord) — de lijstpagina toont ze als **preview-kaarten** (net als
   notities): naam, **beschrijving**, aantal componenten en gekleurde **tags**, met
@@ -496,6 +499,14 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     en **syntax highlighting**. Sluit het (kruisje, klik naast het paneel, of Escape) en open
     dezelfde snippet nogmaals → de regelnummers verschijnen nog steeds correct (niet dubbel
     of ontbrekend).
+33. Open diezelfde snippet in het fullscreen-paneel en klik "Bewerken" → de code (met
+    meerdere regels, inclusief inspringing) verschijnt in een tekstvak. Pas een regel aan
+    en klik "Opslaan" → de pagina herlaadt en de aangepaste code staat er (open de snippet
+    opnieuw om te controleren dat regeleindes/inspringing intact bleven — dat was een
+    bug tijdens het bouwen: regelnummers herstructureren de code in een tabel, waardoor
+    `\n`-tekens verloren gaan als je niet oplet). Open nogmaals "Bewerken", wijzig iets,
+    maar klik nu "Annuleren" → de oorspronkelijke code (vóór de laatste, wél opgeslagen
+    wijziging) verschijnt weer, zonder dat er iets is opgeslagen.
 
 ## Architectuur
 
@@ -627,6 +638,23 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   code-blokken sowieso bij het laden van de pagina (ook terwijl ze verborgen zijn — highlight.js
   werkt op de DOM, niet op wat er zichtbaar is), dus de kloon erft die opmaak al mee en hoeft
   zelf niet opnieuw gehighlight te worden.
+- **Snippets — code bewerken vanuit de viewer, los van het volledige bewerkformulier**: een
+  nieuwe, bewust smalle route (`POST /snippets/{id}/files/{file_id}/content`, alleen een
+  `content`-form-veld) werkt alléén de inhoud van dat ene bestand bij — title/tags/overige
+  bestanden blijven gegarandeerd ongemoeid, in tegenstelling tot de bestaande
+  `update_snippet`-route die de hele bestandenlijst + titel + tags in één keer vervangt
+  (`_apply_files_from_form`) en dus een leeg meegestuurd titel/tags-veld per ongeluk zou
+  kunnen laten leeglopen. "Bewerken" in het fullscreen-paneel vervangt per bestand de
+  `<pre><code>` door een `<textarea>`. Een addertje onder het gras: `hljs.lineNumbersBlock()`
+  herstructureert de code in een `<table>` per regel, waarbij de originele `\n`-tekens
+  verdwijnen (regeleinden worden dan tabelrijen i.p.v. tekens) — `codeEl.textContent`
+  opvragen ná het toepassen van regelnummers levert dus alle regels aan elkaar geplakt op.
+  Fix: de platte tekst wordt vóór het toepassen van regelnummers weggeschreven naar
+  `codeEl.dataset.rawContent`, en de textarea leest daaruit i.p.v. uit `textContent`.
+  "Opslaan" stuurt élk bestand als losse fetch-call weg en herlaadt de pagina bij succes
+  (simpel en consistent met de rest van de app, die overwegend op page-navigaties leunt
+  i.p.v. een SPA-aanpak); "Annuleren" rendert de viewer gewoon opnieuw vanuit de nog
+  onaangeraakte bron-node, dus zonder network-call.
 - **Snippets — raster i.p.v. volle-breedte rij**: `.snippets-list` gebruikt dezelfde
   `grid-template-columns: repeat(auto-fill, minmax(...px, 1fr))`-aanpak als `.notes-grid`,
   met `align-items: start` zodat een opengeklapte kaart de rijhoogte van de hele grid-rij niet

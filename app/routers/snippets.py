@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, selectinload
@@ -121,6 +121,28 @@ async def update_snippet(
     _apply_files_from_form(db, snippet, form)
     db.commit()
     return RedirectResponse("/snippets", status_code=303)
+
+
+@router.post("/{snippet_id}/files/{file_id}/content")
+def update_snippet_file_content(
+    snippet_id: int,
+    file_id: int,
+    content: str = Form(...),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Losse route om alleen de code van één bestand bij te werken -- gebruikt door de
+    bijna-volledig-scherm snippet-viewer (app/static/js/snippets-list.js), zodat je code
+    direct kunt aanpassen zonder naar het volledige bewerkformulier te hoeven (dat ook
+    titel/tags/bestandenlijst beheert, wat hier niet nodig -- en dus ook niet per ongeluk
+    aan te passen -- is)."""
+    snippet = _get_snippet_or_404(db, snippet_id, user.id)
+    file = next((f for f in snippet.files if f.id == file_id), None)
+    if file is None:
+        raise HTTPException(status_code=404, detail="Bestand niet gevonden")
+    file.content = content
+    db.commit()
+    return {"ok": True}
 
 
 @router.post("/{snippet_id}/delete")

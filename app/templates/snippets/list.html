@@ -35,7 +35,7 @@
     </div>
     <div class="snippet-files" id="snippet-files-{{ snippet.id }}" hidden>
       {% for file in snippet.files %}
-      <div class="snippet-file">
+      <div class="snippet-file" data-file-id="{{ file.id }}" data-language="{{ file.language }}">
         <div class="snippet-file-name">{{ file.filename }} <span class="snippet-file-lang">{{ file.language }}</span></div>
         <pre><code class="language-{{ file.language }}">{{ file.content }}</code></pre>
       </div>
@@ -51,7 +51,12 @@
 <div class="snippet-fullscreen-modal" id="snippet-fullscreen-modal" hidden>
   <div class="snippet-fullscreen-header">
     <h3 id="snippet-fullscreen-title"></h3>
-    <button type="button" class="snippet-fullscreen-close" id="snippet-fullscreen-close" title="Sluiten">×</button>
+    <div class="snippet-fullscreen-header-actions">
+      <button type="button" class="btn btn-secondary" id="snippet-fullscreen-edit-btn">Bewerken</button>
+      <button type="button" class="btn" id="snippet-fullscreen-save-btn" hidden>Opslaan</button>
+      <button type="button" class="btn btn-secondary" id="snippet-fullscreen-cancel-btn" hidden>Annuleren</button>
+      <button type="button" class="snippet-fullscreen-close" id="snippet-fullscreen-close" title="Sluiten">×</button>
+    </div>
   </div>
   <div class="snippet-fullscreen-body" id="snippet-fullscreen-body"></div>
 </div>

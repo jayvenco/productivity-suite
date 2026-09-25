@@ -85,6 +85,44 @@ def test_edit_snippet(logged_in_client):
     assert "belangrijk" in listing_after
 
 
+def test_edit_snippet_file_content_from_fullscreen_viewer(logged_in_client):
+    """Regressietest voor de aparte content-only route die de fullscreen-viewer gebruikt
+    (app/static/js/snippets-list.js) -- moet alleen de code van het aangewezen bestand
+    bijwerken, zonder titel/tags/andere bestanden aan te raken."""
+    logged_in_client.post(
+        "/snippets",
+        data={
+            "title": "Live-edit-test",
+            "tags": "belangrijk",
+            "filename": ["a.py"],
+            "language": ["python"],
+            "content": ["x = 1"],
+        },
+    )
+    listing = logged_in_client.get("/snippets").text
+    snippet_id = _snippet_id_for_title(listing, "Live-edit-test")
+    idx = listing.index(f'id="snippet-files-{snippet_id}"')
+    file_id = re.search(r'data-file-id="(\d+)"', listing[idx:]).group(1)
+
+    response = logged_in_client.post(
+        f"/snippets/{snippet_id}/files/{file_id}/content",
+        data={"content": "x = 42\nprint(x)"},
+    )
+    assert response.status_code == 200
+    assert response.json() == {"ok": True}
+
+    listing_after = logged_in_client.get("/snippets").text
+    assert "Live-edit-test" in listing_after
+    assert "belangrijk" in listing_after
+    assert "x = 42" in listing_after
+
+
+def test_edit_snippet_file_content_requires_login(client):
+    response = client.post("/snippets/1/files/1/content", data={"content": "hacked"}, follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
 def test_delete_snippet(logged_in_client):
     logged_in_client.post(
         "/snippets",

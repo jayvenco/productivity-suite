@@ -1393,6 +1393,12 @@ textarea {
   margin: 0;
 }
 
+.snippet-fullscreen-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .snippet-fullscreen-close {
   background: none;
   border: none;
@@ -1414,6 +1420,21 @@ textarea {
 
 .snippet-fullscreen-body .snippet-file pre code {
   font-size: 13px;
+}
+
+.snippet-edit-textarea {
+  width: 100%;
+  min-height: 320px;
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px;
+  resize: vertical;
+  tab-size: 4;
 }
 
 /* highlightjs-line-numbers.js output-structuur (geen aparte CDN-CSS, bewust minimaal
