@@ -170,6 +170,7 @@ def create_task(
     deadline: str = Form(""),
     tags: str = Form(""),
     priority: bool = Form(False),
+    daily_task: bool = Form(False),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -179,6 +180,7 @@ def create_task(
         description=description,
         deadline=date.fromisoformat(deadline) if deadline else None,
         priority=priority,
+        daily_task=daily_task,
     )
     task.tags = resolve_tags(db, tags)
     db.add(task)
@@ -201,6 +203,7 @@ def update_task(
     status_value: str = Form(...),
     tags: str = Form(""),
     priority: bool = Form(False),
+    daily_task: bool = Form(False),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -210,6 +213,7 @@ def update_task(
     task.deadline = date.fromisoformat(deadline) if deadline else None
     task.status = TaskStatus(status_value)
     task.priority = priority
+    task.daily_task = daily_task
     task.tags = resolve_tags(db, tags)
     db.commit()
     return RedirectResponse("/tasks", status_code=303)

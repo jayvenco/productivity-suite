@@ -18,8 +18,8 @@
   {% for snippet in snippets %}
   <div class="snippet-card" style="{{ snippet.row_tint_style }}">
     <div class="snippet-card-header">
-      <button type="button" class="snippet-toggle" data-snippet-id="{{ snippet.id }}">
-        <span class="snippet-toggle-arrow">▸</span>
+      <button type="button" class="snippet-toggle" data-snippet-id="{{ snippet.id }}" title="Openen in volledig scherm">
+        <span class="snippet-toggle-arrow">⛶</span>
         <span class="snippet-card-title-text">{{ snippet.title }}</span>
       </button>
       <div class="snippet-card-header-actions">
@@ -47,7 +47,17 @@
   {% endfor %}
 </div>
 
+<div class="snippet-fullscreen-backdrop" id="snippet-fullscreen-backdrop" hidden></div>
+<div class="snippet-fullscreen-modal" id="snippet-fullscreen-modal" hidden>
+  <div class="snippet-fullscreen-header">
+    <h3 id="snippet-fullscreen-title"></h3>
+    <button type="button" class="snippet-fullscreen-close" id="snippet-fullscreen-close" title="Sluiten">×</button>
+  </div>
+  <div class="snippet-fullscreen-body" id="snippet-fullscreen-body"></div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
 <script>hljs.highlightAll();</script>
 <script src="{{ static_url('js/snippets-list.js') }}"></script>
 {% endblock %}

@@ -181,3 +181,15 @@ def test_collapsed_snippet_ui_present(logged_in_client):
     # De 'hidden'-attribuut moet vlak vóór de afsluitende '>' van deze div staan.
     div_end = listing.index(">", files_start)
     assert "hidden" in listing[files_start:div_end]
+
+
+def test_snippet_list_includes_fullscreen_viewer_markup(logged_in_client):
+    """De titel opent de code in een los, bijna-volledig-scherm paneel (zie
+    snippets-list.js) i.p.v. inline uit te klappen -- dit checkt dat de benodigde
+    modal-elementen en de highlight.js-line-numbers-plugin op de pagina staan."""
+    page = logged_in_client.get("/snippets").text
+    assert 'id="snippet-fullscreen-backdrop"' in page
+    assert 'id="snippet-fullscreen-modal"' in page
+    assert 'id="snippet-fullscreen-title"' in page
+    assert 'id="snippet-fullscreen-body"' in page
+    assert "highlightjs-line-numbers.js" in page

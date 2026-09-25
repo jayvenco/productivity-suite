@@ -26,6 +26,7 @@ class Task(Base):
     description: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[TaskStatus] = mapped_column(Enum(TaskStatus), default=TaskStatus.TODO)
     priority: Mapped[bool] = mapped_column(Boolean, default=False)
+    daily_task: Mapped[bool] = mapped_column(Boolean, default=False)
     deadline: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())

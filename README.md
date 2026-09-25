@@ -44,6 +44,9 @@ Gebouwd:
   meta-regel. De hele kaart is klikbaar om te bewerken (net als notities/snippets); de
   cirkel en de tags hebben hun eigen gedrag en negeren die klik. Een taak met een
   **prioriteitsvinkje** (★) krijgt een ster voor de titel en sorteert bovenaan de takenlijst;
+  een **"dagtaak"-vinkje** (☀) is een tweede, onafhankelijk vinkje naast prioriteit — zo'n
+  taak krijgt een zonnetje voor de titel én de hele kaart een oranje linkerrand + subtiele
+  oranje tint, zodat dagelijkse taken in één oogopslag opvallen tussen de rest;
   het **afvink-vinkje** zet de taak direct op "done" (doorgestreepte titel, gevulde cirkel) of
   terug naar "todo"; heeft de taak een beschrijving, dan staat er een **cursieve preview**
   (eerste 20 tekens) op de meta-regel. Tags en deadline staan **helemaal rechts** uitgelijnd
@@ -118,8 +121,10 @@ Gebouwd:
   bestandsextensie** zodra je een bestandsnaam typt (bv. `config.json` → json,
   `app.py` → python), en blijft daarna gewoon handmatig aan te passen via de select. Kaarten
   staan **in een raster** (net als notities) en **standaard ingeklapt** (alleen titel, tags en
-  bestandsnamen) — klik erop om de code compact binnen die kaart te tonen, i.p.v. een regel
-  die over het hele werkscherm uitrekt. Eén zoekveld doorzoekt titel, tag én code-inhoud
+  bestandsnamen) — klik op de titel om de code te bekijken in een **bijna-volledig-scherm
+  paneel** (i.p.v. een klein regeltje binnen de kaart), met **regelnummers**
+  (highlightjs-line-numbers.js) naast de syntax highlighting, voor een stuk betere
+  leesbaarheid bij langere snippets. Eén zoekveld doorzoekt titel, tag én code-inhoud
   tegelijk, taggable met hetzelfde gedeelde tag-systeem
 - **Mindmap**: je kunt **meerdere, losse mindmaps aanmaken en opslaan** (net als notities of
   snippets, i.p.v. één vast bord) — de lijstpagina toont ze als **preview-kaarten** (net als
@@ -482,6 +487,15 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     daarna een notitie aan, bulk-verwijder 'm meteen, en maak direct een nieuwe notitie aan
     met andere tags → controleer dat die nieuwe notitie **niet** de tags van de verwijderde
     notitie heeft overgenomen (regressietest voor de foreign-key-bugfix hieronder).
+31. Maak een taak aan en vink "Dagtaak" aan (naast "Prioriteit") → controleer dat de taak in
+    de takenlijst een ☀-icoon voor de titel krijgt én dat de hele kaart een oranje
+    linkerrand + subtiele oranje tint heeft. Vink ook "Prioriteit" aan op dezelfde taak →
+    beide iconen (★ en ☀) staan naast elkaar voor de titel.
+32. Maak een snippet aan met een langer codebestand (20+ regels) → ga naar Snippets en klik
+    op de titel → een bijna-volledig-scherm paneel opent met de code, **regelnummers** links
+    en **syntax highlighting**. Sluit het (kruisje, klik naast het paneel, of Escape) en open
+    dezelfde snippet nogmaals → de regelnummers verschijnen nog steeds correct (niet dubbel
+    of ontbrekend).
 
 ## Architectuur
 
@@ -602,10 +616,17 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 - **Snippets — syntax highlighting**: highlight.js via CDN, alleen geladen op de lijstpagina.
   Zoeken (`?q=`) filtert op titel, tag-naam ÓF code-inhoud in één keer
   (`Snippet.tags.any(Tag.name.ilike(...))` / `Snippet.files.any(SnippetFile.content.ilike(...))`).
-- **Snippets — standaard ingeklapt**: de code (`.snippet-files`) staat standaard `hidden`; een
-  klik op de titel (`app/static/js/snippets-list.js`) toont/verbergt 'm. `hljs.highlightAll()`
-  verwerkt de code-blokken sowieso bij het laden, ook terwijl ze verborgen zijn — highlight.js
-  werkt op de DOM, niet op wat er zichtbaar is.
+- **Snippets — bijna-volledig-scherm viewer i.p.v. inline uitklappen**: de code
+  (`.snippet-files`) staat per kaart standaard `hidden` en blijft dat ook — dit is nu puur de
+  *bron*, niet meer wat er getoond wordt. Een klik op de titel (`app/static/js/snippets-list.js`)
+  kloont die verborgen node (`cloneNode(true)`) in een los modal-paneel (`inset: 3vh 3vw`) i.p.v.
+  'm inline te tonen; de kloon is nodig zodat `hljs.lineNumbersBlock()` (de
+  highlightjs-line-numbers.js-plugin, CDN, geen aparte CSS nodig — de `.hljs-ln*`-klassen zijn
+  handmatig gestyled in `app.css` zodat ze in elk thema passen) niet twee keer op dezelfde node
+  toegepast wordt als je 'm meerdere keren opent. `hljs.highlightAll()` verwerkt de
+  code-blokken sowieso bij het laden van de pagina (ook terwijl ze verborgen zijn — highlight.js
+  werkt op de DOM, niet op wat er zichtbaar is), dus de kloon erft die opmaak al mee en hoeft
+  zelf niet opnieuw gehighlight te worden.
 - **Snippets — raster i.p.v. volle-breedte rij**: `.snippets-list` gebruikt dezelfde
   `grid-template-columns: repeat(auto-fill, minmax(...px, 1fr))`-aanpak als `.notes-grid`,
   met `align-items: start` zodat een opengeklapte kaart de rijhoogte van de hele grid-rij niet

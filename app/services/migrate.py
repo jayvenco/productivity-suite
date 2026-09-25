@@ -7,7 +7,7 @@ from sqlalchemy.engine import Engine
 # opgetuigd voor deze schaal; dit voorkomt alleen dat bestaande installaties
 # (bv. op Unraid) hun data kwijtraken wanneer een model een kolom krijgt.
 _COLUMNS_TO_ENSURE = {
-    "tasks": [("priority", "BOOLEAN DEFAULT 0")],
+    "tasks": [("priority", "BOOLEAN DEFAULT 0"), ("daily_task", "BOOLEAN DEFAULT 0")],
     "kanban_cards": [("color", "VARCHAR(20)")],
     "kanban_columns": [("swimlane_id", "INTEGER")],
     "kanban_swimlanes": [("color", "VARCHAR(20)")],

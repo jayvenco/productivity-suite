@@ -52,6 +52,23 @@ def test_priority_task_shown_and_sorted_first(logged_in_client):
     assert listing.index("Belangrijke taak") < listing.index("Normale taak")
 
 
+def test_daily_task_shown_with_orange_badge_and_card_styling(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Gewone taak", "description": "", "deadline": "", "tags": ""})
+    logged_in_client.post(
+        "/tasks",
+        data={"title": "Dagelijkse taak", "description": "", "deadline": "", "tags": "", "daily_task": "true"},
+    )
+
+    listing = logged_in_client.get("/tasks").text
+    assert "daily-task-badge" in listing
+    assert "task-card-daily" in listing
+
+    idx = listing.rindex("Dagelijkse taak")
+    task_id = re.findall(r'href="/tasks/(\d+)/edit"', listing[:idx])[-1]
+    edit_page = logged_in_client.get(f"/tasks/{task_id}/edit").text
+    assert re.search(r'name="daily_task"[^>]*checked', edit_page)
+
+
 def test_deadline_warning_badge_for_near_deadline(logged_in_client):
     near_deadline = (date.today() + timedelta(days=2)).isoformat()
     logged_in_client.post(

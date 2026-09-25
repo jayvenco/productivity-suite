@@ -48,6 +48,12 @@
       Prioriteit (★ herkenbaar in de takenlijst, staat bovenaan)
     </label>
   </div>
+  <div class="field">
+    <label style="display:flex;align-items:center;gap:6px;color:var(--text)">
+      <input type="checkbox" name="daily_task" value="true" style="width:auto" {{ 'checked' if task and task.daily_task }}>
+      Dagtaak (oranje herkenbaar in de takenlijst)
+    </label>
+  </div>
   <button type="submit" class="btn">Opslaan</button>
   <a href="/tasks" class="btn btn-secondary">Annuleren</a>
 </form>

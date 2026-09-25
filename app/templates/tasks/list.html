@@ -2,7 +2,7 @@
 {% block title %}Taken - Productivity Suite{% endblock %}
 
 {% macro task_card(task, sort, group_by, active_tags, active_status) %}
-<div class="task-card {{ 'task-card-done' if task.status.value == 'done' }}" data-href="/tasks/{{ task.id }}/edit">
+<div class="task-card {{ 'task-card-done' if task.status.value == 'done' }} {{ 'task-card-daily' if task.daily_task }}" data-href="/tasks/{{ task.id }}/edit">
   <form method="post" action="/tasks/{{ task.id }}/toggle-done" class="task-check-form">
     <input type="hidden" name="sort" value="{{ sort }}">
     <input type="hidden" name="group_by" value="{{ group_by }}">
@@ -14,6 +14,7 @@
     <div class="task-card-main-row">
       <a href="/tasks/{{ task.id }}/edit" class="task-card-title-link">
         {% if task.priority %}<span class="priority-star" title="Prioriteit">★</span>{% endif %}
+        {% if task.daily_task %}<span class="daily-task-badge" title="Dagtaak">☀</span>{% endif %}
         {{ task.title }}
       </a>
       <div class="task-card-meta">
