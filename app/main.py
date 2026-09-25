@@ -18,6 +18,7 @@ from app.routers import (
     mindmap,
     notes,
     pomodoro,
+    search,
     settings as settings_router,
     snippets,
     stats,
@@ -51,6 +52,7 @@ app.include_router(snippets.router)
 app.include_router(settings_router.router)
 app.include_router(stats.router)
 app.include_router(voice.router)
+app.include_router(search.router)
 app.include_router(api.router)
 
 

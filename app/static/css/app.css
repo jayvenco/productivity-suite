@@ -3018,3 +3018,62 @@ body.mindmap-editor .mindmap-canvas {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 }
+
+.empty-state {
+  color: var(--text-secondary);
+  padding: 24px 0;
+}
+
+.search-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.search-form-input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-form-tag {
+  min-width: 160px;
+}
+
+.search-result-count {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.search-section {
+  margin-bottom: 24px;
+}
+
+.search-section h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.search-result-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+
+.search-result-date {
+  color: var(--text-secondary);
+  font-size: 13px;
+}

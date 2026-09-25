@@ -239,6 +239,15 @@ Gebouwd:
   van de container — die blijven werken als fallback zolang het veld leeg is), met een
   eigen **"Verbinding testen"-knop** die `GET {url}/v1/models` opvraagt en controleert of
   het ingestelde model daar ook echt bij staat (i.p.v. alleen "is de service bereikbaar")
+- **Zoeken** (nieuw menu-item "Zoeken", `/search`): één zoekscherm over **alle** taggable
+  soorten items heen (taken, notities, kanban-kaarten, snippets, mindmaps,
+  kalenderafspraken) — op los woord (titel/inhoud, `ILIKE`) en/of op een specifieke tag,
+  allebei tegelijk mag ook (dan moet een item aan beide voldoen). Resultaten worden per
+  soort gegroepeerd getoond, met een link naar de bewerkpagina (kanban-kaarten linken naar
+  het hele bord, want die hebben geen eigen pagina — ze worden inline op het bord bewerkt).
+  De tag-keuzelijst toont alle tags in het systeem (`Tag` heeft bewust geen `user_id`, zie
+  Architectuur), niet per-gebruiker gefilterd — voor een single-user-per-deployment app
+  maakt dat niets uit.
 
 Nog niet gebouwd: CI/CD, slimme voice-commando-interpretatie (taak/kanban/notitie kiezen +
 matchen op bestaande items via ChatGPT — de basis "opnemen → transcriberen → als notitie
@@ -574,6 +583,14 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     het transcript als beschrijving. Open het paneel opnieuw → "Taak" staat nog steeds
     geselecteerd. Zet "Opslaan als" terug op "Notitie", neem nogmaals iets op en sla op → je
     komt nu op de notitielijst met een gewone notitie.
+38. Ga naar "Zoeken" in de sidebar → zonder iets in te vullen zie je een uitleg-tekst, geen
+    resultaten. Maak een taak en een notitie aan met hetzelfde woord in de titel (bv.
+    "Feestplanning") en dezelfde tag → zoek op dat woord: beide staan gegroepeerd onder
+    "Taken"/"Notities" met een klikbare titel. Zoek in plaats daarvan op de tag via de
+    keuzelijst → dezelfde twee resultaten komen terug. Vul zowel een woord als een tag in
+    die niet allebei bij hetzelfde item horen → 0 resultaten.
+39. Log uit en ga naar `/` (of log opnieuw in) → je komt automatisch op de Kalender terecht
+    (dat was al zo, geen losse instelling nodig).
 
 ## Architectuur
 
@@ -1050,3 +1067,20 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   een taal-keuzelijst in de UI (`app/templates/base.html`, onthouden in `localStorage`)
   stuurt 'm als form-veld mee naar Speaches, dat 'm doorzet naar faster-whisper's eigen
   `language`-parameter.
+- **Zoeken (`app/routers/search.py`) — losse queries per entiteit i.p.v. één generieke
+  tabel**: er is bewust geen gedeelde "doorzoekbare items"-tabel/view gebouwd — elk van de
+  zes taggable modellen (Task, Note, KanbanCard, Snippet, MindmapBoard, CalendarEvent) heeft
+  eigen tekstvelden en een eigen relatie naar `user_id` (`KanbanCard` alleen indirect, via
+  een join op `KanbanBoard`), dus `/search` doet zes losse, user-gescoopte queries met
+  `ILIKE`/`Tag.name`-filters i.p.v. één generieke abstractie — dat past beter bij hoe de rest
+  van de app per entiteit is opgebouwd, en blijft simpel zolang het er zes blijven. De
+  tag-keuzelijst op de zoekpagina toont alle tags in het systeem (`db.query(Tag)` zonder
+  filter), niet per-gebruiker — `Tag` heeft bewust geen `user_id`-kolom (zie de
+  Kanban-bugfix hierboven over gedeelde tag-infrastructuur), en voor een
+  single-user-per-deployment app is dat geen probleem. Kanban-kaarten hebben geen eigen
+  bewerkpagina (ze worden inline op het bord bewerkt), dus die zoekresultaten linken naar
+  `/kanban` in plaats van naar een specifieke kaart.
+- **Kalender-als-startpagina bestond al, geen aparte instelling nodig**: `GET /` in
+  `app/main.py` stuurt een ingelogde gebruiker altijd door naar `/calendar` (zie de
+  Kalender-bugfix/architectuurnotitie eerder in dit bestand) — dit was dus al zo vóórdat de
+  zoekfunctie werd toegevoegd.

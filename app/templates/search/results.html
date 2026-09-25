@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Zoeken - Productivity Suite{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h2 style="margin:0">Zoeken</h2>
+</div>
+
+<form method="get" action="/search" class="search-form">
+  <input type="text" name="q" value="{{ q }}" placeholder="Zoek op woord (titel, inhoud)..." class="search-form-input" autofocus>
+  <select name="tag" class="search-form-tag">
+    <option value="">Alle tags</option>
+    {% for t in all_tags %}
+      <option value="{{ t.name }}" {{ 'selected' if t.name == tag }}>{{ t.name }}</option>
+    {% endfor %}
+  </select>
+  <button type="submit" class="btn">Zoeken</button>
+</form>
+
+{% if not has_query %}
+  <p class="empty-state">Typ een woord of kies een tag om te zoeken over al je taken, notities, kanban-kaarten, snippets, mindmaps en kalenderafspraken.</p>
+{% elif total == 0 %}
+  <p class="empty-state">Geen resultaten gevonden.</p>
+{% else %}
+  <p class="search-result-count">{{ total }} {{ 'resultaat' if total == 1 else 'resultaten' }} gevonden.</p>
+
+  {% if tasks %}
+  <section class="search-section">
+    <h3>Taken ({{ tasks|length }})</h3>
+    <ul class="search-result-list">
+      {% for item in tasks %}
+      <li class="search-result-item">
+        <a href="/tasks/{{ item.id }}/edit">{{ item.title }}</a>
+        {% for t in item.tags %}<span class="tag" style="{{ t.badge_style }}">{{ t.name }}</span>{% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if notes %}
+  <section class="search-section">
+    <h3>Notities ({{ notes|length }})</h3>
+    <ul class="search-result-list">
+      {% for item in notes %}
+      <li class="search-result-item">
+        <a href="/notes/{{ item.id }}/edit">{{ item.title }}</a>
+        {% for t in item.tags %}<span class="tag" style="{{ t.badge_style }}">{{ t.name }}</span>{% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if cards %}
+  <section class="search-section">
+    <h3>Kanban-kaarten ({{ cards|length }})</h3>
+    <ul class="search-result-list">
+      {% for item in cards %}
+      <li class="search-result-item">
+        <a href="/kanban">{{ item.title }}</a>
+        {% for t in item.tags %}<span class="tag" style="{{ t.badge_style }}">{{ t.name }}</span>{% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if snippets %}
+  <section class="search-section">
+    <h3>Snippets ({{ snippets|length }})</h3>
+    <ul class="search-result-list">
+      {% for item in snippets %}
+      <li class="search-result-item">
+        <a href="/snippets/{{ item.id }}/edit">{{ item.title }}</a>
+        {% for t in item.tags %}<span class="tag" style="{{ t.badge_style }}">{{ t.name }}</span>{% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if mindmaps %}
+  <section class="search-section">
+    <h3>Mindmaps ({{ mindmaps|length }})</h3>
+    <ul class="search-result-list">
+      {% for item in mindmaps %}
+      <li class="search-result-item">
+        <a href="/mindmap/{{ item.id }}">{{ item.name }}</a>
+        {% for t in item.tags %}<span class="tag" style="{{ t.badge_style }}">{{ t.name }}</span>{% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if events %}
+  <section class="search-section">
+    <h3>Kalenderafspraken ({{ events|length }})</h3>
+    <ul class="search-result-list">
+      {% for item in events %}
+      <li class="search-result-item">
+        <a href="/calendar/events/{{ item.id }}/edit">{{ item.title }}</a>
+        <span class="search-result-date">{{ item.event_date.isoformat() }}</span>
+        {% for t in item.tags %}<span class="tag" style="{{ t.badge_style }}">{{ t.name }}</span>{% endfor %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+{% endif %}
+{% endblock %}
