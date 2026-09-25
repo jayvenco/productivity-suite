@@ -66,3 +66,53 @@ def test_transcribe_surfaces_whisper_service_error_response(logged_in_client):
         )
     assert response.status_code == 502
     assert "404" in response.json()["detail"]
+
+
+def _fake_models_client(*, status_code=200, model_ids=None, error=None):
+    fake_client = AsyncMock()
+    fake_client.__aenter__.return_value = fake_client
+    fake_client.__aexit__.return_value = False
+    if error is not None:
+        fake_client.get.side_effect = error
+    else:
+        fake_response = MagicMock()
+        fake_response.status_code = status_code
+        fake_response.json.return_value = {"data": [{"id": m} for m in (model_ids or [])]}
+        fake_client.get.return_value = fake_response
+    return fake_client
+
+
+def test_test_connection_reports_valid_when_model_is_loaded(logged_in_client):
+    fake_client = _fake_models_client(model_ids=["Systran/faster-whisper-base", "other-model"])
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post(
+            "/voice/test-connection",
+            data={"whisper_service_url": "http://whisper:8000", "whisper_model": "Systran/faster-whisper-base"},
+        )
+    data = response.json()
+    assert data["valid"] is True
+    assert "Systran/faster-whisper-base" in data["message"]
+
+
+def test_test_connection_reports_missing_model(logged_in_client):
+    fake_client = _fake_models_client(model_ids=["other-model"])
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post(
+            "/voice/test-connection",
+            data={"whisper_service_url": "http://whisper:8000", "whisper_model": "does-not-exist"},
+        )
+    data = response.json()
+    assert data["valid"] is False
+    assert "other-model" in data["message"]
+
+
+def test_test_connection_handles_unreachable_service(logged_in_client):
+    fake_client = _fake_models_client(error=httpx.ConnectError("boom"))
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post(
+            "/voice/test-connection",
+            data={"whisper_service_url": "http://onbereikbaar:8000", "whisper_model": "x"},
+        )
+    data = response.json()
+    assert data["valid"] is False
+    assert "onbereikbaar" in data["message"]

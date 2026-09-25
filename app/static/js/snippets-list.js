@@ -136,4 +136,17 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !modal.hidden) closeModal();
   });
+
+  // Meerdere snippets tegelijk selecteren en verwijderen (zelfde patroon als notities).
+  const bulkForm = document.getElementById("snippets-bulk-form");
+  const bulkBar = document.getElementById("snippets-bulk-bar");
+  const bulkCount = document.getElementById("snippets-bulk-count");
+  if (bulkForm && bulkBar && bulkCount) {
+    bulkForm.addEventListener("change", (event) => {
+      if (!event.target.classList.contains("snippet-select")) return;
+      const checked = bulkForm.querySelectorAll(".snippet-select:checked").length;
+      bulkBar.hidden = checked === 0;
+      bulkCount.textContent = `${checked} geselecteerd`;
+    });
+  }
 });

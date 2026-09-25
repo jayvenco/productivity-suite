@@ -32,4 +32,9 @@ class User(Base):
     # voice-commando-interpretatie, dus een hash (die je niet kunt terugdraaien) volstaat
     # hier niet. Blijft binnen de eigen SQLite-database, wordt nooit naar de client gestuurd.
     openai_api_key: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Overschrijft de WHISPER_SERVICE_URL/WHISPER_MODEL env vars (app/config.py) als ze
+    # hier gezet zijn -- zo hoef je niet per se de container-omgeving aan te passen, maar
+    # kan het ook gewoon via de Settings-pagina. None = val terug op de env var/default.
+    whisper_service_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    whisper_model: Mapped[str | None] = mapped_column(String(100), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

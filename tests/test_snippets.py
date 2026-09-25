@@ -138,6 +138,44 @@ def test_delete_snippet(logged_in_client):
     assert "Te verwijderen" not in listing_after
 
 
+def test_bulk_delete_snippets(logged_in_client):
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "Bulk een", "tags": "", "filename": ["a.py"], "language": ["python"], "content": ["x = 1"]},
+    )
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "Bulk twee", "tags": "", "filename": ["b.py"], "language": ["python"], "content": ["y = 2"]},
+    )
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "Blijft staan", "tags": "", "filename": ["c.py"], "language": ["python"], "content": ["z = 3"]},
+    )
+    listing = logged_in_client.get("/snippets").text
+    id_een = _snippet_id_for_title(listing, "Bulk een")
+    id_twee = _snippet_id_for_title(listing, "Bulk twee")
+
+    response = logged_in_client.post(
+        "/snippets/bulk-delete", data={"snippet_ids": [id_een, id_twee]}, follow_redirects=False
+    )
+    assert response.status_code == 303
+
+    listing_after = logged_in_client.get("/snippets").text
+    assert "Bulk een" not in listing_after
+    assert "Bulk twee" not in listing_after
+    assert "Blijft staan" in listing_after
+
+
+def test_snippet_list_has_select_checkboxes_and_bulk_bar(logged_in_client):
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "Selecteerbaar", "tags": "", "filename": ["a.py"], "language": ["python"], "content": ["x = 1"]},
+    )
+    page = logged_in_client.get("/snippets").text
+    assert 'class="snippet-select" name="snippet_ids"' in page
+    assert 'id="snippets-bulk-bar"' in page
+
+
 def test_filter_snippets_by_tag(logged_in_client):
     logged_in_client.post(
         "/snippets",

@@ -128,7 +128,11 @@ Gebouwd:
   ("Bewerken" → tekstvak(-ken) per bestand → "Opslaan" of "Annuleren") zonder naar het
   volledige bewerkformulier te hoeven — handig voor een snelle correctie, terwijl
   titel/tags/bestand-toevoegen nog steeds via "Bewerken" op de kaart zelf gaat. Eén zoekveld
-  doorzoekt titel, tag én code-inhoud tegelijk, taggable met hetzelfde gedeelde tag-systeem
+  doorzoekt titel, tag én code-inhoud tegelijk, taggable met hetzelfde gedeelde tag-systeem.
+  De "Bewerken"/"Verwijder"-knoppen op de kaart zijn **kleiner** (`.btn-sm`) zodat ze minder
+  aandacht opeisen dan de titel, en een **selectievak per snippet** maakt (net als bij
+  notities) **bulk-verwijderen** van meerdere snippets in één keer mogelijk — de hele lijst
+  staat in één formulier, met een selectiebalk die verschijnt zodra je iets aanvinkt
 - **Mindmap**: je kunt **meerdere, losse mindmaps aanmaken en opslaan** (net als notities of
   snippets, i.p.v. één vast bord) — de lijstpagina toont ze als **preview-kaarten** (net als
   notities): naam, **beschrijving**, aantal componenten en gekleurde **tags**, met
@@ -220,7 +224,12 @@ Gebouwd:
   OpenAI-sleutel daarvoor kun je nu alvast instellen via Account → OpenAI API-sleutel, met
   een **"Sleutel testen"-knop** die de zojuist ingevulde (nog niet per se opgeslagen)
   sleutel direct tegen `GET https://api.openai.com/v1/models` test en meldt of 'm werkt —
-  zonder dat je eerst hoeft op te slaan of ergens anders hoeft te controleren
+  zonder dat je eerst hoeft op te slaan of ergens anders hoeft te controleren. De
+  Speaches-**service-URL en modelnaam zijn nu ook via Account → Whisper / Speaches
+  in te stellen** (i.p.v. alleen via de WHISPER_SERVICE_URL/WHISPER_MODEL-omgevingsvariabelen
+  van de container — die blijven werken als fallback zolang het veld leeg is), met een
+  eigen **"Verbinding testen"-knop** die `GET {url}/v1/models` opvraagt en controleert of
+  het ingestelde model daar ook echt bij staat (i.p.v. alleen "is de service bereikbaar")
 
 Nog niet gebouwd: CI/CD, slimme voice-commando-interpretatie (taak/kanban/notitie kiezen +
 matchen op bestaande items via ChatGPT — de basis "opnemen → transcriberen → als notitie
@@ -238,16 +247,24 @@ Voor voice-notities heb je een **losse Speaches-container** nodig (voorheen
 faster-whisper-server — draait niet mee in de hoofd-image, zie architectuur hieronder).
 Speaches praat de OpenAI Audio API na (`POST /v1/audio/transcriptions`), dus als je 'm al
 op Unraid draait (bv. via de Community Applications-app "faster-whisper" / "Speaches")
-hoef je 'm alleen te wijzen via twee omgevingsvariabelen **op de Productivity Suite-
-container** (niet op de Speaches-container zelf):
-- `WHISPER_SERVICE_URL`: de URL van je Speaches-container (default: `http://whisper:8000`
-  — bv. `http://<unraid-ip>:8000` als je 'm niet in hetzelfde Docker-netwerk draait)
-- `WHISPER_MODEL`: de exacte modelnaam die Speaches geladen heeft (default:
-  `Systran/faster-whisper-base`) — kijk in de Speaches-logs of -UI welk model actief is en
-  zet deze env var daarop, anders geeft `/voice/transcribe` een duidelijke 502-foutmelding
-  met de modelnaam die niet klopte
+hoef je alleen twee dingen door te geven:
+- de **URL** van je Speaches-container (bv. `http://<unraid-ip>:8000` als je 'm niet in
+  hetzelfde Docker-netwerk draait)
+- de exacte **modelnaam** die Speaches geladen heeft (kijk in de Speaches-logs of -UI welk
+  model actief is) — komt dit niet overeen, dan geeft `/voice/transcribe` een duidelijke
+  502-foutmelding met de modelnaam die niet klopte
 
-**Waar zet je dat precies neer?** Hangt af van hoe je de container beheert:
+**Makkelijkste manier**: Account → Whisper / Speaches → vul de service-URL en modelnaam in,
+klik "Verbinding testen" om te checken of het klopt (nog vóór opslaan), en klik "Opslaan".
+Dit is een **per-gebruiker instelling in de database** (`User.whisper_service_url`/
+`whisper_model`), geen omgevingsvariabele — dus geen container-herstart nodig en direct
+aan te passen vanuit de app zelf.
+
+**Alternatief**: de env vars `WHISPER_SERVICE_URL`/`WHISPER_MODEL` op de container zelf
+zetten (bv. handig als vaste fallback/default voor alle gebruikers, of als je liever bij
+infra-as-config blijft). De instelling via de Settings-pagina wint als beide gezet zijn;
+laat je het Settings-veld leeg, dan val je terug op de env var. **Waar zet je die env vars
+precies neer?** Hangt af van hoe je de container beheert:
 - **Via `scripts/install-unraid.sh`** (aanbevolen als je dat script gebruikt): vul
   `WHISPER_SERVICE_URL`/`WHISPER_MODEL` in bij het configuratieblok bovenaan het script,
   of zet ze als shell-omgevingsvariabele vóór het draaien:
@@ -526,6 +543,18 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     `\n`-tekens verloren gaan als je niet oplet). Open nogmaals "Bewerken", wijzig iets,
     maar klik nu "Annuleren" → de oorspronkelijke code (vóór de laatste, wél opgeslagen
     wijziging) verschijnt weer, zonder dat er iets is opgeslagen.
+34. Ga naar Account → Whisper / Speaches → vul een willekeurige URL in en klik "Verbinding
+    testen" → een rode foutmelding verschijnt (kan geen verbinding maken). Vul de URL van
+    je echte Speaches-container in (en eventueel modelnaam) en test opnieuw → "Verbinding
+    gelukt" in groen, met een melding of het ingestelde model ook echt geladen is. Klik
+    "Opslaan" en herlaad de pagina → de waarden staan er nog. Neem daarna een voice-notitie
+    op (zie stap 27) → die gebruikt nu deze per-gebruiker instelling i.p.v. de
+    WHISPER_SERVICE_URL/WHISPER_MODEL-omgevingsvariabelen van de container.
+35. Maak drie snippets aan → ga naar Snippets en controleer dat "Bewerken"/"Verwijder" op
+    elke kaart merkbaar kleiner zijn dan voorheen. Vink het selectievakje van twee snippets
+    aan → een selectiebalk verschijnt bovenaan met het aantal geselecteerd en een
+    "Verwijderen"-knop. Klik die knop (bevestig de confirm-dialoog) → beide geselecteerde
+    snippets verdwijnen, de derde blijft staan.
 
 ## Architectuur
 
@@ -966,3 +995,22 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   ruimt `app/services/migrate.py::_cleanup_orphaned_tag_associations` bij elke start
   eenmalig eventuele al bestaande wees-rijen op (voor installaties die deze bug al
   hebben meegemaakt vóór deze fix).
+- **Whisper/Speaches: per-gebruiker DB-instelling i.p.v. alleen env vars**: `User.
+  whisper_service_url`/`whisper_model` (nullable, `None` = val terug op de
+  WHISPER_SERVICE_URL/WHISPER_MODEL-env vars uit `app/config.py`). Zowel
+  `POST /voice/transcribe` als de nieuwe `POST /voice/test-connection` gebruiken dezelfde
+  `_resolve_whisper_config(user, url_override, model_override)`-helper, met als
+  prioriteitsvolgorde: het formulierveld (nog niet opgeslagen, voor "test vóór opslaan") →
+  de opgeslagen per-gebruiker instelling → de env var/app-default. De verbindingstest
+  bevraagt `GET {url}/v1/models` (Speaches' OpenAI-compatibele modellenlijst) i.p.v. alleen
+  te checken of de service reageert — zo zie je ook meteen of het ingestelde model daar
+  wel/niet bij staat, in plaats van pas te ontdekken dat het misgaat bij de eerste
+  opname.
+- **Snippets bulk-delete: routevolgorde-valkuil**: `POST /snippets/bulk-delete` gaf eerst
+  een 422 i.p.v. te werken, omdat FastAPI/Starlette routes in registratievolgorde matcht en
+  de generieke `POST /snippets/{snippet_id}` (van `update_snippet`) al eerder geregistreerd
+  stond — "bulk-delete" werd dan als `snippet_id` geprobeerd te parsen (faalt, want geen
+  getal) i.p.v. de bedoelde route te raken. Fix: de specifieke `/bulk-delete`-route moet vóór
+  de generieke `/{snippet_id}`-routes geregistreerd staan (dezelfde volgorde-eis gold al voor
+  `/notes/bulk-delete` in `app/routers/notes.py` — dit keer bij het toevoegen aan snippets
+  over het hoofd gezien en tijdens het testen gevonden).

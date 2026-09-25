@@ -124,6 +124,35 @@
 </form>
 {% endif %}
 
+<h2 style="margin-top:28px">Whisper / Speaches (voice-notities)</h2>
+<p style="color:var(--text-muted);font-size:12px;max-width:480px">
+  Adres en modelnaam van je zelf-gehoste Speaches-container (voorheen faster-whisper-server)
+  voor het transcriberen van voice-notities. Leeg laten valt terug op de
+  WHISPER_SERVICE_URL/WHISPER_MODEL-omgevingsvariabelen van de container (indien gezet).
+</p>
+<form method="post" action="/account/whisper-settings" id="whisper-settings-form" style="max-width:480px">
+  <div class="field">
+    <label for="whisper_service_url">Service-URL</label>
+    <input type="text" id="whisper_service_url" name="whisper_service_url"
+           placeholder="http://<unraid-ip>:8000" value="{{ user.whisper_service_url or '' }}">
+  </div>
+  <div class="field">
+    <label for="whisper_model">Modelnaam</label>
+    <input type="text" id="whisper_model" name="whisper_model"
+           placeholder="Systran/faster-whisper-base" value="{{ user.whisper_model or '' }}">
+  </div>
+  <div style="display:flex;gap:8px">
+    <button type="button" class="btn btn-secondary" id="whisper-test-btn">Verbinding testen</button>
+    <button type="submit" class="btn">Opslaan</button>
+  </div>
+</form>
+<p id="whisper-test-result" style="font-size:12px;margin-top:6px"></p>
+{% if user.whisper_service_url or user.whisper_model %}
+<form method="post" action="/account/whisper-settings/clear" style="display:inline;margin-top:8px" onsubmit="return confirm('Instellingen wissen? Valt dan terug op de omgevingsvariabelen van de container.')">
+  <button type="submit" class="btn btn-danger">Instellingen wissen</button>
+</form>
+{% endif %}
+
 <h2 style="margin-top:28px">Backup</h2>
 <p style="color:var(--text-muted);font-size:12px;max-width:480px">
   Exporteert/importeert de hele database (taken, kanban, notities, snippets, kalender,

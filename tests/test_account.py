@@ -143,6 +143,24 @@ def test_openai_key_test_reports_invalid_key(logged_in_client):
     assert "401" in data["message"]
 
 
+def test_whisper_settings_save_and_clear(logged_in_client):
+    account_page = logged_in_client.get("/account").text
+    assert 'id="whisper_service_url"' in account_page
+
+    logged_in_client.post(
+        "/account/whisper-settings",
+        data={"whisper_service_url": "http://192.168.1.50:8000", "whisper_model": "Systran/faster-whisper-base"},
+    )
+    after_save = logged_in_client.get("/account").text
+    assert 'value="http://192.168.1.50:8000"' in after_save
+    assert 'value="Systran/faster-whisper-base"' in after_save
+
+    logged_in_client.post("/account/whisper-settings/clear")
+    after_clear = logged_in_client.get("/account").text
+    assert 'value="http://192.168.1.50:8000"' not in after_clear
+    assert 'value="Systran/faster-whisper-base"' not in after_clear
+
+
 def test_stats_deadline_met_when_completed_on_time(logged_in_client):
     with SessionLocal() as db:
         user = db.query(User).filter(User.username == "admin").first()

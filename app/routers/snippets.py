@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from urllib.parse import urlencode
+
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import or_
@@ -100,6 +102,28 @@ async def create_snippet(request: Request, user: User = Depends(require_user), d
     _apply_files_from_form(db, snippet, form)
     db.commit()
     return RedirectResponse("/snippets", status_code=303)
+
+
+@router.post("/bulk-delete")
+async def bulk_delete_snippets(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    # Moet vóór de generieke /{snippet_id}-routes staan, anders matcht FastAPI
+    # "bulk-delete" per ongeluk als snippet_id (en geeft dan een 422 i.p.v. dit uit te
+    # voeren) -- zelfde volgorde-eis als bij de /bulk-delete-route in app/routers/notes.py.
+    form = await request.form()
+    snippet_ids = [int(v) for v in form.getlist("snippet_ids")]
+    if snippet_ids:
+        db.query(Snippet).filter(Snippet.id.in_(snippet_ids), Snippet.user_id == user.id).delete(
+            synchronize_session=False
+        )
+        db.commit()
+
+    params: dict[str, str] = {}
+    if form.get("q"):
+        params["q"] = form.get("q")
+    if form.get("tag"):
+        params["tag"] = form.get("tag")
+    query = f"?{urlencode(params)}" if params else ""
+    return RedirectResponse(f"/snippets{query}", status_code=303)
 
 
 @router.get("/{snippet_id}/edit")

@@ -188,6 +188,32 @@ async def test_openai_key(openai_api_key: str = Form(""), user: User = Depends(r
     return {"valid": False, "message": f"OpenAI gaf een foutmelding ({response.status_code})."}
 
 
+# ---- Whisper/Speaches-instellingen (voice-notities, zie app/routers/voice.py) ----
+# De verbindingstest zelf staat in app/routers/voice.py (POST /voice/test-connection),
+# dicht bij de rest van de Whisper-aanroeplogica.
+
+
+@router.post("/whisper-settings")
+def save_whisper_settings(
+    whisper_service_url: str = Form(""),
+    whisper_model: str = Form(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    user.whisper_service_url = whisper_service_url.strip() or None
+    user.whisper_model = whisper_model.strip() or None
+    db.commit()
+    return RedirectResponse("/account", status_code=303)
+
+
+@router.post("/whisper-settings/clear")
+def clear_whisper_settings(user: User = Depends(require_user), db: Session = Depends(get_db)):
+    user.whisper_service_url = None
+    user.whisper_model = None
+    db.commit()
+    return RedirectResponse("/account", status_code=303)
+
+
 # ---- Backup (export/import van de hele SQLite-database) ----
 
 
