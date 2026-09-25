@@ -25,8 +25,8 @@ schema-update bij het importeren van een oudere back-up.
 
 ~~Fase 1~~ — opgelost: een 🎤 "Voice"-spaak in het quick-add-wiel opent een opnamepaneel
 (`MediaRecorder` in de browser). Het audiofragment gaat naar `POST /voice/transcribe`
-(`app/routers/voice.py`), dat 'm doorstuurt naar een **losse, zelf-gehoste Whisper-container**
-(`WHISPER_SERVICE_URL`, standaard `ahmetoner/whisper-asr-webservice` — bewust niet de
+(`app/routers/voice.py`), dat 'm doorstuurt naar een **losse, zelf-gehoste Speaches-container**
+(voorheen faster-whisper-server; `WHISPER_SERVICE_URL` + `WHISPER_MODEL` — bewust niet de
 betaalde OpenAI Whisper-API, en niet ingebakken in de hoofd-image, zie README →
 Architectuur). Het transcript verschijnt bewerkbaar in een tekstvak (de bevestigingsstap)
 en wordt bij "Opslaan als notitie" altijd als gewone notitie opgeslagen

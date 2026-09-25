@@ -203,9 +203,9 @@ Gebouwd:
 - **Voice-notitie (fase 1: opnemen → transcriberen → opslaan)**: een nieuwe 🎤 "Voice"-spaak
   in het quick-add-wiel opent een opnamepaneel. Opname gebeurt in de browser
   (`MediaRecorder`), het audiofragment gaat naar `POST /voice/transcribe`, dat het
-  doorstuurt naar een **losse, zelf-gehoste Whisper-container** (bv.
-  `ahmetoner/whisper-asr-webservice`, zie Configuratie hieronder) voor de transcriptie. Je
-  ziet en corrigeert het transcript zelf vóórdat je op "Opslaan als notitie" klikt — dat
+  doorstuurt naar een **losse, zelf-gehoste Speaches-container** (voorheen
+  faster-whisper-server, zie Configuratie hieronder) voor de transcriptie. Je ziet en
+  corrigeert het transcript zelf vóórdat je op "Opslaan als notitie" klikt — dat
   is bewust de bevestigingsstap, want spraakherkenning gaat af en toe mis. Fase 2 (nog niet
   gebouwd): ChatGPT laten interpreteren of het transcript een taak/kanban-kaart/notitie
   moet worden i.p.v. altijd een notitie, met een eigen bevestigingsscherm — de
@@ -226,18 +226,22 @@ Geen `.env`-bestand of omgevingsvariabelen nodig. Bij de eerste start:
   (blijft geldig na herstarts/updates, zolang het data-volume bewaard blijft);
 - wordt een seed-account aangemaakt: gebruikersnaam `admin`, wachtwoord `admin`.
 
-Voor voice-notities heb je een **losse Whisper-container** nodig (draait niet mee in de
-hoofd-image, zie architectuur hieronder). Zet de env var `WHISPER_SERVICE_URL` op de URL
-van die container (default: `http://whisper:9000`). Voorbeeld met de webservice van het
-[`ahmetoner/whisper-asr-webservice`](https://github.com/ahmetoner/whisper-asr-webservice)-project
-(Docker Hub-image heet `onerahmet/openai-whisper-asr-webservice`, andere naam dan de
-GitHub-repo):
+Voor voice-notities heb je een **losse Speaches-container** nodig (voorheen
+faster-whisper-server — draait niet mee in de hoofd-image, zie architectuur hieronder).
+Speaches praat de OpenAI Audio API na (`POST /v1/audio/transcriptions`), dus als je 'm al
+op Unraid draait (bv. via de Community Applications-app "faster-whisper" / "Speaches")
+hoef je 'm alleen te wijzen:
+- `WHISPER_SERVICE_URL`: de URL van je Speaches-container (default: `http://whisper:8000`
+  — bv. `http://<unraid-ip>:8000` als je 'm niet in hetzelfde Docker-netwerk draait)
+- `WHISPER_MODEL`: de exacte modelnaam die Speaches geladen heeft (default:
+  `Systran/faster-whisper-base`) — kijk in de Speaches-logs of -UI welk model actief is en
+  zet deze env var daarop, anders geeft `/voice/transcribe` een duidelijke 502-foutmelding
+  met de modelnaam die niet klopte
 
-```bash
-docker run -d --name whisper -p 9000:9000 \
-  -e ASR_MODEL=base \
-  onerahmet/openai-whisper-asr-webservice:latest
-```
+Draai je 'm nog niet: zoek in Unraid Community Applications naar "faster-whisper" of
+"Speaches" en installeer die met een CPU- of GPU-image naar keuze (afhankelijk van je
+hardware) — de exacte poort en modelnaam die je daarbij instelt, gebruik je hierboven voor
+`WHISPER_SERVICE_URL`/`WHISPER_MODEL`.
 
 Zonder deze container werkt de rest van de app gewoon door — je krijgt dan alleen een
 duidelijke foutmelding zodra je een voice-notitie probeert op te nemen.
@@ -450,11 +454,14 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     URL ook even tussen backticks (\`www.mondschoon.nl\`) in een taakbeschrijving → controleer
     dat die in de preview gewoon platte code-tekst blijft (niet gelinkt).
 27. Klik op het quick-add-wiel op de nieuwe 🎤 "Voice"-spaak → een opnamepaneel opent. Zonder
-    een draaiende Whisper-container: druk op opnemen, spreek iets in, druk nogmaals om te
-    stoppen → na even wachten verschijnt een duidelijke foutmelding ("Kan de Whisper-service
-    niet bereiken..."). Start daarna een Whisper-container (zie Configuratie hierboven) en
-    herhaal de opname → het transcript verschijnt in een bewerkbaar tekstvak met een
-    voorgestelde titel. Pas het eventueel aan en klik "Opslaan als notitie" → je komt op de
+    een draaiende Speaches-container (of met een verkeerde `WHISPER_SERVICE_URL`): druk op
+    opnemen, spreek iets in, druk nogmaals om te stoppen → na even wachten verschijnt een
+    duidelijke foutmelding ("Kan de Whisper-service niet bereiken..."). Zet
+    `WHISPER_SERVICE_URL` goed maar `WHISPER_MODEL` fout → een andere foutmelding met het
+    HTTP-statuscode en de responstekst van Speaches erin (bv. "model not found"), zodat je
+    kunt zien welk modelnaam wél geladen is. Zet ook `WHISPER_MODEL` goed en herhaal de
+    opname → het transcript verschijnt in een bewerkbaar tekstvak met een voorgestelde
+    titel. Pas het eventueel aan en klik "Opslaan als notitie" → je komt op de
     notities-pagina en de nieuwe notitie staat er met het (aangepaste) transcript in.
 28. Ga naar Account → OpenAI API-sleutel. Klik "Sleutel testen" zonder iets in te vullen →
     "Vul eerst een sleutel in." verschijnt in rood. Typ een willekeurige/onechte sleutel
