@@ -238,7 +238,8 @@ Voor voice-notities heb je een **losse Speaches-container** nodig (voorheen
 faster-whisper-server — draait niet mee in de hoofd-image, zie architectuur hieronder).
 Speaches praat de OpenAI Audio API na (`POST /v1/audio/transcriptions`), dus als je 'm al
 op Unraid draait (bv. via de Community Applications-app "faster-whisper" / "Speaches")
-hoef je 'm alleen te wijzen:
+hoef je 'm alleen te wijzen via twee omgevingsvariabelen **op de Productivity Suite-
+container** (niet op de Speaches-container zelf):
 - `WHISPER_SERVICE_URL`: de URL van je Speaches-container (default: `http://whisper:8000`
   — bv. `http://<unraid-ip>:8000` als je 'm niet in hetzelfde Docker-netwerk draait)
 - `WHISPER_MODEL`: de exacte modelnaam die Speaches geladen heeft (default:
@@ -246,7 +247,25 @@ hoef je 'm alleen te wijzen:
   zet deze env var daarop, anders geeft `/voice/transcribe` een duidelijke 502-foutmelding
   met de modelnaam die niet klopte
 
-Draai je 'm nog niet: zoek in Unraid Community Applications naar "faster-whisper" of
+**Waar zet je dat precies neer?** Hangt af van hoe je de container beheert:
+- **Via `scripts/install-unraid.sh`** (aanbevolen als je dat script gebruikt): vul
+  `WHISPER_SERVICE_URL`/`WHISPER_MODEL` in bij het configuratieblok bovenaan het script,
+  of zet ze als shell-omgevingsvariabele vóór het draaien:
+  ```bash
+  WHISPER_SERVICE_URL=http://192.168.1.50:8000 \
+  WHISPER_MODEL=Systran/faster-whisper-base \
+  bash install-unraid.sh
+  ```
+  Het script geeft ze door aan de container en meldt aan het einde of voice-notities
+  geconfigureerd zijn.
+- **Via de Unraid Docker-GUI** (als je de container los beheert, niet via het script):
+  ga naar **Docker** → klik op de "productivity-suite"-container → **Edit** → onderaan
+  **"Add another Path, Port, Variable, Label or Device"** → kies **Variable**, vul als
+  **Key** `WHISPER_SERVICE_URL` in en als **Value** de URL, herhaal voor `WHISPER_MODEL` →
+  **Apply** (herstart de container automatisch).
+- **Lokaal met `docker compose up`**: zet ze onder `environment:` in `docker-compose.yml`.
+
+Draai je Speaches nog niet: zoek in Unraid Community Applications naar "faster-whisper" of
 "Speaches" en installeer die met een CPU- of GPU-image naar keuze (afhankelijk van je
 hardware) — de exacte poort en modelnaam die je daarbij instelt, gebruik je hierboven voor
 `WHISPER_SERVICE_URL`/`WHISPER_MODEL`.
