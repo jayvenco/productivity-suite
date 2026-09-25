@@ -42,6 +42,28 @@ def test_transcribe_returns_text_from_whisper_service(logged_in_client):
     assert response.json() == {"text": "Hallo wereld"}
 
 
+def test_transcribe_passes_language_when_given(logged_in_client):
+    fake_client = _fake_whisper_client(text="Hello world")
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        logged_in_client.post(
+            "/voice/transcribe",
+            data={"language": "en"},
+            files={"audio": ("test.webm", b"fake-audio-bytes", "audio/webm")},
+        )
+    _, kwargs = fake_client.post.call_args
+    assert kwargs["data"]["language"] == "en"
+
+
+def test_transcribe_omits_language_when_not_given(logged_in_client):
+    fake_client = _fake_whisper_client(text="Auto-detected")
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        logged_in_client.post(
+            "/voice/transcribe", files={"audio": ("test.webm", b"fake-audio-bytes", "audio/webm")}
+        )
+    _, kwargs = fake_client.post.call_args
+    assert "language" not in kwargs["data"]
+
+
 def test_transcribe_handles_unreachable_whisper_service(logged_in_client):
     fake_client = _fake_whisper_client(error=httpx.ConnectError("boom"))
     with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):

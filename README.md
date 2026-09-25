@@ -216,7 +216,11 @@ Gebouwd:
   in het quick-add-wiel opent een opnamepaneel. Opname gebeurt in de browser
   (`MediaRecorder`), het audiofragment gaat naar `POST /voice/transcribe`, dat het
   doorstuurt naar een **losse, zelf-gehoste Speaches-container** (voorheen
-  faster-whisper-server, zie Configuratie hieronder) voor de transcriptie. Je ziet en
+  faster-whisper-server, zie Configuratie hieronder) voor de transcriptie. Een
+  **taal-keuzelijst** (Automatisch detecteren / Nederlands / English, onthouden in
+  `localStorage`) laat je de taal expliciet meegeven — vooral bij kleinere Whisper-modellen
+  ("tiny") is dat een stuk betrouwbaarder dan automatische taaldetectie, die bij korte
+  fragmenten weleens de verkeerde taal raadt of talen door elkaar mixt. Je ziet en
   corrigeert het transcript zelf vóórdat je op "Opslaan als notitie" klikt — dat
   is bewust de bevestigingsstap, want spraakherkenning gaat af en toe mis. Fase 2 (nog niet
   gebouwd): ChatGPT laten interpreteren of het transcript een taak/kanban-kaart/notitie
@@ -555,6 +559,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     aan → een selectiebalk verschijnt bovenaan met het aantal geselecteerd en een
     "Verwijderen"-knop. Klik die knop (bevestig de confirm-dialoog) → beide geselecteerde
     snippets verdwijnen, de derde blijft staan.
+36. Open het opnamepaneel (🎤 Voice) → een "Taal"-keuzelijst staat boven de opnameknop met
+    "Automatisch detecteren"/"Nederlands"/"English". Kies "English", sluit het paneel en
+    open het opnieuw → "English" staat nog steeds geselecteerd (localStorage). Neem een
+    Engelse zin op → het transcript moet er nu stukken betrouwbaarder uitzien dan met
+    automatische detectie, vooral bij een klein Whisper-model.
 
 ## Architectuur
 
@@ -1014,3 +1023,20 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   de generieke `/{snippet_id}`-routes geregistreerd staan (dezelfde volgorde-eis gold al voor
   `/notes/bulk-delete` in `app/routers/notes.py` — dit keer bij het toevoegen aan snippets
   over het hoofd gezien en tijdens het testen gevonden).
+- **Voice-opname vereist een secure context**: `navigator.mediaDevices.getUserMedia` (het
+  microfoon-API van de browser) werkt alleen op `https://` of `http://localhost` — niet op
+  gewoon `http://<ip-adres>:poort`, wat voor een self-hosted app op het lokale netwerk (bv.
+  Unraid zonder reverse proxy) juist de normale manier van toegang is. Zonder HTTPS geeft
+  de browser altijd "Kon geen toegang krijgen tot de microfoon", ongeacht of de gebruiker
+  toestemming zou geven — dit is browserbeleid, geen bug in de app. Oplossingen: een reverse
+  proxy met een certificaat vóór de app zetten (structureel, voor iedereen), of per browser
+  het adres als "secure" whitelisten via een instelling als
+  `chrome://flags/#unsafely-treat-insecure-origin-as-secure` (`edge://flags/...` in Edge,
+  Chromium-gebaseerde browsers delen dezelfde vlag) — een snelle workaround per apparaat,
+  geen serverwijziging nodig.
+- **`/voice/transcribe` — taal expliciet kunnen meegeven**: `language` is een optioneel
+  form-veld (leeg = Whisper's eigen taaldetectie). Vooral het "tiny"-model detecteert de
+  taal bij korte spraakfragmenten onbetrouwbaar (soms zelfs binnen één opname wisselend) —
+  een taal-keuzelijst in de UI (`app/templates/base.html`, onthouden in `localStorage`)
+  stuurt 'm als form-veld mee naar Speaches, dat 'm doorzet naar faster-whisper's eigen
+  `language`-parameter.

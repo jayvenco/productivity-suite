@@ -2650,6 +2650,11 @@ body.mindmap-editor .mindmap-canvas {
   color: var(--danger);
 }
 
+.voice-recorder-language-field {
+  max-width: 220px;
+  margin: 0 auto 16px;
+}
+
 .voice-recorder-controls {
   display: flex;
   flex-direction: column;

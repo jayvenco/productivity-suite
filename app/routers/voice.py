@@ -20,25 +20,33 @@ def _resolve_whisper_config(user: User, url_override: str = "", model_override: 
 
 
 @router.post("/transcribe")
-async def transcribe(audio: UploadFile, user: User = Depends(require_user)) -> dict:
+async def transcribe(audio: UploadFile, language: str = Form(""), user: User = Depends(require_user)) -> dict:
     """Stuurt een opgenomen audiofragment door naar een losse, self-hosted Speaches-
     container (voorheen faster-whisper-server) voor de transcriptie. Speaches praat de
     OpenAI Audio API na (`POST /v1/audio/transcriptions`, multipart-veld `file`, form-veld
     `model`), dus dezelfde aanroep werkt ook tegen een echte OpenAI-endpoint mocht iemand
     daar ooit voor kiezen. De app doet zelf geen spraakherkenning -- dat blijft in een
     aparte container zodat de hoofd-image licht blijft en er geen zware ML-dependencies in
-    de Docker-image van de app zelf nodig zijn."""
+    de Docker-image van de app zelf nodig zijn.
+
+    `language` is optioneel (leeg = Whisper laat het zelf detecteren). Met name kleinere
+    modellen ("tiny") detecteren de taal bij korte fragmenten nog weleens verkeerd of
+    mixen talen door elkaar -- expliciet meegeven (bv. "nl" of "en") maakt de transcriptie
+    een stuk betrouwbaarder zonder dat je aan één vaste taal vastzit."""
     audio_bytes = await audio.read()
     if not audio_bytes:
         raise HTTPException(status_code=400, detail="Geen audio ontvangen")
 
     base_url, model = _resolve_whisper_config(user)
     url = f"{base_url}/v1/audio/transcriptions"
+    request_data = {"model": model, "response_format": "json"}
+    if language.strip():
+        request_data["language"] = language.strip()
     try:
         async with httpx.AsyncClient(timeout=120) as http_client:
             response = await http_client.post(
                 url,
-                data={"model": model, "response_format": "json"},
+                data=request_data,
                 files={
                     "file": (
                         audio.filename or "opname.webm",

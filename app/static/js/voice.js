@@ -18,7 +18,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const transcriptInput = document.getElementById("voice-recorder-transcript");
   const saveBtn = document.getElementById("voice-recorder-save-btn");
   const retryBtn = document.getElementById("voice-recorder-retry-btn");
+  const languageSelect = document.getElementById("voice-recorder-language");
   if (!spokeBtn || !panel) return;
+
+  const LANGUAGE_STORAGE_KEY = "voice-recorder-language";
+  if (languageSelect) {
+    try {
+      const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+      if (savedLanguage !== null) languageSelect.value = savedLanguage;
+    } catch (err) {
+      // localStorage kan geblokkeerd zijn; werkt dan gewoon met de default (auto).
+    }
+    languageSelect.addEventListener("change", () => {
+      try {
+        localStorage.setItem(LANGUAGE_STORAGE_KEY, languageSelect.value);
+      } catch (err) {
+        // Zie hierboven.
+      }
+    });
+  }
 
   let mediaRecorder = null;
   let audioChunks = [];
@@ -122,6 +140,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const blob = new Blob(audioChunks, { type: "audio/webm" });
     const formData = new FormData();
     formData.append("audio", blob, "opname.webm");
+    if (languageSelect && languageSelect.value) {
+      formData.append("language", languageSelect.value);
+    }
 
     try {
       const response = await fetch("/voice/transcribe", { method: "POST", body: formData });
