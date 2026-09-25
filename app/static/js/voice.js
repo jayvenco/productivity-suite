@@ -1,9 +1,9 @@
 // Voice-notitie: neemt audio op via MediaRecorder, laat 'm transcriberen door de
 // zelf-gehoste Whisper-container (server-side, zie app/routers/voice.py), en
-// slaat het (door de gebruiker gecontroleerde/aangepaste) transcript op als
-// gewone notitie via de bestaande /notes-route. Er zit bewust geen automatische
-// interpretatie (taak/kanban/...) in -- dat is een latere uitbreiding; dit is de
-// eerste stap: spreken -> transcript -> zelf controleren -> opslaan.
+// slaat het (door de gebruiker gecontroleerde/aangepaste) transcript op als notitie
+// óf taak (eigen keuze via "Opslaan als", geen automatische AI-classificatie -- dat
+// is een latere uitbreiding; dit is de eerste stap: spreken -> transcript -> zelf
+// controleren én zelf het type kiezen -> opslaan).
 document.addEventListener("DOMContentLoaded", () => {
   const spokeBtn = document.getElementById("voice-spoke-btn");
   const backdrop = document.getElementById("voice-modal-backdrop");
@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const saveBtn = document.getElementById("voice-recorder-save-btn");
   const retryBtn = document.getElementById("voice-recorder-retry-btn");
   const languageSelect = document.getElementById("voice-recorder-language");
+  const typeSelect = document.getElementById("voice-recorder-type");
   if (!spokeBtn || !panel) return;
 
   const LANGUAGE_STORAGE_KEY = "voice-recorder-language";
@@ -36,6 +37,32 @@ document.addEventListener("DOMContentLoaded", () => {
         // Zie hierboven.
       }
     });
+  }
+
+  const TYPE_STORAGE_KEY = "voice-recorder-type";
+  const SAVE_LABELS = { note: "Opslaan als notitie", task: "Opslaan als taak" };
+
+  function updateSaveLabel() {
+    if (!typeSelect || saveBtn.disabled) return;
+    saveBtn.textContent = SAVE_LABELS[typeSelect.value] || SAVE_LABELS.note;
+  }
+
+  if (typeSelect) {
+    try {
+      const savedType = localStorage.getItem(TYPE_STORAGE_KEY);
+      if (savedType !== null) typeSelect.value = savedType;
+    } catch (err) {
+      // Zie hierboven.
+    }
+    typeSelect.addEventListener("change", () => {
+      try {
+        localStorage.setItem(TYPE_STORAGE_KEY, typeSelect.value);
+      } catch (err) {
+        // Zie hierboven.
+      }
+      updateSaveLabel();
+    });
+    updateSaveLabel();
   }
 
   let mediaRecorder = null;
@@ -169,24 +196,38 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   saveBtn.addEventListener("click", async () => {
-    const title = titleInput.value.trim() || "Voice-notitie";
-    const content = `<p>${transcriptInput.value.trim().replace(/\n/g, "<br>")}</p>`;
+    const type = typeSelect ? typeSelect.value : "note";
+    const transcript = transcriptInput.value.trim();
+    const title = titleInput.value.trim() || (type === "task" ? "Voice-taak" : "Voice-notitie");
 
     saveBtn.disabled = true;
     saveBtn.textContent = "Opslaan...";
     try {
-      await fetch("/notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ title, content, tags: "" }),
-      });
-      closePanel();
-      window.location.href = "/notes";
+      if (type === "task") {
+        // Taken tonen platte/markdown-tekst (geen HTML-editor zoals notities), dus de
+        // rauwe transcript-tekst gaat gewoon door als beschrijving.
+        await fetch("/tasks", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ title, description: transcript, deadline: "", tags: "" }),
+        });
+        closePanel();
+        window.location.href = "/tasks";
+      } else {
+        const content = `<p>${transcript.replace(/\n/g, "<br>")}</p>`;
+        await fetch("/notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ title, content, tags: "" }),
+        });
+        closePanel();
+        window.location.href = "/notes";
+      }
     } catch (err) {
       statusEl.textContent = "Opslaan mislukt, probeer het opnieuw.";
       statusEl.classList.add("voice-recorder-status-error");
       saveBtn.disabled = false;
-      saveBtn.textContent = "Opslaan als notitie";
+      updateSaveLabel();
     }
   });
 });

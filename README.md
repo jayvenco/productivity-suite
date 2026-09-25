@@ -221,10 +221,15 @@ Gebouwd:
   `localStorage`) laat je de taal expliciet meegeven — vooral bij kleinere Whisper-modellen
   ("tiny") is dat een stuk betrouwbaarder dan automatische taaldetectie, die bij korte
   fragmenten weleens de verkeerde taal raadt of talen door elkaar mixt. Je ziet en
-  corrigeert het transcript zelf vóórdat je op "Opslaan als notitie" klikt — dat
-  is bewust de bevestigingsstap, want spraakherkenning gaat af en toe mis. Fase 2 (nog niet
-  gebouwd): ChatGPT laten interpreteren of het transcript een taak/kanban-kaart/notitie
-  moet worden i.p.v. altijd een notitie, met een eigen bevestigingsscherm — de
+  corrigeert het transcript zelf vóórdat je opslaat — dat is bewust de bevestigingsstap,
+  want spraakherkenning gaat af en toe mis. Een **"Opslaan als"-keuzelijst** (Notitie / Taak,
+  ook onthouden in `localStorage`) bepaalt of het transcript naar de bestaande `/notes`- of
+  `/tasks`-route gaat — bij een taak wordt de rauwe transcript-tekst de beschrijving (taken
+  tonen platte/markdown-tekst, geen HTML-editor zoals notities), en de knoptekst
+  ("Opslaan als notitie"/"Opslaan als taak") past zich live aan je keuze aan. Dit is een
+  bewuste eigen keuze i.p.v. automatische classificatie — Fase 2 (nog niet gebouwd): ChatGPT
+  laten bepalen of het een taak/kanban-kaart/notitie moet worden i.p.v. dat je het zelf
+  aangeeft, met een eigen bevestigingsscherm — de
   OpenAI-sleutel daarvoor kun je nu alvast instellen via Account → OpenAI API-sleutel, met
   een **"Sleutel testen"-knop** die de zojuist ingevulde (nog niet per se opgeslagen)
   sleutel direct tegen `GET https://api.openai.com/v1/models` test en meldt of 'm werkt —
@@ -564,6 +569,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     open het opnieuw → "English" staat nog steeds geselecteerd (localStorage). Neem een
     Engelse zin op → het transcript moet er nu stukken betrouwbaarder uitzien dan met
     automatische detectie, vooral bij een klein Whisper-model.
+37. Zet in het opnamepaneel "Opslaan als" op "Taak" → de knop onderaan heet nu "Opslaan als
+    taak". Neem iets op en sla op → je komt op de takenlijst en de nieuwe taak staat er met
+    het transcript als beschrijving. Open het paneel opnieuw → "Taak" staat nog steeds
+    geselecteerd. Zet "Opslaan als" terug op "Notitie", neem nogmaals iets op en sla op → je
+    komt nu op de notitielijst met een gewone notitie.
 
 ## Architectuur
 
