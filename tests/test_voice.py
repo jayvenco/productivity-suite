@@ -1,3 +1,4 @@
+import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import httpx
@@ -138,3 +139,78 @@ def test_test_connection_handles_unreachable_service(logged_in_client):
     data = response.json()
     assert data["valid"] is False
     assert "onbereikbaar" in data["message"]
+
+
+def _fake_openai_chat_client(*, content=None, status_code=200, error=None):
+    fake_client = AsyncMock()
+    fake_client.__aenter__.return_value = fake_client
+    fake_client.__aexit__.return_value = False
+    if error is not None:
+        fake_client.post.side_effect = error
+    else:
+        fake_response = MagicMock()
+        fake_response.status_code = status_code
+        fake_response.text = content or ""
+        fake_response.json.return_value = {"choices": [{"message": {"content": content}}]}
+        fake_client.post.return_value = fake_response
+    return fake_client
+
+
+def test_classify_requires_login(client):
+    response = client.post("/voice/classify", data={"transcript": "iets"}, follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
+def test_classify_rejects_empty_transcript(logged_in_client):
+    response = logged_in_client.post("/voice/classify", data={"transcript": "  "})
+    assert response.status_code == 400
+
+
+def test_classify_requires_openai_key(logged_in_client):
+    response = logged_in_client.post("/voice/classify", data={"transcript": "Boodschappen doen"})
+    assert response.status_code == 400
+    assert "OpenAI" in response.json()["detail"]
+
+
+def test_classify_returns_parsed_type_title_and_tags(logged_in_client):
+    logged_in_client.post("/account/openai-key", data={"openai_api_key": "sk-test"})
+    payload = json.dumps({"type": "task", "title": "Boodschappen doen", "tags": ["huishouden", "boodschappen"]})
+    fake_client = _fake_openai_chat_client(content=payload)
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post("/voice/classify", data={"transcript": "Ik moet boodschappen doen"})
+    assert response.status_code == 200
+    assert response.json() == {"type": "task", "title": "Boodschappen doen", "tags": "huishouden, boodschappen"}
+
+
+def test_classify_falls_back_to_note_for_unknown_type(logged_in_client):
+    logged_in_client.post("/account/openai-key", data={"openai_api_key": "sk-test"})
+    payload = json.dumps({"type": "onzin", "title": "Iets", "tags": []})
+    fake_client = _fake_openai_chat_client(content=payload)
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post("/voice/classify", data={"transcript": "Iets vaags"})
+    assert response.json()["type"] == "note"
+
+
+def test_classify_handles_unreachable_openai(logged_in_client):
+    logged_in_client.post("/account/openai-key", data={"openai_api_key": "sk-test"})
+    fake_client = _fake_openai_chat_client(error=httpx.ConnectError("boom"))
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post("/voice/classify", data={"transcript": "Iets"})
+    assert response.status_code == 503
+
+
+def test_classify_surfaces_openai_error_response(logged_in_client):
+    logged_in_client.post("/account/openai-key", data={"openai_api_key": "sk-test"})
+    fake_client = _fake_openai_chat_client(status_code=401, content="invalid api key")
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post("/voice/classify", data={"transcript": "Iets"})
+    assert response.status_code == 502
+
+
+def test_classify_handles_unparseable_openai_response(logged_in_client):
+    logged_in_client.post("/account/openai-key", data={"openai_api_key": "sk-test"})
+    fake_client = _fake_openai_chat_client(content="dit is geen json")
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post("/voice/classify", data={"transcript": "Iets"})
+    assert response.status_code == 502

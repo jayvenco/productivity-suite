@@ -28,6 +28,20 @@ def _get_board_or_404(db: Session, user_id: int) -> KanbanBoard:
     return board
 
 
+@router.get("/default-cell")
+def default_cell(user: User = Depends(require_user), db: Session = Depends(get_db)) -> dict:
+    """Geeft de eerste swimlane/kolom van het bord terug -- gebruikt door de
+    voice-opname (app/static/js/voice.js) om een kanban-kaart aan te maken zonder dat er
+    een UI is om zelf een cel te kiezen: de kaart komt gewoon in de eerste cel terecht,
+    net als bij een nieuwe swimlane (die ook altijd met de standaardkolommen begint)."""
+    board = _get_board_or_404(db, user.id)
+    if not board.swimlanes or not board.swimlanes[0].columns:
+        raise HTTPException(status_code=404, detail="Geen kolommen gevonden op het bord")
+    swimlane = board.swimlanes[0]
+    column = swimlane.columns[0]
+    return {"swimlane_id": swimlane.id, "column_id": column.id}
+
+
 @router.get("")
 def board_view(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
     board = _get_board_or_404(db, user.id)

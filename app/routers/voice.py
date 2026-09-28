@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import httpx
 from fastapi import APIRouter, Depends, Form, HTTPException, UploadFile
 
@@ -8,6 +10,26 @@ from app.config import settings
 from app.models.user import User
 
 router = APIRouter(prefix="/voice", tags=["voice"])
+
+# Fase 2 (zie BACKLOG.md): het model dat bepaalt welk type item het transcript moet
+# worden -- bewust een klein/goedkoop model, want dit is een simpele classificatietaak
+# (geen lange generatie).
+_CLASSIFY_MODEL = "gpt-4o-mini"
+_CLASSIFY_TYPES = {"task", "note", "kanban_card", "snippet"}
+_CLASSIFY_SYSTEM_PROMPT = (
+    "Je bepaalt welk type item een gesproken transcript uit een persoonlijke "
+    "productivity-app moet worden. Het transcript kan Nederlands of Engels zijn. "
+    "Antwoord ALLEEN met geldige JSON, zonder uitleg erbuiten, in dit exacte formaat: "
+    '{"type": "task" | "note" | "kanban_card" | "snippet", '
+    '"title": "korte titel, max ~60 tekens, zelfde taal als het transcript", '
+    '"tags": ["los", "trefwoord"]}. '
+    "Kies 'task' voor een concrete actie/to-do. Kies 'kanban_card' alleen als het "
+    "transcript expliciet een project- of bordcontext noemt (bv. 'zet op het bord ...'). "
+    "Kies 'snippet' alleen als het transcript letterlijk code, een commando of "
+    "configuratie bevat. Kies in alle andere gevallen 'note' -- dat is de veilige "
+    "standaardkeuze bij twijfel. Verzin geen tags die niet in het transcript passen; "
+    "een lege tags-lijst mag."
+)
 
 
 def _resolve_whisper_config(user: User, url_override: str = "", model_override: str = "") -> tuple[str, str]:
@@ -114,3 +136,61 @@ async def test_connection(
             "message": f"Verbinding gelukt, maar model '{model}' staat er niet bij. Geladen: {', '.join(model_ids)}.",
         }
     return {"valid": True, "message": "Verbinding gelukt (geen modellenlijst ontvangen om te vergelijken)."}
+
+
+@router.post("/classify")
+async def classify(transcript: str = Form(...), user: User = Depends(require_user)) -> dict:
+    """Fase 2 (zie BACKLOG.md): laat ChatGPT bepalen welk type item het transcript moet
+    worden (taak/notitie/kanban-kaart/snippet) i.p.v. dat de gebruiker dat altijd zelf via
+    de "Opslaan als"-keuzelijst kiest. Bepaalt bewust ALLEEN type/titel/tags -- de inhoud
+    zelf blijft het transcript dat de gebruiker net gecontroleerd/gecorrigeerd heeft (de
+    bevestigingsstap uit fase 1), zodat er geen tweede laag AI-herschrijving boven op de
+    spraakherkenning komt. Dit hele resultaat is een suggestie: opslaan gebeurt pas als de
+    gebruiker zelf op de "Opslaan als ..."-knop klikt, met de velden die op dat moment in
+    het formulier staan."""
+    if not transcript.strip():
+        raise HTTPException(status_code=400, detail="Geen tekst om te classificeren")
+    if not user.openai_api_key:
+        raise HTTPException(
+            status_code=400,
+            detail="Stel eerst een OpenAI API-sleutel in via Account → OpenAI API-sleutel.",
+        )
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as http_client:
+            response = await http_client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {user.openai_api_key}"},
+                json={
+                    "model": _CLASSIFY_MODEL,
+                    "response_format": {"type": "json_object"},
+                    "messages": [
+                        {"role": "system", "content": _CLASSIFY_SYSTEM_PROMPT},
+                        {"role": "user", "content": transcript},
+                    ],
+                },
+            )
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=503, detail="Kan de OpenAI API niet bereiken.") from exc
+
+    if response.status_code >= 400:
+        raise HTTPException(
+            status_code=502,
+            detail=f"OpenAI gaf een foutmelding ({response.status_code}): {response.text[:300]}",
+        )
+
+    try:
+        raw_content = response.json()["choices"][0]["message"]["content"]
+        parsed = json.loads(raw_content)
+    except (KeyError, IndexError, ValueError) as exc:
+        raise HTTPException(status_code=502, detail="Kon het antwoord van OpenAI niet lezen.") from exc
+
+    item_type = parsed.get("type") if parsed.get("type") in _CLASSIFY_TYPES else "note"
+    title = (parsed.get("title") or "").strip()[:200] or "Voice-item"
+    raw_tags = parsed.get("tags") or []
+    if isinstance(raw_tags, list):
+        tags = ", ".join(str(t).strip() for t in raw_tags if str(t).strip())
+    else:
+        tags = str(raw_tags).strip()
+
+    return {"type": item_type, "title": title, "tags": tags}

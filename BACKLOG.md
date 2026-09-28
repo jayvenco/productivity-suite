@@ -21,24 +21,28 @@ aan is.
 (via `VACUUM INTO`, dus veilig naast een lopende app), met automatische veiligheidskopie en
 schema-update bij het importeren van een oudere back-up.
 
-**Voice-opname → taken/notities/etc. (Whisper + ChatGPT) — fase 1 opgelost, fase 2 nog niet**:
+~~**Voice-opname → taken/notities/etc. (Whisper + ChatGPT)**~~ — opgelost (fase 1 én 2):
 
-~~Fase 1~~ — opgelost: een 🎤 "Voice"-spaak in het quick-add-wiel opent een opnamepaneel
-(`MediaRecorder` in de browser). Het audiofragment gaat naar `POST /voice/transcribe`
+Fase 1: een 🎤 "Voice"-spaak in het quick-add-wiel opent een opnamepaneel (`MediaRecorder`
+in de browser). Het audiofragment gaat naar `POST /voice/transcribe`
 (`app/routers/voice.py`), dat 'm doorstuurt naar een **losse, zelf-gehoste Speaches-container**
 (voorheen faster-whisper-server; `WHISPER_SERVICE_URL` + `WHISPER_MODEL` — bewust niet de
 betaalde OpenAI Whisper-API, en niet ingebakken in de hoofd-image, zie README →
-Architectuur). Het transcript verschijnt bewerkbaar in een tekstvak (de bevestigingsstap)
-en wordt bij "Opslaan als notitie" altijd als gewone notitie opgeslagen
-(hergebruikt de bestaande `/notes`-route). Een OpenAI API-sleutel is al instelbaar via
-Account → OpenAI API-sleutel, klaar voor fase 2.
+Architectuur). Het transcript verschijnt bewerkbaar in een tekstvak (de bevestigingsstap).
+Je kiest zelf het type (Notitie/Taak/Kanban-kaart/Snippet) via "Opslaan als", met een eigen
+tags-veld.
 
-**Fase 2 (nog te bouwen)**: de tekst laten interpreteren door ChatGPT (structured
-output/JSON: welke actie — taak/notitie/kanban-kaart/snippet, evt. verwijzend naar een
-bestaand item — met welke velden) i.p.v. altijd een notitie. De uitvoering hergebruikt de
-bestaande create-routes/services (dezelfde die de agent-API al gebruikt), dus geen herbouw
-van de kernlogica nodig — vooral een nieuwe interpretatie-stap + een eigen
-bevestigingsscherm ("Ik heb begrepen: taak 'X' aanmaken — klopt dat?") vóór het écht wordt
-uitgevoerd, want AI-interpretatie gaat af en toe mis. Kosten: verwaarloosbaar voor
-persoonlijk gebruik (een kleine ChatGPT-prompt per commando; transcriptie zelf is al gratis
-via de lokale Whisper-container).
+Fase 2: een "✨ Laat AI het type bepalen"-knop stuurt het transcript naar `POST
+/voice/classify` (`app/routers/voice.py`), die ChatGPT (structured JSON-output) laat
+bepalen welk type het moet worden + een titel + tags voorstelt. Bewust **alleen**
+type/titel/tags — de inhoud blijft het transcript dat je net zelf gecontroleerd hebt, geen
+tweede laag AI-herschrijving boven op de spraakherkenning. Het resultaat vult de velden
+("Opslaan als" + titel + tags) alvast in, maar je klikt zelf nog op de "Opslaan als
+..."-knop — dát is de bevestigingsstap, in plaats van een apart bevestigingsscherm. Vereist
+een ingestelde OpenAI-sleutel (Account → OpenAI API-sleutel). Kanban-kaarten komen in de
+eerste cel van het bord terecht (`GET /kanban/default-cell`) — er is geen UI om vanuit
+voice een specifieke cel te kiezen, maar de kaart is daarna gewoon te verslepen.
+
+**Nog niet gebouwd (mocht daar ooit behoefte aan zijn)**: matchen op een al bestaand item
+i.p.v. altijd een nieuw item aanmaken (bv. "voeg dit toe aan mijn boodschappenlijst-notitie"
+i.p.v. een nieuwe notitie).

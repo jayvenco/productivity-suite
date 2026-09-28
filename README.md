@@ -222,16 +222,31 @@ Gebouwd:
   ("tiny") is dat een stuk betrouwbaarder dan automatische taaldetectie, die bij korte
   fragmenten weleens de verkeerde taal raadt of talen door elkaar mixt. Je ziet en
   corrigeert het transcript zelf vóórdat je opslaat — dat is bewust de bevestigingsstap,
-  want spraakherkenning gaat af en toe mis. Een **"Opslaan als"-keuzelijst** (Notitie / Taak,
-  ook onthouden in `localStorage`) bepaalt of het transcript naar de bestaande `/notes`- of
-  `/tasks`-route gaat — bij een taak wordt de rauwe transcript-tekst de beschrijving (taken
-  tonen platte/markdown-tekst, geen HTML-editor zoals notities), en de knoptekst
-  ("Opslaan als notitie"/"Opslaan als taak") past zich live aan je keuze aan. Dit is een
-  bewuste eigen keuze i.p.v. automatische classificatie — Fase 2 (nog niet gebouwd): ChatGPT
-  laten bepalen of het een taak/kanban-kaart/notitie moet worden i.p.v. dat je het zelf
-  aangeeft, met een eigen bevestigingsscherm — de
-  OpenAI-sleutel daarvoor kun je nu alvast instellen via Account → OpenAI API-sleutel, met
-  een **"Sleutel testen"-knop** die de zojuist ingevulde (nog niet per se opgeslagen)
+  want spraakherkenning gaat af en toe mis. Een **"Opslaan als"-keuzelijst** (Notitie / Taak
+  / Kanban-kaart / Snippet, onthouden in `localStorage`) plus een eigen **tags-veld**
+  bepalen naar welke bestaande create-route het transcript gaat (`/notes`, `/tasks`,
+  `/kanban/cards` of `/snippets`) — bij een taak/kanban-kaart wordt de rauwe
+  transcript-tekst de beschrijving (die tonen platte/markdown-tekst, geen HTML-editor zoals
+  notities), bij een snippet wordt het één bestand (`notitie.txt`, plaintext). Een
+  kanban-kaart komt in de eerste cel van je bord terecht (`GET /kanban/default-cell`,
+  hergebruikt door fase 2 hieronder) — er is vanuit voice geen UI om zelf een cel te kiezen,
+  maar de kaart is daarna gewoon te verslepen. De knoptekst ("Opslaan als ...") past zich
+  live aan je keuze aan.
+- **Voice-notitie fase 2: AI bepaalt het type**: een **"✨ Laat AI het type
+  bepalen"-knop** in hetzelfde opnamepaneel stuurt het (al gecontroleerde) transcript naar
+  `POST /voice/classify` (`app/routers/voice.py`), die ChatGPT (`gpt-4o-mini`, JSON-output)
+  laat bepalen of het een taak/notitie/kanban-kaart/snippet moet worden, plus een titel en
+  tags voorstelt. Bewust **alleen** type/titel/tags — de inhoud blijft het transcript dat je
+  net zelf gecontroleerd hebt (fase 1's bevestigingsstap), zodat er geen tweede laag
+  AI-herschrijving boven op de spraakherkenning komt. Het resultaat vult de
+  "Opslaan als"-keuzelijst, het titelveld en het tags-veld alvast in, met een tekstregel
+  ("AI denkt: taak 'Boodschappen doen' — controleer de velden en klik op ...") — je klikt
+  daarna nog steeds zelf op de "Opslaan als ..."-knop, dát is de eigenlijke
+  bevestigingsstap (in plaats van een apart bevestigingsscherm: de velden staan al
+  zichtbaar/bewerkbaar in hetzelfde paneel). Vereist een ingestelde OpenAI-sleutel (zie
+  hieronder) — zonder sleutel geeft de knop een duidelijke foutmelding i.p.v. een vage 500.
+  De **OpenAI-sleutel** stel je in via Account → OpenAI API-sleutel, met een
+  **"Sleutel testen"-knop** die de zojuist ingevulde (nog niet per se opgeslagen)
   sleutel direct tegen `GET https://api.openai.com/v1/models` test en meldt of 'm werkt —
   zonder dat je eerst hoeft op te slaan of ergens anders hoeft te controleren. De
   Speaches-**service-URL en modelnaam zijn nu ook via Account → Whisper / Speaches
@@ -249,10 +264,10 @@ Gebouwd:
   Architectuur), niet per-gebruiker gefilterd — voor een single-user-per-deployment app
   maakt dat niets uit.
 
-Nog niet gebouwd: CI/CD, slimme voice-commando-interpretatie (taak/kanban/notitie kiezen +
-matchen op bestaande items via ChatGPT — de basis "opnemen → transcriberen → als notitie
-opslaan" werkt al, zie hierboven), verdere LLM-koppeling (er is nu wel een API voor
-scripts/agents, zie hieronder).
+Nog niet gebouwd: CI/CD, voice-commando's matchen op een al bestaand item i.p.v. altijd een
+nieuw item aanmaken (bv. "voeg dit toe aan mijn boodschappenlijst-notitie" i.p.v. een nieuwe
+notitie — de classificatie zelf, welk type item het moet worden, werkt al via ChatGPT, zie
+hierboven), verdere LLM-koppeling (er is nu wel een API voor scripts/agents, zie hieronder).
 
 ## Configuratie
 
@@ -591,6 +606,23 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     die niet allebei bij hetzelfde item horen → 0 resultaten.
 39. Log uit en ga naar `/` (of log opnieuw in) → je komt automatisch op de Kalender terecht
     (dat was al zo, geen losse instelling nodig).
+40. Open het opnamepaneel (🎤 Voice) → naast "Opslaan als" staat nu ook een Tags-veld. Zet
+    "Opslaan als" op "Kanban-kaart", neem iets op en sla op → je komt op het kanbanbord en de
+    kaart staat in de eerste kolom van de eerste swimlane. Zet "Opslaan als" op "Snippet",
+    neem iets op en sla op → je komt op de Snippets-pagina met een nieuwe snippet
+    (`notitie.txt`, platte tekst).
+41. Ga naar Account → OpenAI API-sleutel en vul een ongeldige sleutel in (bv. `sk-test`),
+    klik "Opslaan". Open het opnamepaneel, neem iets op, klik op "✨ Laat AI het type
+    bepalen" → je krijgt een duidelijke foutmelding onder de knop (OpenAI wijst de sleutel
+    af), geen crash. Wis de sleutel weer via "Sleutel wissen" en probeer de knop opnieuw →
+    nu een andere, duidelijke foutmelding ("Stel eerst een OpenAI API-sleutel in..."). Vul
+    een echte, werkende OpenAI-sleutel in en probeer het nogmaals met een duidelijke
+    to-do-zin (bv. "ik moet morgen de auto laten wassen") → de "Opslaan als"-keuzelijst
+    springt naar "Taak", de titel en tags worden voorgesteld, en er verschijnt een regel
+    "AI denkt: taak '...' — controleer de velden en klik op ...". Klik daarna zelf op de
+    "Opslaan als taak"-knop → de taak wordt pas nú aangemaakt, met de tekst zoals die op dat
+    moment in het transcript-veld staat (dus als je die nog aanpast vóór het klikken, komt
+    jouw aanpassing erin, niet wat de AI oorspronkelijk zag).
 
 ## Architectuur
 
@@ -1084,3 +1116,25 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   `app/main.py` stuurt een ingelogde gebruiker altijd door naar `/calendar` (zie de
   Kalender-bugfix/architectuurnotitie eerder in dit bestand) — dit was dus al zo vóórdat de
   zoekfunctie werd toegevoegd.
+- **Voice fase 2 (`POST /voice/classify`) hergebruikt de bestaande create-routes, geen eigen
+  opslaglogica**: het endpoint doet zelf niets met de database -- het geeft alleen
+  `{type, title, tags}` terug aan de browser, die daarmee dezelfde `/tasks`-, `/notes`-,
+  `/kanban/cards`- en `/snippets`-routes aanroept die ook de handmatige "Opslaan als"-flow
+  (fase 1) en de agent-API al gebruiken. Zo blijft er precies één plek per entiteit die
+  weet hoe een taak/notitie/kaart/snippet aangemaakt wordt. De classificatieprompt vraagt
+  bewust NIET om de inhoud te herschrijven (alleen type/titel/tags) -- de inhoud is en
+  blijft het transcript dat de gebruiker al gecontroleerd heeft; een tweede AI-laag die de
+  tekst zelf ook nog aanpast zou een tweede plek zijn waar het mis kan gaan, boven op de
+  spraakherkenning zelf.
+- **Kanban-kaart vanuit voice: eerste cel, geen keuze-UI**: `GET /kanban/default-cell`
+  (`app/routers/kanban.py`) geeft de eerste swimlane/kolom van het bord terug. Er is bewust
+  geen los stap in het voice-paneel om een swimlane/kolom te kiezen (dat zou het paneel
+  onnodig complex maken voor een functie die je terloops via spraak gebruikt) -- de kaart
+  komt in de eerste cel terecht en is daarna via drag-and-drop net zo makkelijk te
+  verplaatsen als elke andere kaart.
+- **`gpt-4o-mini` hardcoded i.p.v. instelbaar**: in tegenstelling tot Whisper (waar het
+  model wél instelbaar is, omdat verschillende self-hosted Speaches-installaties andere
+  modellen geladen kunnen hebben) is er voor de OpenAI-classificatie geen instelbaar model
+  -- dit is een simpele, goedkope classificatietaak (geen lange generatie) waarvoor één
+  vast klein model volstaat, en instelbaarheid zou hier alleen maar een extra
+  foutbron/instelling toevoegen zonder echt voordeel.

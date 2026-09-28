@@ -176,6 +176,8 @@
       <select id="voice-recorder-type">
         <option value="note">Notitie</option>
         <option value="task">Taak</option>
+        <option value="kanban_card">Kanban-kaart</option>
+        <option value="snippet">Snippet</option>
       </select>
     </div>
 
@@ -192,8 +194,16 @@
         <input type="text" id="voice-recorder-title" placeholder="Voice-notitie">
       </div>
       <div class="field">
+        <label for="voice-recorder-tags">Tags (optioneel, komma-gescheiden)</label>
+        <input type="text" id="voice-recorder-tags" placeholder="bv. werk, belangrijk">
+      </div>
+      <div class="field">
         <label for="voice-recorder-transcript">Transcript (controleer/pas aan vóór opslaan)</label>
         <textarea id="voice-recorder-transcript" rows="6"></textarea>
+      </div>
+      <div class="voice-recorder-ai-row">
+        <button type="button" class="btn btn-secondary" id="voice-recorder-classify-btn">✨ Laat AI het type bepalen</button>
+        <div class="voice-recorder-ai-hint" id="voice-recorder-ai-hint"></div>
       </div>
       <div class="voice-recorder-actions">
         <button type="button" class="btn" id="voice-recorder-save-btn">Opslaan als notitie</button>

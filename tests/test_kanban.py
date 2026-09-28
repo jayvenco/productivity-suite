@@ -19,6 +19,21 @@ def _swimlane_id_for_name(html: str, name: str) -> str:
     return matches[-1].group(1)
 
 
+def test_default_cell_returns_first_swimlane_and_column(logged_in_client):
+    board_html = logged_in_client.get("/kanban").text
+    column_id, swimlane_id = _first_ids(board_html)
+
+    response = logged_in_client.get("/kanban/default-cell")
+    assert response.status_code == 200
+    assert response.json() == {"swimlane_id": int(swimlane_id), "column_id": int(column_id)}
+
+
+def test_default_cell_requires_login(client):
+    response = client.get("/kanban/default-cell", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
 def _card_id_for_title(html: str, title: str) -> str:
     """Zoekt het data-card-id van de kaart met deze titel (het board bevat kaarten
     uit eerdere tests in dezelfde sessie, dus de eerste data-card-id is niet altijd

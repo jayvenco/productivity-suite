@@ -2709,6 +2709,20 @@ body.mindmap-editor .mindmap-canvas {
   margin-top: 12px;
 }
 
+.voice-recorder-ai-row {
+  margin-top: 12px;
+}
+
+.voice-recorder-ai-hint {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.voice-recorder-ai-hint-error {
+  color: var(--danger, #e06c75);
+}
+
 /* ---- Account: statistieken-tegels ---- */
 
 .stats-grid {
