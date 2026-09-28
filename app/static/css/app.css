@@ -697,6 +697,58 @@ textarea {
   margin-bottom: 0;
 }
 
+.swimlane-rename-form {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.swimlane-rename-form summary {
+  list-style: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 2px 4px;
+}
+
+.swimlane-rename-form summary:hover {
+  color: var(--text);
+}
+
+.swimlane-rename-form summary::-webkit-details-marker {
+  display: none;
+}
+
+.swimlane-rename-form form {
+  position: absolute;
+  z-index: 5;
+  top: 100%;
+  left: 0;
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  background: var(--bg-elevated);
+  padding: 6px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.swimlane-delete-form {
+  flex-shrink: 0;
+}
+
+.swimlane-delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 2px 4px;
+}
+
+.swimlane-delete-btn:hover {
+  color: var(--danger);
+}
+
 .board-row[hidden] {
   display: none;
 }
@@ -816,6 +868,12 @@ textarea {
 
 .kanban-card .card-title {
   font-weight: 600;
+}
+
+.card-task-link {
+  color: var(--accent);
+  margin-right: 4px;
+  text-decoration: none;
 }
 
 .card-actions {

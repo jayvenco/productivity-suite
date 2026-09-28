@@ -39,7 +39,10 @@ class KanbanSwimlane(Base):
     columns: Mapped[list["KanbanColumn"]] = relationship(
         back_populates="swimlane", cascade="all, delete-orphan", order_by="KanbanColumn.position"
     )
-    cards: Mapped[list["KanbanCard"]] = relationship(back_populates="swimlane")
+    # passive_deletes=True: laat de DB-cascade (ondelete="CASCADE" op KanbanCard.swimlane_id,
+    # PRAGMA foreign_keys=ON) de kaarten opruimen i.p.v. dat SQLAlchemy zelf eerst
+    # `swimlane_id=NULL` probeert te zetten -- dat laatste botst met de NOT NULL-kolom.
+    cards: Mapped[list["KanbanCard"]] = relationship(back_populates="swimlane", passive_deletes=True)
 
     @property
     def hue(self) -> int:
@@ -75,7 +78,8 @@ class KanbanColumn(Base):
 
     board: Mapped["KanbanBoard"] = relationship()
     swimlane: Mapped["KanbanSwimlane"] = relationship(back_populates="columns")
-    cards: Mapped[list["KanbanCard"]] = relationship(back_populates="column")
+    # passive_deletes=True: zie dezelfde toelichting bij KanbanSwimlane.cards hierboven.
+    cards: Mapped[list["KanbanCard"]] = relationship(back_populates="column", passive_deletes=True)
 
 
 class KanbanCard(Base):

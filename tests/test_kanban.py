@@ -97,12 +97,123 @@ def test_create_card_with_checklist_and_toggle(logged_in_client):
     assert 'checklist-item done' in board_html_after
 
 
+def test_add_task_as_card_links_and_copies_fields(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Auto laten wassen", "description": "zaterdag inplannen", "deadline": "", "tags": "auto"}
+    )
+    tasks_html = logged_in_client.get("/tasks").text
+    idx = tasks_html.rindex("Auto laten wassen")
+    task_id = re.findall(r'data-href="/tasks/(\d+)/edit"', tasks_html[:idx])[-1]
+
+    board_html = logged_in_client.get("/kanban").text
+    assert f'<option value="{task_id}">Auto laten wassen</option>' in board_html
+    column_id, swimlane_id = _first_ids(board_html)
+
+    response = logged_in_client.post(
+        "/kanban/cards/from-task",
+        data={"column_id": column_id, "swimlane_id": swimlane_id, "task_id": task_id},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+    board_html = logged_in_client.get("/kanban").text
+    assert "Auto laten wassen" in board_html
+    assert f'href="/tasks/{task_id}/edit"' in board_html
+    # Tags zijn niet zichtbaar op het bord zelf (zie architectuurnotitie "Tags weg uit de
+    # overzichten"), maar wel meegekopieerd naar het (verborgen) bewerkformulier van de kaart.
+    assert 'name="tags" placeholder="Tags (komma-gescheiden)" value="auto"' in board_html
+    # De taak staat niet meer in de keuzelijst, want die is al aan een kaart gekoppeld.
+    assert f'<option value="{task_id}">Auto laten wassen</option>' not in board_html
+
+
+def test_add_task_as_card_requires_existing_task(logged_in_client):
+    board_html = logged_in_client.get("/kanban").text
+    column_id, swimlane_id = _first_ids(board_html)
+    response = logged_in_client.post(
+        "/kanban/cards/from-task",
+        data={"column_id": column_id, "swimlane_id": swimlane_id, "task_id": 999999},
+    )
+    assert response.status_code == 404
+
+
+def test_done_tasks_are_not_offered_as_cards(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Al afgerond", "description": "", "deadline": "", "tags": ""})
+    tasks_html = logged_in_client.get("/tasks").text
+    match = re.search(r'data-href="/tasks/(\d+)/edit">[\s\S]*?Al afgerond', tasks_html)
+    assert match, "Taak niet gevonden"
+    task_id = match.group(1)
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+
+    board_html = logged_in_client.get("/kanban").text
+    assert f'<option value="{task_id}">Al afgerond</option>' not in board_html
+
+    # Opruimen: andere tests in dezelfde testrun delen deze database en doen soms brede
+    # "task-card-done" not in ...-checks -- een hier achtergelaten afgeronde taak zou die
+    # tests laten falen, dus meteen weer opruimen i.p.v. alleen terugzetten naar "todo".
+    logged_in_client.post(f"/tasks/{task_id}/delete")
+
+
 def test_create_swimlane(logged_in_client):
     response = logged_in_client.post("/kanban/swimlanes", data={"name": "Werk"}, follow_redirects=False)
     assert response.status_code == 303
 
     board_html = logged_in_client.get("/kanban").text
     assert "Werk" in board_html
+
+
+def test_rename_swimlane(logged_in_client):
+    logged_in_client.post("/kanban/swimlanes", data={"name": "Hernoem-mij"})
+    board_html = logged_in_client.get("/kanban").text
+    swimlane_id = _swimlane_id_for_name(board_html, "Hernoem-mij")
+
+    response = logged_in_client.post(
+        f"/kanban/swimlanes/{swimlane_id}/rename", data={"name": "Hernoemd"}, follow_redirects=False
+    )
+    assert response.status_code == 303
+
+    board_html = logged_in_client.get("/kanban").text
+    assert "Hernoemd" in board_html
+    assert "Hernoem-mij" not in board_html
+
+
+def test_delete_swimlane_removes_its_cards(logged_in_client):
+    logged_in_client.post("/kanban/swimlanes", data={"name": "Weg-te-gooien"})
+    board_html = logged_in_client.get("/kanban").text
+    swimlane_id = _swimlane_id_for_name(board_html, "Weg-te-gooien")
+    column_id = re.search(
+        rf'data-column-id="(\d+)" data-swimlane-id="{swimlane_id}"', board_html
+    ).group(1)
+    logged_in_client.post(
+        "/kanban/cards",
+        data={"column_id": column_id, "swimlane_id": swimlane_id, "title": "Kaart in te verwijderen lane", "description": "", "tags": ""},
+    )
+
+    response = logged_in_client.post(f"/kanban/swimlanes/{swimlane_id}/delete", follow_redirects=False)
+    assert response.status_code == 303
+
+    board_html = logged_in_client.get("/kanban").text
+    assert "Weg-te-gooien" not in board_html
+    assert "Kaart in te verwijderen lane" not in board_html
+
+
+def test_cannot_delete_last_swimlane(logged_in_client):
+    board_html = logged_in_client.get("/kanban").text
+    _, swimlane_id = _first_ids(board_html)
+    swimlane_count = board_html.count("swimlane-toggle=")
+    if swimlane_count > 1:
+        # Deze testrun heeft (door eerdere tests) meer dan één swimlane -- verwijder de
+        # rest tot er nog maar één over is, zodat deze test z'n eigen randgeval test.
+        for sid in re.findall(r'data-swimlane-toggle="(\d+)"', board_html)[1:]:
+            logged_in_client.post(f"/kanban/swimlanes/{sid}/delete")
+
+    response = logged_in_client.post(f"/kanban/swimlanes/{swimlane_id}/delete")
+    assert response.status_code == 400
+
+
+def test_delete_swimlane_requires_login(client):
+    response = client.post("/kanban/swimlanes/1/delete", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
 
 
 def test_bare_url_in_card_description_is_auto_linked(logged_in_client):

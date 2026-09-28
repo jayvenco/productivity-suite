@@ -25,7 +25,19 @@
       <button type="button" class="swimlane-heading swimlane-toggle" style="{{ swimlane.heading_style }}" data-swimlane-toggle="{{ swimlane.id }}">
         <span class="swimlane-toggle-arrow">▾</span> {{ swimlane.name }}
       </button>
+      <details class="swimlane-rename-form">
+        <summary title="Naam wijzigen">✎</summary>
+        <form method="post" action="/kanban/swimlanes/{{ swimlane.id }}/rename">
+          <input type="text" name="name" value="{{ swimlane.name }}" required>
+          <button type="submit" class="btn btn-sm">Opslaan</button>
+        </form>
+      </details>
       <input type="color" class="swimlane-color-input" data-swimlane-id="{{ swimlane.id }}" value="{{ swimlane.color or '#6c7086' }}" title="Swimlane-kleur kiezen">
+      {% if board.swimlanes|length > 1 %}
+      <form method="post" action="/kanban/swimlanes/{{ swimlane.id }}/delete" class="swimlane-delete-form" onsubmit="return confirm('Swimlane &quot;{{ swimlane.name }}&quot; verwijderen? Alle kolommen en kaarten hierin gaan ook mee weg.')">
+        <button type="submit" class="swimlane-delete-btn" title="Swimlane verwijderen">🗑</button>
+      </form>
+      {% endif %}
     </div>
     <div class="board-row">
       {% for column in swimlane.columns %}
@@ -39,7 +51,7 @@
         <div class="card-list" data-column-id="{{ column.id }}" data-swimlane-id="{{ swimlane.id }}">
           {% for card in column_cards %}
           <div class="kanban-card" draggable="true" data-card-id="{{ card.id }}" {% if card.color %}style="border-left-color: {{ card.color }};"{% endif %}>
-            <div class="card-title">{{ card.title }}</div>
+            <div class="card-title">{% if card.task_id %}<a href="/tasks/{{ card.task_id }}/edit" class="card-task-link" title="Gekoppelde taak openen" onclick="event.stopPropagation()">✓</a> {% endif %}{{ card.title }}</div>
             {% if card.description %}<div class="card-description">{{ card.description|checklist_html(card.id)|safe }}</div>{% endif %}
             <div class="card-actions">
               <button type="button" class="card-edit-toggle" data-card-id="{{ card.id }}">Bewerken</button>
@@ -81,6 +93,21 @@
             <button type="submit" class="btn">Toevoegen</button>
           </form>
         </details>
+        {% if available_tasks %}
+        <details class="add-card-form">
+          <summary>+ Taak toevoegen</summary>
+          <form method="post" action="/kanban/cards/from-task">
+            <input type="hidden" name="column_id" value="{{ column.id }}">
+            <input type="hidden" name="swimlane_id" value="{{ swimlane.id }}">
+            <select name="task_id" required>
+              {% for task in available_tasks %}
+              <option value="{{ task.id }}">{{ task.title }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-secondary">Toevoegen</button>
+          </form>
+        </details>
+        {% endif %}
       </div>
       {% endfor %}
       <details class="add-column-form">

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, selectinload
 from app.auth.dependencies import require_user
 from app.database import get_db
 from app.models.kanban import KanbanBoard, KanbanCard, KanbanColumn, KanbanSwimlane
+from app.models.task import Task, TaskStatus
 from app.models.user import User
 from app.services.checklist import toggle_checklist_line
 from app.services.seed import DEFAULT_COLUMNS
@@ -56,10 +57,24 @@ def board_view(request: Request, user: User = Depends(require_user), db: Session
     for card in cards:
         cards_by_cell.setdefault((card.swimlane_id, card.column_id), []).append(card)
 
+    # Taken die je vanuit het bord als kaart kunt toevoegen ("+ Taak toevoegen"): nog niet
+    # afgerond en nog niet al aan een kaart gekoppeld (anders zou je 'm twee keer kunnen
+    # toevoegen). `KanbanCard.task_id` bestond al in het model maar werd nergens gezet --
+    # dit is de ontbrekende koppeling.
+    already_linked_task_ids = (
+        db.query(KanbanCard.task_id).filter(KanbanCard.board_id == board.id, KanbanCard.task_id.isnot(None))
+    )
+    available_tasks = (
+        db.query(Task)
+        .filter(Task.user_id == user.id, Task.status != TaskStatus.DONE, ~Task.id.in_(already_linked_task_ids))
+        .order_by(Task.title)
+        .all()
+    )
+
     return templates.TemplateResponse(
         request,
         "kanban/board.html",
-        {"user": user, "board": board, "cards_by_cell": cards_by_cell},
+        {"user": user, "board": board, "cards_by_cell": cards_by_cell, "available_tasks": available_tasks},
     )
 
 
@@ -100,6 +115,42 @@ def set_swimlane_color(
         raise HTTPException(status_code=404, detail="Swimlane niet gevonden")
 
     swimlane.color = None if clear_color else (color.strip() or None)
+    db.commit()
+    return RedirectResponse("/kanban", status_code=303)
+
+
+@router.post("/swimlanes/{swimlane_id}/rename")
+def rename_swimlane(
+    swimlane_id: int,
+    name: str = Form(...),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    board = _get_board_or_404(db, user.id)
+    swimlane = db.get(KanbanSwimlane, swimlane_id)
+    if swimlane is None or swimlane.board_id != board.id:
+        raise HTTPException(status_code=404, detail="Swimlane niet gevonden")
+
+    swimlane.name = name.strip()
+    db.commit()
+    return RedirectResponse("/kanban", status_code=303)
+
+
+@router.post("/swimlanes/{swimlane_id}/delete")
+def delete_swimlane(swimlane_id: int, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    """Verwijdert de swimlane inclusief kolommen en kaarten (DB-cascade, zie
+    app/database.py -- PRAGMA foreign_keys=ON). Een bord houdt altijd minstens één
+    swimlane over: zonder swimlane is er geen "+ Kaart toevoegen"-cel meer om een nieuwe
+    aan te maken zonder eerst zelf een swimlane toe te voegen, dus dat blokkeren we hier
+    liever meteen met een duidelijke foutmelding."""
+    board = _get_board_or_404(db, user.id)
+    swimlane = db.get(KanbanSwimlane, swimlane_id)
+    if swimlane is None or swimlane.board_id != board.id:
+        raise HTTPException(status_code=404, detail="Swimlane niet gevonden")
+    if len(board.swimlanes) <= 1:
+        raise HTTPException(status_code=400, detail="Je kunt niet de laatste swimlane van het bord verwijderen")
+
+    db.delete(swimlane)
     db.commit()
     return RedirectResponse("/kanban", status_code=303)
 
@@ -155,6 +206,56 @@ def create_card(
         position=max_position,
     )
     card.tags = resolve_tags(db, tags)
+    db.add(card)
+    db.commit()
+    return RedirectResponse("/kanban", status_code=303)
+
+
+@router.post("/cards/from-task")
+def create_card_from_task(
+    column_id: int = Form(...),
+    swimlane_id: int = Form(...),
+    task_id: int = Form(...),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Zet een bestaande taak op het bord, i.p.v. een losse kaart met dezelfde tekst
+    opnieuw te moeten intypen. Kopieert titel/beschrijving/tags eenmalig over (geen
+    live-sync erna -- zie architectuurnotitie in README); de kaart onthoudt via
+    `task_id` welke taak erbij hoort (ON DELETE SET NULL: de kaart blijft gewoon staan
+    als de taak later verwijderd wordt)."""
+    board = _get_board_or_404(db, user.id)
+    swimlane = db.get(KanbanSwimlane, swimlane_id)
+    if swimlane is None or swimlane.board_id != board.id:
+        raise HTTPException(status_code=404, detail="Swimlane niet gevonden")
+    column = db.get(KanbanColumn, column_id)
+    if column is None or column.swimlane_id != swimlane_id:
+        raise HTTPException(status_code=404, detail="Kolom niet gevonden")
+    task = (
+        db.query(Task)
+        .options(selectinload(Task.tags))
+        .filter(Task.id == task_id, Task.user_id == user.id)
+        .first()
+    )
+    if task is None:
+        raise HTTPException(status_code=404, detail="Taak niet gevonden")
+
+    max_position = (
+        db.query(KanbanCard)
+        .filter(KanbanCard.column_id == column_id, KanbanCard.swimlane_id == swimlane_id)
+        .count()
+    )
+
+    card = KanbanCard(
+        board_id=board.id,
+        column_id=column_id,
+        swimlane_id=swimlane_id,
+        task_id=task.id,
+        title=task.title,
+        description=task.description,
+        position=max_position,
+    )
+    card.tags = list(task.tags)
     db.add(card)
     db.commit()
     return RedirectResponse("/kanban", status_code=303)

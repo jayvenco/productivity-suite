@@ -46,3 +46,14 @@ voice een specifieke cel te kiezen, maar de kaart is daarna gewoon te verslepen.
 **Nog niet gebouwd (mocht daar ooit behoefte aan zijn)**: matchen op een al bestaand item
 i.p.v. altijd een nieuw item aanmaken (bv. "voeg dit toe aan mijn boodschappenlijst-notitie"
 i.p.v. een nieuwe notitie).
+
+~~**Taken kunnen toevoegen aan het kanbanbord**~~ — opgelost: elke kolomcel heeft nu ook
+"+ Taak toevoegen" (naast "+ Kaart toevoegen"), met een keuzelijst van je nog-niet-afgeronde,
+nog niet gekoppelde taken. `KanbanCard.task_id` bestond al in het model maar werd nergens
+gezet — dat was de ontbrekende schakel. Kopieert titel/beschrijving/tags eenmalig, geen
+live-sync erna.
+
+~~**Swimlanes hernoemen en verwijderen**~~ — opgelost: elke swimlane-kop heeft nu een
+✎-knopje (inline hernoem-formuliertje) en, zodra er meer dan één swimlane is, een
+🗑-knopje (met bevestiging, verwijdert ook kolommen/kaarten erin). De allerlaatste swimlane
+van een bord kun je niet verwijderen.

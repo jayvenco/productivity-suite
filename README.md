@@ -263,6 +263,15 @@ Gebouwd:
   De tag-keuzelijst toont alle tags in het systeem (`Tag` heeft bewust geen `user_id`, zie
   Architectuur), niet per-gebruiker gefilterd — voor een single-user-per-deployment app
   maakt dat niets uit.
+- **Kanban: taak toevoegen, swimlane hernoemen/verwijderen**: elke kolomcel heeft nu ook een
+  **"+ Taak toevoegen"**-keuzelijst (naast "+ Kaart toevoegen") met je nog-niet-afgeronde
+  taken die nog niet als kaart op het bord staan — kiezen kopieert titel/beschrijving/tags
+  eenmalig naar een nieuwe kaart en onthoudt de koppeling (✓-icoontje op de kaart, linkt naar
+  de taak). Elke swimlane-kop heeft nu een **✎ Naam wijzigen**-knop (klein inline
+  formuliertje) en, zodra er meer dan één swimlane is, een **🗑 Swimlane verwijderen**-knop
+  (met bevestiging — verwijdert ook alle kolommen/kaarten erin). De allerlaatste swimlane
+  van een bord kun je niet verwijderen, anders zou je geen "+ Kaart toevoegen"-plek meer
+  overhouden zonder eerst zelf een nieuwe swimlane aan te maken.
 
 Nog niet gebouwd: CI/CD, voice-commando's matchen op een al bestaand item i.p.v. altijd een
 nieuw item aanmaken (bv. "voeg dit toe aan mijn boodschappenlijst-notitie" i.p.v. een nieuwe
@@ -623,6 +632,16 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     "Opslaan als taak"-knop → de taak wordt pas nú aangemaakt, met de tekst zoals die op dat
     moment in het transcript-veld staat (dus als je die nog aanpast vóór het klikken, komt
     jouw aanpassing erin, niet wat de AI oorspronkelijk zag).
+42. Maak een taak aan, ga naar Kanban en klik in een kolom op "+ Taak toevoegen" → je taak
+    staat in de keuzelijst. Kies 'm en klik "Toevoegen" → de kaart verschijnt met een
+    ✓-icoontje vóór de titel dat naar de bewerkpagina van de taak linkt, en dezelfde taak
+    staat niet meer in de "+ Taak toevoegen"-keuzelijst (al gekoppeld). Klik op het
+    ✎-icoontje naast een swimlane-naam, wijzig de naam en klik "Opslaan" → de kop van de
+    swimlane toont meteen de nieuwe naam. Maak een tweede swimlane aan → er verschijnt nu
+    een 🗑-icoontje bij beide swimlanes (bij precies één swimlane staat dat icoontje niet).
+    Klik het 🗑-icoontje bij de nieuwe swimlane, bevestig → de swimlane en alles erin is weg.
+    Probeer de allerlaatste overgebleven swimlane te verwijderen → dat lukt niet (foutmelding
+    i.p.v. een leeg bord).
 
 ## Architectuur
 
@@ -1138,3 +1157,29 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   -- dit is een simpele, goedkope classificatietaak (geen lange generatie) waarvoor één
   vast klein model volstaat, en instelbaarheid zou hier alleen maar een extra
   foutbron/instelling toevoegen zonder echt voordeel.
+- **BUGFIX — taak-op-bord kopieert eenmalig, geen live-sync**: `KanbanCard.task_id` bestond
+  al in het model (`ondelete="SET NULL"`) maar werd nergens gezet -- er was dus geen manier
+  om een bestaande taak op het bord te zetten, alleen een losse kaart met dezelfde tekst
+  opnieuw intypen. `POST /kanban/cards/from-task` (`app/routers/kanban.py`) kopieert
+  titel/beschrijving/tags op het moment van toevoegen; wijzig je de taak daarna, dan wijzigt
+  de kaart niet automatisch mee (en andersom). Een levende sync zou een aparte
+  achtergrondsync of een joined weergave vereisen -- bewust niet gebouwd, want dit is een
+  persoonlijke app zonder scheduler/achtergrondproces (zie ook de tijdelijke-notities-notitie
+  hieronder over dezelfde "geen cron"-keuze). De takenkeuzelijst per cel toont alleen
+  niet-afgeronde taken die nog niet aan een kaart gekoppeld zijn (`board_view` in
+  `app/routers/kanban.py`), zodat je een taak niet twee keer per ongeluk toevoegt.
+- **BUGFIX — swimlane/kolom verwijderen faalde op een NOT NULL-constraint**: `KanbanCard`
+  heeft niet-nullable `column_id`/`swimlane_id`-kolommen met `ondelete="CASCADE"` op de FK
+  (en `PRAGMA foreign_keys=ON`, zie de eerdere tag-cascade-bugfix hieronder). Zonder meer
+  probeerde SQLAlchemy bij het verwijderen van een swimlane/kolom éérst zelf de kaarten hun
+  `column_id`/`swimlane_id` op `NULL` te zetten (standaardgedrag als een relationship geen
+  cascade-optie heeft), wat botst met de NOT NULL-kolom en een `IntegrityError` gaf.
+  Opgelost met `passive_deletes=True` op `KanbanColumn.cards`/`KanbanSwimlane.cards`
+  (`app/models/kanban.py`): dat zegt tegen SQLAlchemy "beheer deze kant niet zelf, vertrouw
+  op de databasecascade", die de kaarten (en via `card_tags` ook de tag-koppelingen) gewoon
+  laat meeverwijderen.
+- **Laatste swimlane van een bord kun je niet verwijderen**: zonder deze check zou je een
+  bord kunnen leegmaken tot nul swimlanes, waarna er nergens meer een "+ Kaart
+  toevoegen"-cel is om zonder omweg (eerst een nieuwe swimlane aanmaken) verder te gaan --
+  een simpele `len(board.swimlanes) <= 1`-check in `delete_swimlane` voorkomt dat, met een
+  duidelijke 400-foutmelding i.p.v. een verwarrend leeg bord.
