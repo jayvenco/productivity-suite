@@ -86,7 +86,7 @@ Gebouwd:
   (16 opties — systeemstandaard, de leesletters Inter/Roboto/Open Sans/Lato/Poppins/Nunito/
   Source Sans 3/Merriweather/Fira Sans/DM Sans, het sierlijke schreefletter Playfair Display,
   en de monospace/code-letters Hack/JetBrains Mono/Fira Code/Consolas), **lettergrootte**
-  (13–18px) en **compactheid** (comfortabel/compact,
+  (11–18px) en **compactheid** (comfortabel/compact,
   verkleint de ruimte tussen tekst en elementen door de sidebar, tabellen, kaarten en formulieren).
   Ook een **achtergrondafbeelding** (Geen/Natuur/Bergen/Heelal, self-hosted foto's, geen
   externe API) met een **sterkte-schuifje** (10–70%) — de sidebar en het hoofdvlak worden dan
@@ -662,6 +662,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     wordt vervangen door een beknopte samenvatting, met een regel eronder die dat bevestigt.
     Pas de samenvatting nog aan en sla op als notitie → de aangepaste samenvatting (niet het
     originele transcript) komt in de notitie terecht.
+44. Maak een notitie en een snippet aan → de selectievakjes ervoor (bulk-select) zijn nu
+    ronde, halftransparante cirkeltjes i.p.v. vierkante native checkboxes; aangevinkt vullen
+    ze zich met de accentkleur op 50% dekking. Controleer ook dat de notitietitels in de
+    lijst kleiner ogen dan voorheen. Ga naar Account → Weergave → Lettergrootte → er staan nu
+    ook 11px en 12px in de keuzelijst (naast de bestaande 13–18px).
 
 ## Architectuur
 
@@ -1220,3 +1225,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   (één bewerkbaar tekstvak, wat erin staat wordt opgeslagen) alleen maar verwart. Wie de
   samenvatting niet wil, negeert de knop gewoon; wie 'm niet meer wil nadat die is
   toegepast, neemt het transcript opnieuw op/upload het opnieuw.
+- **Ronde bulk-select-checkboxes i.p.v. vierkant**: `.note-select`/`.snippet-select`
+  (`app/static/css/app.css`) gebruiken `appearance: none` + een eigen cirkelvormige
+  `border-radius: 50%`-styling (zelfde patroon als `.task-check`, dat al langer rond was),
+  met `color-mix(in srgb, var(--accent) 50%, transparent)` als gevulde kleur zodra
+  aangevinkt -- consistent met de rest van de app, die `color-mix` vaker gebruikt voor
+  semi-transparante accentkleuren i.p.v. een losse, hardgecodeerde rgba-waarde.

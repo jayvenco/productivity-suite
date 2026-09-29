@@ -36,7 +36,7 @@ AVAILABLE_FONTS = [
 ]
 AVAILABLE_FONT_IDS = {font_id for font_id, _ in AVAILABLE_FONTS}
 
-AVAILABLE_FONT_SIZES = [13, 14, 15, 16, 17, 18]
+AVAILABLE_FONT_SIZES = [11, 12, 13, 14, 15, 16, 17, 18]
 
 AVAILABLE_DENSITIES = [
     ("comfortable", "Comfortabel"),

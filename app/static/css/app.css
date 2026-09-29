@@ -1138,14 +1138,32 @@ textarea {
   gap: 8px;
 }
 
-.note-select {
-  width: auto;
+.note-select,
+.snippet-select {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: transparent;
   cursor: pointer;
   flex-shrink: 0;
 }
 
+.note-select:hover,
+.snippet-select:hover {
+  border-color: var(--accent);
+}
+
+.note-select:checked,
+.snippet-select:checked {
+  background: color-mix(in srgb, var(--accent) 50%, transparent);
+  border-color: var(--accent);
+}
+
 .note-card-title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--text);
   text-decoration: none;
@@ -1306,12 +1324,6 @@ textarea {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.snippet-select {
-  width: auto;
-  flex-shrink: 0;
-  cursor: pointer;
 }
 
 .snippet-card-header-actions {
