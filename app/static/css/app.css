@@ -299,12 +299,13 @@ textarea {
   padding: 6px 12px;
   cursor: pointer;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.12s ease;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .task-card:hover {
   border-color: var(--accent);
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.14);
+  transform: translateY(-2px);
 }
 
 .task-check-form {
@@ -1126,10 +1127,14 @@ textarea {
   flex-direction: column;
   gap: 10px;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
 }
 
 .note-card:hover {
   border-color: var(--accent);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+  transform: translateY(-2px);
 }
 
 .note-card-header {
