@@ -254,6 +254,19 @@ Gebouwd:
   van de container — die blijven werken als fallback zolang het veld leeg is), met een
   eigen **"Verbinding testen"-knop** die `GET {url}/v1/models` opvraagt en controleert of
   het ingestelde model daar ook echt bij staat (i.p.v. alleen "is de service bereikbaar")
+- **Voice: bestaand audiobestand uploaden + samenvatten met AI**: naast live opnemen kun je
+  in hetzelfde paneel ook een **bestaand audiobestand uploaden** (mp3/wav/m4a/...) — gaat
+  door dezelfde `POST /voice/transcribe`-route als een eigen opname (Speaches maakt geen
+  onderscheid tussen audio van de microfoon of van schijf). Handig voor bv. een opname die
+  je met een andere app hebt gemaakt (voice-memo op je telefoon, een vergaderopname). Een
+  nieuwe **"📝 Samenvatten met AI"-knop** (naast "✨ Laat AI het type bepalen") stuurt het
+  transcript naar `POST /voice/summarize`, dat ChatGPT een beknopte samenvatting laat maken
+  en die in het transcript-tekstvak zet — handig bij een langere opname (bv. een
+  vergadering) waar je liever de kern opslaat dan de volledige letterlijke tekst. Net als
+  bij classificeren blijft dit bewerkbaar vóór opslaan, en vereist het dezelfde
+  OpenAI-sleutel. Mindmap-generatie uit een transcript staat nog niet op de planning (zie
+  BACKLOG.md) — dat vraagt om ChatGPT die zelf knopen/verbindingen bedenkt i.p.v. platte
+  tekst, een stuk complexer dan transcript/samenvatting.
 - **Zoeken** (nieuw menu-item "Zoeken", `/search`): één zoekscherm over **alle** taggable
   soorten items heen (taken, notities, kanban-kaarten, snippets, mindmaps,
   kalenderafspraken) — op los woord (titel/inhoud, `ILIKE`) en/of op een specifieke tag,
@@ -642,6 +655,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     Klik het 🗑-icoontje bij de nieuwe swimlane, bevestig → de swimlane en alles erin is weg.
     Probeer de allerlaatste overgebleven swimlane te verwijderen → dat lukt niet (foutmelding
     i.p.v. een leeg bord).
+43. Open het opnamepaneel → onder de opnameknop staat "of upload een bestaand
+    audiobestand". Kies een mp3/m4a-bestand van je computer → net als bij een eigen opname
+    verschijnt na even wachten het transcript, bewerkbaar in het tekstvak. Klik op "📝
+    Samenvatten met AI" (met een geldige OpenAI-sleutel ingesteld) → het transcript-tekstvak
+    wordt vervangen door een beknopte samenvatting, met een regel eronder die dat bevestigt.
+    Pas de samenvatting nog aan en sla op als notitie → de aangepaste samenvatting (niet het
+    originele transcript) komt in de notitie terecht.
 
 ## Architectuur
 
@@ -1183,3 +1203,20 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   toevoegen"-cel is om zonder omweg (eerst een nieuwe swimlane aanmaken) verder te gaan --
   een simpele `len(board.swimlanes) <= 1`-check in `delete_swimlane` voorkomt dat, met een
   duidelijke 400-foutmelding i.p.v. een verwarrend leeg bord.
+- **Bestand uploaden hergebruikt `/voice/transcribe` zonder aanpassing**: een `<input
+  type="file">` in het opnamepaneel stuurt het gekozen bestand naar dezelfde route als een
+  eigen `MediaRecorder`-opname (`transcribeBlob()` in `app/static/js/voice.js`, gedeeld
+  tussen beide paden) -- Speaches/de OpenAI Audio API maakt geen onderscheid tussen "audio
+  van de microfoon" en "audio van schijf", dus was er geen backend-wijziging nodig, alleen
+  een nieuwe manier om aan de audio-bytes te komen in de browser.
+- **`/voice/summarize` en `/voice/classify` delen nu één `_openai_chat_completion()`-helper**
+  (`app/routers/voice.py`): zelfde model, sleutel-check, foutafhandeling -- alleen de
+  prompt/berichten en (bij classificeren) de JSON-`response_format` verschillen. Voorkomt
+  dat een toekomstige derde AI-functie (bv. de nog-niet-gebouwde mindmap-generatie) die
+  hele httpx/foutafhandelingsblok opnieuw moet kopiëren.
+- **Samenvatten vervangt het transcript-veld, geen apart samenvatting-veld**: bewust geen
+  losse "samenvatting"-textarea naast het transcript -- dat zou een keuze toevoegen
+  ("welke van de twee sla ik nu op?") die de bestaande, al begrepen bevestigingsstap
+  (één bewerkbaar tekstvak, wat erin staat wordt opgeslagen) alleen maar verwart. Wie de
+  samenvatting niet wil, negeert de knop gewoon; wie 'm niet meer wil nadat die is
+  toegepast, neemt het transcript opnieuw op/upload het opnieuw.

@@ -11,10 +11,10 @@ from app.models.user import User
 
 router = APIRouter(prefix="/voice", tags=["voice"])
 
-# Fase 2 (zie BACKLOG.md): het model dat bepaalt welk type item het transcript moet
-# worden -- bewust een klein/goedkoop model, want dit is een simpele classificatietaak
-# (geen lange generatie).
-_CLASSIFY_MODEL = "gpt-4o-mini"
+# Klein/goedkoop model voor de voice-AI-functies (classificatie + samenvatten, zie
+# BACKLOG.md) -- allebei simpele taken (geen lange generatie) waarvoor één vast model
+# volstaat.
+_OPENAI_MODEL = "gpt-4o-mini"
 _CLASSIFY_TYPES = {"task", "note", "kanban_card", "snippet"}
 _CLASSIFY_SYSTEM_PROMPT = (
     "Je bepaalt welk type item een gesproken transcript uit een persoonlijke "
@@ -30,6 +30,55 @@ _CLASSIFY_SYSTEM_PROMPT = (
     "standaardkeuze bij twijfel. Verzin geen tags die niet in het transcript passen; "
     "een lege tags-lijst mag."
 )
+
+
+_SUMMARIZE_SYSTEM_PROMPT = (
+    "Je vat een gesproken transcript uit een persoonlijke productivity-app samen. Het "
+    "transcript kan Nederlands of Engels zijn -- antwoord in diezelfde taal. Geef een "
+    "beknopte samenvatting (een paar zinnen, of een korte opsommingslijst met '- ' als het "
+    "transcript duidelijk meerdere losse punten bevat). Laat overbodige stopwoorden, "
+    "herhalingen en verspreektaal weg, maar verzin geen informatie die niet in het "
+    "transcript staat. Antwoord ALLEEN met de samenvatting zelf, geen inleidende zin zoals "
+    "'Hier is de samenvatting:'."
+)
+
+
+async def _openai_chat_completion(
+    user: User, messages: list[dict], *, response_format: dict | None = None
+) -> str:
+    """Gedeelde OpenAI Chat Completions-aanroep voor de voice-AI-functies
+    (classificatie + samenvatten) -- zelfde model, zelfde sleutel, zelfde
+    foutafhandeling, alleen de prompt/berichten verschillen per aanroeper."""
+    if not user.openai_api_key:
+        raise HTTPException(
+            status_code=400,
+            detail="Stel eerst een OpenAI API-sleutel in via Account → OpenAI API-sleutel.",
+        )
+
+    payload: dict = {"model": _OPENAI_MODEL, "messages": messages}
+    if response_format:
+        payload["response_format"] = response_format
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as http_client:
+            response = await http_client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {user.openai_api_key}"},
+                json=payload,
+            )
+    except httpx.HTTPError as exc:
+        raise HTTPException(status_code=503, detail="Kan de OpenAI API niet bereiken.") from exc
+
+    if response.status_code >= 400:
+        raise HTTPException(
+            status_code=502,
+            detail=f"OpenAI gaf een foutmelding ({response.status_code}): {response.text[:300]}",
+        )
+
+    try:
+        return response.json()["choices"][0]["message"]["content"]
+    except (KeyError, IndexError, ValueError) as exc:
+        raise HTTPException(status_code=502, detail="Kon het antwoord van OpenAI niet lezen.") from exc
 
 
 def _resolve_whisper_config(user: User, url_override: str = "", model_override: str = "") -> tuple[str, str]:
@@ -150,39 +199,18 @@ async def classify(transcript: str = Form(...), user: User = Depends(require_use
     het formulier staan."""
     if not transcript.strip():
         raise HTTPException(status_code=400, detail="Geen tekst om te classificeren")
-    if not user.openai_api_key:
-        raise HTTPException(
-            status_code=400,
-            detail="Stel eerst een OpenAI API-sleutel in via Account → OpenAI API-sleutel.",
-        )
 
+    raw_content = await _openai_chat_completion(
+        user,
+        [
+            {"role": "system", "content": _CLASSIFY_SYSTEM_PROMPT},
+            {"role": "user", "content": transcript},
+        ],
+        response_format={"type": "json_object"},
+    )
     try:
-        async with httpx.AsyncClient(timeout=30) as http_client:
-            response = await http_client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={"Authorization": f"Bearer {user.openai_api_key}"},
-                json={
-                    "model": _CLASSIFY_MODEL,
-                    "response_format": {"type": "json_object"},
-                    "messages": [
-                        {"role": "system", "content": _CLASSIFY_SYSTEM_PROMPT},
-                        {"role": "user", "content": transcript},
-                    ],
-                },
-            )
-    except httpx.HTTPError as exc:
-        raise HTTPException(status_code=503, detail="Kan de OpenAI API niet bereiken.") from exc
-
-    if response.status_code >= 400:
-        raise HTTPException(
-            status_code=502,
-            detail=f"OpenAI gaf een foutmelding ({response.status_code}): {response.text[:300]}",
-        )
-
-    try:
-        raw_content = response.json()["choices"][0]["message"]["content"]
         parsed = json.loads(raw_content)
-    except (KeyError, IndexError, ValueError) as exc:
+    except ValueError as exc:
         raise HTTPException(status_code=502, detail="Kon het antwoord van OpenAI niet lezen.") from exc
 
     item_type = parsed.get("type") if parsed.get("type") in _CLASSIFY_TYPES else "note"
@@ -194,3 +222,24 @@ async def classify(transcript: str = Form(...), user: User = Depends(require_use
         tags = str(raw_tags).strip()
 
     return {"type": item_type, "title": title, "tags": tags}
+
+
+@router.post("/summarize")
+async def summarize(transcript: str = Form(...), user: User = Depends(require_user)) -> dict:
+    """Laat ChatGPT het (al gecontroleerde) transcript samenvatten -- handig voor lange
+    opnames/uploads (bv. een vergadering) waar je liever de kern opslaat dan de volledige
+    letterlijke tekst. Het resultaat vervangt het transcript-tekstvak in de browser (blijft
+    daar gewoon bewerkbaar/controleerbaar, net als het rauwe transcript) -- er wordt hier
+    niets opgeslagen, dat gebeurt nog steeds pas als de gebruiker zelf op "Opslaan als
+    ..." klikt."""
+    if not transcript.strip():
+        raise HTTPException(status_code=400, detail="Geen tekst om samen te vatten")
+
+    summary = await _openai_chat_completion(
+        user,
+        [
+            {"role": "system", "content": _SUMMARIZE_SYSTEM_PROMPT},
+            {"role": "user", "content": transcript},
+        ],
+    )
+    return {"summary": summary.strip()}

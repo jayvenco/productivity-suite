@@ -188,6 +188,11 @@
       <div class="voice-recorder-timer" id="voice-recorder-timer" hidden>00:00</div>
     </div>
 
+    <label class="voice-recorder-upload-label" for="voice-recorder-file-input">
+      of upload een bestaand audiobestand (mp3, wav, m4a, ...)
+    </label>
+    <input type="file" id="voice-recorder-file-input" accept="audio/*" class="voice-recorder-upload-input">
+
     <div class="voice-recorder-result" id="voice-recorder-result" hidden>
       <div class="field">
         <label for="voice-recorder-title">Titel</label>
@@ -203,6 +208,7 @@
       </div>
       <div class="voice-recorder-ai-row">
         <button type="button" class="btn btn-secondary" id="voice-recorder-classify-btn">✨ Laat AI het type bepalen</button>
+        <button type="button" class="btn btn-secondary" id="voice-recorder-summarize-btn">📝 Samenvatten met AI</button>
         <div class="voice-recorder-ai-hint" id="voice-recorder-ai-hint"></div>
       </div>
       <div class="voice-recorder-actions">

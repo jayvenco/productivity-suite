@@ -23,7 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const languageSelect = document.getElementById("voice-recorder-language");
   const typeSelect = document.getElementById("voice-recorder-type");
   const classifyBtn = document.getElementById("voice-recorder-classify-btn");
+  const summarizeBtn = document.getElementById("voice-recorder-summarize-btn");
   const aiHintEl = document.getElementById("voice-recorder-ai-hint");
+  const fileInput = document.getElementById("voice-recorder-file-input");
   if (!spokeBtn || !panel) return;
 
   const LANGUAGE_STORAGE_KEY = "voice-recorder-language";
@@ -104,6 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (tagsInput) tagsInput.value = "";
     transcriptInput.value = "";
     if (aiHintEl) aiHintEl.textContent = "";
+    if (fileInput) fileInput.value = "";
     secondsElapsed = 0;
     clearInterval(timerInterval);
   }
@@ -175,15 +178,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  async function transcribeRecording() {
+  // Gedeeld tussen een eigen opname (MediaRecorder-chunks) en een geüpload bestand --
+  // Speaches krijgt sowieso gewoon audio-bytes + bestandsnaam voorgeschoteld, het maakt
+  // 'm niet uit of die van de microfoon of van schijf komen.
+  async function transcribeBlob(blob, filename) {
     recordBtn.disabled = true;
     recordBtn.classList.remove("recording");
     recordIcon.textContent = "⏺";
     statusEl.textContent = "Bezig met transcriberen...";
 
-    const blob = new Blob(audioChunks, { type: "audio/webm" });
     const formData = new FormData();
-    formData.append("audio", blob, "opname.webm");
+    formData.append("audio", blob, filename);
     if (languageSelect && languageSelect.value) {
       formData.append("language", languageSelect.value);
     }
@@ -210,6 +215,20 @@ document.addEventListener("DOMContentLoaded", () => {
       statusEl.textContent = err.message || "Transcriberen mislukt.";
       statusEl.classList.add("voice-recorder-status-error");
     }
+  }
+
+  function transcribeRecording() {
+    const blob = new Blob(audioChunks, { type: "audio/webm" });
+    transcribeBlob(blob, "opname.webm");
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files && fileInput.files[0];
+      fileInput.value = "";
+      if (!file) return;
+      transcribeBlob(file, file.name);
+    });
   }
 
   if (classifyBtn) {
@@ -250,6 +269,48 @@ document.addEventListener("DOMContentLoaded", () => {
       } finally {
         classifyBtn.disabled = false;
         classifyBtn.textContent = "✨ Laat AI het type bepalen";
+      }
+    });
+  }
+
+  if (summarizeBtn) {
+    summarizeBtn.addEventListener("click", async () => {
+      const transcript = transcriptInput.value.trim();
+      if (!transcript) return;
+
+      summarizeBtn.disabled = true;
+      summarizeBtn.textContent = "Bezig...";
+      if (aiHintEl) {
+        aiHintEl.textContent = "";
+        aiHintEl.classList.remove("voice-recorder-ai-hint-error");
+      }
+      try {
+        const response = await fetch("/voice/summarize", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ transcript }),
+        });
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => ({}));
+          throw new Error(errorBody.detail || "Samenvatten mislukt.");
+        }
+        const data = await response.json();
+        // Vervangt het transcript-tekstvak zelf -- dat blijft de bewerkbare/controleerbare
+        // tekst die bij opslaan gebruikt wordt (zelfde bevestigingsstap als bij het rauwe
+        // transcript). Onomkeerbaar in de UI: bevalt de samenvatting niet, dan opnieuw
+        // opnemen/uploaden voor een vers, niet-samengevat transcript.
+        transcriptInput.value = data.summary;
+        if (aiHintEl) {
+          aiHintEl.textContent = "Samenvatting toegepast in het transcript-veld hierboven.";
+        }
+      } catch (err) {
+        if (aiHintEl) {
+          aiHintEl.textContent = err.message || "Samenvatten mislukt.";
+          aiHintEl.classList.add("voice-recorder-ai-hint-error");
+        }
+      } finally {
+        summarizeBtn.disabled = false;
+        summarizeBtn.textContent = "📝 Samenvatten met AI";
       }
     });
   }

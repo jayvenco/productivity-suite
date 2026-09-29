@@ -168,6 +168,7 @@ def test_classify_rejects_empty_transcript(logged_in_client):
 
 
 def test_classify_requires_openai_key(logged_in_client):
+    logged_in_client.post("/account/openai-key/clear")
     response = logged_in_client.post("/voice/classify", data={"transcript": "Boodschappen doen"})
     assert response.status_code == 400
     assert "OpenAI" in response.json()["detail"]
@@ -214,3 +215,61 @@ def test_classify_handles_unparseable_openai_response(logged_in_client):
     with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
         response = logged_in_client.post("/voice/classify", data={"transcript": "Iets"})
     assert response.status_code == 502
+
+
+def test_summarize_requires_login(client):
+    response = client.post("/voice/summarize", data={"transcript": "iets"}, follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
+def test_summarize_rejects_empty_transcript(logged_in_client):
+    response = logged_in_client.post("/voice/summarize", data={"transcript": "   "})
+    assert response.status_code == 400
+
+
+def test_summarize_requires_openai_key(logged_in_client):
+    # Eerdere tests in deze testrun kunnen al een sleutel hebben opgeslagen (gedeelde
+    # database binnen één pytest-run) -- expliciet wissen zodat dit echt de
+    # "geen sleutel"-situatie test i.p.v. afhankelijk te zijn van testvolgorde.
+    logged_in_client.post("/account/openai-key/clear")
+    response = logged_in_client.post("/voice/summarize", data={"transcript": "Een lang verhaal"})
+    assert response.status_code == 400
+    assert "OpenAI" in response.json()["detail"]
+
+
+def test_summarize_returns_summary_from_openai(logged_in_client):
+    logged_in_client.post("/account/openai-key", data={"openai_api_key": "sk-test"})
+    fake_client = _fake_openai_chat_client(content="Korte samenvatting van het verhaal.")
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post("/voice/summarize", data={"transcript": "Een heel lang verhaal " * 20})
+    assert response.status_code == 200
+    assert response.json() == {"summary": "Korte samenvatting van het verhaal."}
+
+
+def test_summarize_handles_unreachable_openai(logged_in_client):
+    logged_in_client.post("/account/openai-key", data={"openai_api_key": "sk-test"})
+    fake_client = _fake_openai_chat_client(error=httpx.ConnectError("boom"))
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post("/voice/summarize", data={"transcript": "Iets"})
+    assert response.status_code == 503
+
+
+def test_summarize_surfaces_openai_error_response(logged_in_client):
+    logged_in_client.post("/account/openai-key", data={"openai_api_key": "sk-test"})
+    fake_client = _fake_openai_chat_client(status_code=401, content="invalid api key")
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post("/voice/summarize", data={"transcript": "Iets"})
+    assert response.status_code == 502
+
+
+def test_transcribe_accepts_uploaded_file_regardless_of_source(logged_in_client):
+    """Onderscheidt niet tussen een eigen opname en een geüpload bestand -- allebei komen
+    als multipart-bestand binnen, zie app/static/js/voice.js transcribeBlob()."""
+    fake_client = _fake_whisper_client(text="Tekst uit geüpload bestand")
+    with patch("app.routers.voice.httpx.AsyncClient", return_value=fake_client):
+        response = logged_in_client.post(
+            "/voice/transcribe", files={"audio": ("interview.mp3", b"fake-mp3-bytes", "audio/mpeg")}
+        )
+    assert response.status_code == 200
+    assert response.json() == {"text": "Tekst uit geüpload bestand"}

@@ -57,3 +57,23 @@ live-sync erna.
 ✎-knopje (inline hernoem-formuliertje) en, zodra er meer dan één swimlane is, een
 🗑-knopje (met bevestiging, verwijdert ook kolommen/kaarten erin). De allerlaatste swimlane
 van een bord kun je niet verwijderen.
+
+**Audio uploaden + verwerken tot transcript/samenvatting/mindmap** — transcript en
+samenvatting opgelost, mindmap nog niet:
+
+~~Upload + samenvatting~~ — opgelost: het opnamepaneel heeft nu ook een
+bestand-uploadveld (mp3/wav/m4a/...) naast live opnemen, via dezelfde
+`POST /voice/transcribe`-route (geen backend-wijziging nodig -- Speaches maakt geen
+onderscheid tussen audio van de microfoon of van schijf). Een nieuwe "📝 Samenvatten met
+AI"-knop (`POST /voice/summarize`) laat ChatGPT een beknopte samenvatting maken die het
+transcript-tekstvak vervangt, blijft daarna gewoon bewerkbaar/controleerbaar zoals de rest
+van de voice-flow.
+
+**Mindmap-generatie (nog niet gebouwd)**: ChatGPT zelf knopen + verbindingen laten bedenken
+uit een (lang) transcript, en die in een nieuwe `MindmapBoard` met bijbehorende
+`MindmapNode`/`MindmapEdge`-rijen zetten. Aanzienlijk complexer dan classificeren/
+samenvatten (die geven plat tekst/JSON met een vaste, kleine vorm terug) -- vereist een
+eigen prompt die een boomstructuur/graaf teruggeeft, plus een layout-strategie voor waar
+elke knoop op het canvas komt te staan (x/y-coördinaten; de bestaande mindmap-editor laat
+je knopen wel handmatig verslepen na aanmaken, maar een eerste automatische plaatsing moet
+ook redelijk ogen). Bewust uitgesteld tot er echt behoefte aan is.
