@@ -82,6 +82,12 @@ Gebouwd:
   de "+ Kaart toevoegen"-knop is een neutrale pil-knop i.p.v. een kale link. De kolom zelf is
   bewust een **egaal, effen vlak** (geen kleurtint meer) — alleen het bolletje in de kolomkop
   en de rand van de swimlane-titel verraden nog welke swimlane een kaart bij hoort
+- **Favicon**: het browsertabblad-icoon is nu een oranje "P" op antraciet
+  (`app/static/images/favicon.svg`) — dezelfde kleuren (`#ef8354` op `#262a36`) als het
+  "Productivity Suite"-merklabel bovenaan de sidebar. Er bestond nog geen apart logo-bestand
+  (het merklabel was tot nu toe alleen gestylede tekst), dus is dit het eerste echte
+  grafische "logo" van de app, gebruikt op precies twee plekken: de favicon en (indirect,
+  qua kleurkeuze) het merklabel
 - **Weergave-instellingen** (Account → Weergave): los van het thema kiesbaar **lettertype**
   (16 opties — systeemstandaard, de leesletters Inter/Roboto/Open Sans/Lato/Poppins/Nunito/
   Source Sans 3/Merriweather/Fira Sans/DM Sans, het sierlijke schreefletter Playfair Display,
@@ -674,6 +680,8 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     kleiner dan voorheen, met een egale donkere achtergrond en oranje gloed-rand — geen
     felgekleurde taartpunten meer. Open daarna Pomodoro (sidebar) → de kleuren/achtergrond
     van de Pomodoro-cirkel zien er hetzelfde uit als het wiel net.
+46. Kijk naar het browsertabblad → het icoon is een oranje "P" op een antraciet
+    afgeronde-vierkant-achtergrond, i.p.v. het generieke browser-standaardicoon.
 
 ## Architectuur
 
