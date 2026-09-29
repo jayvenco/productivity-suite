@@ -294,6 +294,12 @@ Gebouwd:
   (met bevestiging — verwijdert ook alle kolommen/kaarten erin). De allerlaatste swimlane
   van een bord kun je niet verwijderen, anders zou je geen "+ Kaart toevoegen"-plek meer
   overhouden zonder eerst zelf een nieuwe swimlane aan te maken.
+- **Taken: automatisch opruimen + "lang niet aangeraakt"-markering**: een afgeronde taak
+  ruimt zichzelf automatisch op **4 dagen** nadat 'm op "klaar" gezet is (opportunistisch bij
+  elk bezoek aan de takenlijst, geen aparte scheduler — zelfde patroon als tijdelijke
+  notities). Een taak die meer dan **7 dagen niet bewerkt** is (ongeacht status) krijgt een
+  witte linkerrand + lichte tint op de kaart, zodat je in één oogopslag ziet wat is blijven
+  liggen.
 
 Nog niet gebouwd: CI/CD, voice-commando's matchen op een al bestaand item i.p.v. altijd een
 nieuw item aanmaken (bv. "voeg dit toe aan mijn boodschappenlijst-notitie" i.p.v. een nieuwe
@@ -682,6 +688,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     van de Pomodoro-cirkel zien er hetzelfde uit als het wiel net.
 46. Kijk naar het browsertabblad → het icoon is een oranje "P" op een antraciet
     afgeronde-vierkant-achtergrond, i.p.v. het generieke browser-standaardicoon.
+47. Maak een taak aan en vink 'm af (afgerond). Zet in een database-tool (of via de Python-
+    shell) `completed_at` van die taak 5 dagen terug en herlaad de takenlijst → de taak is
+    weg. Maak nog een taak aan en zet z'n `updated_at` 8 dagen terug → de kaart krijgt een
+    witte linkerrand en lichte witte tint. Wijzig de taak (bv. de titel) → de witte markering
+    verdwijnt (updated_at is weer "nu").
 
 ## Architectuur
 
@@ -1247,3 +1258,19 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   met `color-mix(in srgb, var(--accent) 50%, transparent)` als gevulde kleur zodra
   aangevinkt -- consistent met de rest van de app, die `color-mix` vaker gebruikt voor
   semi-transparante accentkleuren i.p.v. een losse, hardgecodeerde rgba-waarde.
+- **`Task.completed_at` apart van `updated_at`**: `updated_at` verandert bij élke wijziging
+  (titel, tags, deadline, ...), dus die alleen gebruiken zou een taak die je ná het afronden
+  nog even bewerkt telkens weer 4 dagen "vers" maken. `completed_at` wordt alleen gezet/
+  gewist bij een status-overgang van/naar 'done' (via de gedeelde `_apply_status()`-helper
+  in `app/routers/tasks.py`, gebruikt door zowel het bewerkformulier als de
+  snel-afvink-knop, zodat er geen tweede plek is die dat kan vergeten). Bestaande, al vóór
+  deze kolom afgeronde taken krijgen bij de eerstvolgende opstart een benaderde
+  `completed_at` via een backfill-migratie (`_backfill_completed_at` in
+  `app/services/migrate.py`, `completed_at = updated_at` voor alle 'done'-taken zonder
+  completed_at) — anders zouden die nooit opgeruimd worden, want `NULL < cutoff` is in
+  SQLite altijd onwaar.
+- **`Task.stale` kijkt naar `updated_at`, niet naar `completed_at`**: bewust twee losse
+  concepten — "al een tijdje niet aangeraakt" (stale, 7 dagen, elke status) is iets anders
+  dan "al een tijdje geleden afgerond" (opruimen, 4 dagen, alleen 'done'). Een net
+  aangemaakte, nog niet afgeronde taak die je een week laat liggen moet wél als stale
+  opvallen, ook al is-ie nooit "done" geweest.

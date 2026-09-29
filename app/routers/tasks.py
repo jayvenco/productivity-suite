@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Query, Request
@@ -24,6 +24,32 @@ _SORT_OPTIONS = {
     "status": (Task.status.asc(), Task.title.asc()),
 }
 _GEEN_TAG_LABEL = "Zonder tag"
+DONE_TASK_LIFETIME = timedelta(days=4)
+
+
+def _apply_status(task: Task, new_status: TaskStatus) -> None:
+    """Zet completed_at mee met de status i.p.v. dat als losse stap te laten doen door elke
+    aanroeper -- zo kan dat nooit vergeten worden bij een van de twee plekken (het
+    bewerkformulier en de snel-afvink-knop) die de status kunnen wijzigen."""
+    if new_status == TaskStatus.DONE and task.status != TaskStatus.DONE:
+        task.completed_at = datetime.now(UTC).replace(tzinfo=None)
+    elif new_status != TaskStatus.DONE:
+        task.completed_at = None
+    task.status = new_status
+
+
+def _delete_expired_done_tasks(db: Session, user_id: int) -> None:
+    """Afgeronde taken ruimen zichzelf op zodra ze 4 dagen 'done' staan -- zelfde
+    "geen scheduler, opportunistisch bij elk bezoek"-patroon als tijdelijke notities
+    (zie _delete_expired_temp_notes in app/routers/notes.py)."""
+    cutoff = datetime.now(UTC).replace(tzinfo=None) - DONE_TASK_LIFETIME
+    db.query(Task).filter(
+        Task.user_id == user_id,
+        Task.status == TaskStatus.DONE,
+        Task.completed_at.isnot(None),
+        Task.completed_at < cutoff,
+    ).delete(synchronize_session=False)
+    db.commit()
 
 
 def _redirect_to_list(
@@ -65,6 +91,7 @@ def list_tasks(
     db: Session = Depends(get_db),
 ):
     sort = sort if sort in _SORT_OPTIONS else "deadline"
+    _delete_expired_done_tasks(db, user.id)
 
     query = db.query(Task).options(selectinload(Task.tags)).filter(Task.user_id == user.id)
     if tags:
@@ -211,7 +238,7 @@ def update_task(
     task.title = title.strip()
     task.description = description
     task.deadline = date.fromisoformat(deadline) if deadline else None
-    task.status = TaskStatus(status_value)
+    _apply_status(task, TaskStatus(status_value))
     task.priority = priority
     task.daily_task = daily_task
     task.tags = resolve_tags(db, tags)
@@ -231,7 +258,7 @@ def toggle_done(
 ):
     """Snel-afvink-knop: zet de taak op 'done', of terug naar 'todo' als 'm al klaar was."""
     task = _get_task_or_404(db, task_id, user.id)
-    task.status = TaskStatus.TODO if task.status == TaskStatus.DONE else TaskStatus.DONE
+    _apply_status(task, TaskStatus.TODO if task.status == TaskStatus.DONE else TaskStatus.DONE)
     db.commit()
     return _redirect_to_list(sort, group_by, filter_tags, status_filter or None)
 

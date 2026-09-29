@@ -1,5 +1,8 @@
 import re
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, timedelta
+
+from app.database import SessionLocal
+from app.models.task import Task
 
 
 def test_create_and_list_task(logged_in_client):
@@ -283,3 +286,94 @@ def test_done_task_hides_pomodoro_focus_button(logged_in_client):
 
     # Terugzetten voor eventuele volgende tests in deze module.
     logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+
+
+def test_toggle_done_sets_and_clears_completed_at(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Completed-at test", "description": "", "deadline": "", "tags": ""}
+    )
+    listing = logged_in_client.get("/tasks").text
+    task_id = _task_id_for_title(listing, "Completed-at test")
+
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+    with SessionLocal() as db:
+        task = db.get(Task, int(task_id))
+        assert task.completed_at is not None
+
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+    with SessionLocal() as db:
+        task = db.get(Task, int(task_id))
+        assert task.completed_at is None
+
+
+def test_done_task_older_than_4_days_is_auto_deleted(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Oude afgeronde taak", "description": "", "deadline": "", "tags": ""}
+    )
+    listing = logged_in_client.get("/tasks").text
+    task_id = _task_id_for_title(listing, "Oude afgeronde taak")
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+
+    with SessionLocal() as db:
+        task = db.get(Task, int(task_id))
+        task.completed_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(days=5)
+        db.commit()
+
+    listing_after = logged_in_client.get("/tasks").text
+    assert "Oude afgeronde taak" not in listing_after
+
+
+def test_done_task_within_4_days_is_kept(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Net afgeronde taak", "description": "", "deadline": "", "tags": ""}
+    )
+    listing = logged_in_client.get("/tasks").text
+    task_id = _task_id_for_title(listing, "Net afgeronde taak")
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+
+    with SessionLocal() as db:
+        task = db.get(Task, int(task_id))
+        task.completed_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(days=1)
+        db.commit()
+
+    listing_after = logged_in_client.get("/tasks").text
+    assert "Net afgeronde taak" in listing_after
+
+    # Opruimen: niet laten liggen als "recent done", anders vervuilt dat brede
+    # "task-card-done"-asserts in andere tests in deze gedeelde testrun.
+    logged_in_client.post(f"/tasks/{task_id}/delete")
+
+
+def test_task_not_touched_in_7_days_gets_stale_class(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Oude niet-aangeraakte taak", "description": "", "deadline": "", "tags": ""}
+    )
+    listing = logged_in_client.get("/tasks").text
+    task_id = _task_id_for_title(listing, "Oude niet-aangeraakte taak")
+
+    with SessionLocal() as db:
+        task = db.get(Task, int(task_id))
+        task.updated_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(days=8)
+        db.commit()
+
+    listing_after = logged_in_client.get("/tasks").text
+    title_pos = listing_after.index("Oude niet-aangeraakte taak")
+    card_start = listing_after.rindex('class="task-card ', 0, title_pos)
+    card_end = listing_after.index(">", card_start)
+    assert "task-card-stale" in listing_after[card_start:card_end]
+
+    logged_in_client.post(f"/tasks/{task_id}/delete")
+
+
+def test_recently_touched_task_is_not_marked_stale(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Verse taak", "description": "", "deadline": "", "tags": ""}
+    )
+    listing = logged_in_client.get("/tasks").text
+    title_pos = listing.index("Verse taak")
+    card_start = listing.rindex('class="task-card ', 0, title_pos)
+    card_end = listing.index(">", card_start)
+    assert "task-card-stale" not in listing[card_start:card_end]
+
+    task_id = _task_id_for_title(listing, "Verse taak")
+    logged_in_client.post(f"/tasks/{task_id}/delete")

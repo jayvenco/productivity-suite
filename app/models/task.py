@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import enum
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 from sqlalchemy import Boolean, Date, DateTime, Enum, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -30,6 +30,11 @@ class Task(Base):
     deadline: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    # Wanneer de taak voor het laatst op 'done' gezet is (None zolang dat nog niet zo is,
+    # en weer teruggezet naar None als 'm terug naar todo/in_progress gaat) -- apart van
+    # `updated_at`, dat bij élke wijziging meeverandert. Bepaalt wanneer een afgeronde taak
+    # automatisch opgeruimd wordt (zie _delete_expired_done_tasks in app/routers/tasks.py).
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
     tags: Mapped[list["Tag"]] = relationship(  # noqa: F821
         "Tag", secondary=task_tags, back_populates="tasks"
@@ -54,6 +59,14 @@ class Task(Base):
     def deadline_overdue(self) -> bool:
         days = self.days_until_deadline
         return days is not None and days < 0
+
+    @property
+    def stale(self) -> bool:
+        """True als de taak meer dan 7 dagen niet meer bewerkt is (`updated_at`) --
+        onafhankelijk van de deadline, puur "hier is al een tijdje niet meer naar
+        omgekeken". `updated_at` is naive UTC (zie server_default=func.now()), dus
+        vergelijken met een naive UTC "nu" i.p.v. lokale tijd."""
+        return (datetime.now(UTC).replace(tzinfo=None) - self.updated_at).days > 7
 
     @property
     def completed_work_sessions(self) -> list["PomodoroSession"]:  # noqa: F821

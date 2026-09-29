@@ -7,7 +7,11 @@ from sqlalchemy.engine import Engine
 # opgetuigd voor deze schaal; dit voorkomt alleen dat bestaande installaties
 # (bv. op Unraid) hun data kwijtraken wanneer een model een kolom krijgt.
 _COLUMNS_TO_ENSURE = {
-    "tasks": [("priority", "BOOLEAN DEFAULT 0"), ("daily_task", "BOOLEAN DEFAULT 0")],
+    "tasks": [
+        ("priority", "BOOLEAN DEFAULT 0"),
+        ("daily_task", "BOOLEAN DEFAULT 0"),
+        ("completed_at", "DATETIME"),
+    ],
     "kanban_cards": [("color", "VARCHAR(20)")],
     "kanban_columns": [("swimlane_id", "INTEGER")],
     "kanban_swimlanes": [("color", "VARCHAR(20)")],
@@ -43,6 +47,7 @@ def run_lightweight_migrations(engine: Engine) -> None:
             _backfill_column_swimlanes(conn)
 
         _cleanup_orphaned_tag_associations(conn)
+        _backfill_completed_at(conn)
 
 
 # (koppeltabel, kolom die naar het getagde item wijst, tabel van dat item) -- vóór
@@ -71,6 +76,18 @@ def _cleanup_orphaned_tag_associations(conn) -> None:
                 f"DELETE FROM {assoc_table} WHERE {fk_column} NOT IN (SELECT id FROM {parent_table})"  # noqa: S608
             )
         )
+
+
+def _backfill_completed_at(conn) -> None:
+    """Taken die al vóór de completed_at-kolom op 'done' stonden, hebben anders nooit een
+    completed_at gekregen en worden dus nooit automatisch opgeruimd (zie
+    _delete_expired_done_tasks in app/routers/tasks.py) -- benadert de voltooiingsdatum met
+    updated_at (de laatste keer dat er iets aan de taak veranderde, wat voor een al-lang
+    afgeronde taak meestal het moment van afvinken is). Idempotent: raakt alleen rijen waar
+    completed_at nog leeg is, dus goedkoop om bij elke start opnieuw te draaien."""
+    conn.execute(
+        text("UPDATE tasks SET completed_at = updated_at WHERE status = 'done' AND completed_at IS NULL")
+    )
 
 
 def _backfill_column_swimlanes(conn) -> None:

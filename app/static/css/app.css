@@ -487,6 +487,13 @@ textarea {
   background: color-mix(in srgb, #f97316 10%, var(--bg-elevated));
 }
 
+/* Meer dan 7 dagen niet bewerkt (zie Task.stale) -- na .task-card-daily zodat een taak
+   die toevallig allebei is, als "lang niet aangeraakt" opvalt i.p.v. als dagtaak. */
+.task-card-stale {
+  border-left: 3px solid #ffffff;
+  background: color-mix(in srgb, #ffffff 10%, var(--bg-elevated));
+}
+
 .task-card-preview {
   font-style: italic;
   color: var(--text-muted);
