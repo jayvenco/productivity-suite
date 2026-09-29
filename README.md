@@ -182,7 +182,10 @@ Gebouwd:
   **Notities**, **Kanban**, **Snippets**, **Taken** en **Mindmap** — elk met een eigen icoon en
   label, die direct doorlinken naar de bijbehorende aanmaakpagina (`/notes/new`, `/kanban`,
   `/snippets/new`, `/tasks/new`, `/mindmap`). Klik ergens buiten het wiel of druk op Escape om
-  het weer te sluiten
+  het weer te sluiten. **30% kleiner en zelfde donkere-glas-look als de Pomodoro-widget**:
+  geen felgekleurde taartpunten meer (was een conic-gradient met 6 losse kleuren), nu een
+  egale donkere achtergrond (`rgba(20, 20, 25, 0.55)`, `backdrop-filter: blur`) met
+  dezelfde oranje gloed-rand — dezelfde stijl-taal als de Pomodoro-cirkel
 - **Bredere, gecentreerde aanmaak-/bewerkpagina's**: de formulieren voor taken, notities en
   snippets staan in een gecentreerde kolom (i.p.v. links tegen de sidebar aan) met merkbaar
   grotere invoervelden, zodat er meer leesbaar is tijdens het invullen op een groot scherm. De
@@ -667,6 +670,10 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     ze zich met de accentkleur op 50% dekking. Controleer ook dat de notitietitels in de
     lijst kleiner ogen dan voorheen. Ga naar Account → Weergave → Lettergrootte → er staan nu
     ook 11px en 12px in de keuzelijst (naast de bestaande 13–18px).
+45. Klik op de ronde hub rechtsonder (het quick-add-wiel) → het wiel klapt open, merkbaar
+    kleiner dan voorheen, met een egale donkere achtergrond en oranje gloed-rand — geen
+    felgekleurde taartpunten meer. Open daarna Pomodoro (sidebar) → de kleuren/achtergrond
+    van de Pomodoro-cirkel zien er hetzelfde uit als het wiel net.
 
 ## Architectuur
 
@@ -953,18 +960,19 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   zonder dat beide widgets elkaar rechtstreeks hoeven te kennen.
 - **Quick-add-wiel**: `.quickadd-wheel-wrap` in `base.html` + `app/static/js/quickadd.js`.
   De 5 snelkoppelingen zijn gewone `<a>`-links (geen los `/quick`-formulier meer, na eerdere
-  iteraties die dat wel hadden) — het enige JS is het open/dicht togglen van het wiel. De
-  taartpunt-kleuren komen uit één `conic-gradient` (5 gelijke segmenten van 20%, gestart op
-  `-36deg` zodat de segmentgrenzen tussen de iconen vallen i.p.v. er middenin), i.p.v. 5 losse
-  gestileerde `<div>`'s. Elke `.quickadd-spoke` staat gepositioneerd via een vooraf berekende
-  `translate(x, y)` (trigonometrie op 72°-intervallen, radius 100px vanuit het midden) i.p.v.
-  `sin()`/`cos()` in CSS, voor bredere browserondersteuning. `.quickadd-wheel-wrap` is 64×64px
-  als het wiel dicht is (hub plakt in de hoek) en 300×300px als het open is — de hub zelf is
-  altijd gecentreerd in die wrapper (`top:50%;left:50%;transform:translate(-50%,-50%)`), dus
-  schuift vanzelf mee van de hoek naar het midden van het opengeklapte wiel, zonder dat de hub
-  zelf een aparte positie-berekening nodig heeft. `app/services/kanban_cells.py` (met
-  `get_or_create_default_cell`, gedeeld met de agent-API in `app/routers/api.py`) staat hier
-  los van en is gewoon blijven staan.
+  iteraties die dat wel hadden) — het enige JS is het open/dicht togglen van het wiel. Elke
+  `.quickadd-spoke` staat gepositioneerd via een vooraf berekende `translate(x, y)`
+  (trigonometrie op 72°-intervallen vanuit het midden) i.p.v. `sin()`/`cos()` in CSS, voor
+  bredere browserondersteuning. `.quickadd-wheel-wrap` is 45×45px als het wiel dicht is (hub
+  plakt in de hoek) en 210×210px als het open is (30% kleiner dan de oorspronkelijke
+  64px/300px) — de hub zelf is altijd gecentreerd in die wrapper
+  (`top:50%;left:50%;transform:translate(-50%,-50%)`), dus schuift vanzelf mee van de hoek
+  naar het midden van het opengeklapte wiel, zonder dat de hub zelf een aparte
+  positie-berekening nodig heeft. **BUGFIX/stijlkeuze**: de taartpunten hadden eerst 6
+  losse felle kleuren via één `conic-gradient` (letterlijk een "pizza"-look) — vervangen
+  door dezelfde egale donkere-glas-achtergrond + oranje gloed-rand als de
+  Pomodoro-widget (`.pomodoro-circle`), voor een consistente stijl-taal tussen de twee
+  zwevende widgets i.p.v. twee losse ontwerpen.
 - **Apple-achtige vormtaal**: bewust géén nieuw thema of losse "Apple-modus", maar een
   uitbreiding van de bestaande gedeelde classes (`.nav-item`, `.task-card`, `.note-card`,
   `.kanban-card`, `.column`, `.btn`, inputs) zodat elk van de 8 thema's er automatisch mooier

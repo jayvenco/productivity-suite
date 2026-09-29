@@ -2554,14 +2554,14 @@ body.mindmap-editor .mindmap-canvas {
   position: fixed;
   right: 20px;
   bottom: 20px;
-  width: 64px;
-  height: 64px;
+  width: 45px;
+  height: 45px;
   z-index: 900;
 }
 
 .quickadd-wheel-wrap.open {
-  width: 300px;
-  height: 300px;
+  width: 210px;
+  height: 210px;
 }
 
 .quickadd-hub {
@@ -2570,29 +2570,29 @@ body.mindmap-editor .mindmap-canvas {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 2;
-  width: 64px;
-  height: 64px;
+  width: 45px;
+  height: 45px;
   border-radius: 50%;
   border: 2px solid rgba(255, 122, 61, 0.6);
-  background: rgba(30, 28, 26, 0.55);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(20, 20, 25, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   cursor: pointer;
 }
 
 .quickadd-hub-dots {
   display: grid;
-  grid-template-columns: repeat(2, 7px);
-  grid-template-rows: repeat(2, 7px);
-  gap: 5px;
+  grid-template-columns: repeat(2, 5px);
+  grid-template-rows: repeat(2, 5px);
+  gap: 4px;
   margin: 0 auto;
   width: max-content;
 }
 
 .quickadd-hub-dots span {
-  width: 7px;
-  height: 7px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: #fff;
 }
@@ -2601,19 +2601,11 @@ body.mindmap-editor .mindmap-canvas {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 3px solid rgba(255, 122, 61, 0.85);
-  box-shadow: 0 0 24px rgba(255, 122, 61, 0.35), 0 10px 30px rgba(0, 0, 0, 0.45);
-  background: conic-gradient(
-    from -30deg,
-    rgba(110, 110, 112, 0.55) 0% 16.667%,
-    rgba(120, 75, 40, 0.55) 16.667% 33.333%,
-    rgba(80, 55, 40, 0.6) 33.333% 50%,
-    rgba(160, 50, 50, 0.6) 50% 66.667%,
-    rgba(200, 110, 40, 0.6) 66.667% 83.333%,
-    rgba(55, 55, 58, 0.55) 83.333% 100%
-  );
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  border: 2px solid rgba(255, 122, 61, 0.6);
+  box-shadow: 0 0 24px rgba(255, 122, 61, 0.35), 0 12px 40px rgba(0, 0, 0, 0.45);
+  background: rgba(20, 20, 25, 0.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .quickadd-wheel[hidden] {
@@ -2627,10 +2619,10 @@ body.mindmap-editor .mindmap-canvas {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  width: 76px;
+  gap: 3px;
+  width: 53px;
   text-decoration: none;
-  color: #fff;
+  color: #f5f5f5;
   text-align: center;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   background: none;
@@ -2644,25 +2636,25 @@ body.mindmap-editor .mindmap-canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 31px;
+  height: 31px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  font-size: 19px;
+  font-size: 13px;
 }
 
 .quickadd-spoke-label {
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 600;
 }
 
-.quickadd-spoke[data-angle="0"] { transform: translate(calc(-50% + 0px), calc(-50% + -100px)); }
-.quickadd-spoke[data-angle="1"] { transform: translate(calc(-50% + 87px), calc(-50% + -50px)); }
-.quickadd-spoke[data-angle="2"] { transform: translate(calc(-50% + 87px), calc(-50% + 50px)); }
-.quickadd-spoke[data-angle="3"] { transform: translate(calc(-50% + 0px), calc(-50% + 100px)); }
-.quickadd-spoke[data-angle="4"] { transform: translate(calc(-50% + -87px), calc(-50% + 50px)); }
-.quickadd-spoke[data-angle="5"] { transform: translate(calc(-50% + -87px), calc(-50% + -50px)); }
+.quickadd-spoke[data-angle="0"] { transform: translate(calc(-50% + 0px), calc(-50% + -70px)); }
+.quickadd-spoke[data-angle="1"] { transform: translate(calc(-50% + 61px), calc(-50% + -35px)); }
+.quickadd-spoke[data-angle="2"] { transform: translate(calc(-50% + 61px), calc(-50% + 35px)); }
+.quickadd-spoke[data-angle="3"] { transform: translate(calc(-50% + 0px), calc(-50% + 70px)); }
+.quickadd-spoke[data-angle="4"] { transform: translate(calc(-50% + -61px), calc(-50% + 35px)); }
+.quickadd-spoke[data-angle="5"] { transform: translate(calc(-50% + -61px), calc(-50% + -35px)); }
 
 /* ---- Voice-notitie: opname-paneel (zie quickadd-spoke "Voice") ---- */
 
@@ -3108,8 +3100,8 @@ body.mindmap-editor .mindmap-canvas {
   }
 
   .quickadd-wheel-wrap.open {
-    width: 260px;
-    height: 260px;
+    width: 182px;
+    height: 182px;
   }
 
   .quickadd-wheel-wrap {
