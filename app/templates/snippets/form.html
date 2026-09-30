@@ -27,6 +27,11 @@
     <input type="text" id="title" name="title" required value="{{ snippet.title if snippet else '' }}">
   </div>
 
+  <div class="field">
+    <label for="description">Beschrijving (optioneel)</label>
+    <textarea id="description" name="description" rows="2" placeholder="Korte omschrijving, te zien op de kaart">{{ snippet.description if snippet else '' }}</textarea>
+  </div>
+
   <div id="snippet-files">
     {% if snippet and snippet.files %}
       {% for file in snippet.files %}{{ file_block(file.filename, file.language, file.content) }}{% endfor %}

@@ -1,3 +1,4 @@
+import json
 import re
 
 
@@ -243,20 +244,39 @@ def test_search_snippets_by_tag(logged_in_client):
 
 
 def test_collapsed_snippet_ui_present(logged_in_client):
+    """Het eerste bestand toont een altijd-zichtbare code-preview op de kaart (ByteStash-
+    achtig); bij meerdere bestanden blijven de overige verborgen achter "+ N meer
+    bestanden" tot je 'm in het volledige-scherm-paneel opent."""
     logged_in_client.post(
         "/snippets",
-        data={"title": "Inklaptest", "tags": "", "filename": ["a.py"], "language": ["python"], "content": ["x = 1"]},
+        data={
+            "title": "Inklaptest",
+            "tags": "",
+            "filename": ["a.py", "b.py"],
+            "language": ["python", "python"],
+            "content": ["x = 1", "y = 2"],
+        },
     )
     listing = logged_in_client.get("/snippets").text
     snippet_id = _snippet_id_for_title(listing, "Inklaptest")
 
-    # De code-inhoud moet standaard verborgen zijn (achter een hidden container).
     files_marker = f'id="snippet-files-{snippet_id}"'
     assert files_marker in listing
     files_start = listing.index(files_marker)
-    # De 'hidden'-attribuut moet vlak vóór de afsluitende '>' van deze div staan.
     div_end = listing.index(">", files_start)
-    assert "hidden" in listing[files_start:div_end]
+    # De container zelf is niet verborgen -- het eerste bestand toont juist een preview.
+    assert "hidden" not in listing[files_start:div_end]
+
+    # Het eerste bestand (a.py) is zichtbaar, het tweede (b.py) staat achter "hidden".
+    first_file_start = listing.index('data-file-id="', div_end)
+    first_file_div_end = listing.index(">", first_file_start)
+    assert "hidden" not in listing[first_file_start:first_file_div_end]
+
+    second_file_start = listing.index('data-file-id="', first_file_div_end)
+    second_file_div_end = listing.index(">", second_file_start)
+    assert "hidden" in listing[second_file_start:second_file_div_end]
+
+    assert "+ 1 meer bestand" in listing
 
 
 def test_snippet_list_includes_fullscreen_viewer_markup(logged_in_client):
@@ -269,3 +289,112 @@ def test_snippet_list_includes_fullscreen_viewer_markup(logged_in_client):
     assert 'id="snippet-fullscreen-title"' in page
     assert 'id="snippet-fullscreen-body"' in page
     assert "highlightjs-line-numbers.js" in page
+
+
+def test_snippet_card_shows_description_and_placeholder(logged_in_client):
+    logged_in_client.post(
+        "/snippets",
+        data={
+            "title": "Met beschrijving",
+            "description": "Een korte omschrijving",
+            "tags": "",
+            "filename": ["a.py"],
+            "language": ["python"],
+            "content": ["x = 1"],
+        },
+    )
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "Zonder beschrijving", "tags": "", "filename": ["b.py"], "language": ["python"], "content": ["y = 2"]},
+    )
+    listing = logged_in_client.get("/snippets").text
+    assert "Een korte omschrijving" in listing
+    assert "Geen beschrijving beschikbaar" in listing
+
+
+def test_export_snippets_as_json(logged_in_client):
+    logged_in_client.post(
+        "/snippets",
+        data={
+            "title": "Export test",
+            "description": "Beschrijving voor export",
+            "tags": "python",
+            "filename": ["main.py"],
+            "language": ["python"],
+            "content": ["print(1)"],
+        },
+    )
+    response = logged_in_client.get("/snippets/export", params={"format": "json"})
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("application/json")
+    assert "attachment" in response.headers["content-disposition"]
+
+    body = response.json()
+    entry = next(s for s in body["snippets"] if s["title"] == "Export test")
+    assert entry["description"] == "Beschrijving voor export"
+    assert entry["tags"] == ["python"]
+    assert entry["files"] == [{"filename": "main.py", "language": "python", "content": "print(1)"}]
+
+
+def test_export_snippets_as_markdown(logged_in_client):
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "MD export", "tags": "", "filename": ["a.sh"], "language": ["bash"], "content": ["echo hi"]},
+    )
+    response = logged_in_client.get("/snippets/export", params={"format": "markdown"})
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/markdown")
+    assert "## MD export" in response.text
+    assert "```bash" in response.text
+    assert "echo hi" in response.text
+
+
+def test_export_requires_login(client):
+    response = client.get("/snippets/export", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
+def test_import_snippets_from_json(logged_in_client):
+    payload = {
+        "exported_at": "2026-01-01T00:00:00",
+        "snippets": [
+            {
+                "title": "Geïmporteerde snippet",
+                "description": "Uit een export",
+                "tags": ["geimporteerd"],
+                "files": [{"filename": "x.py", "language": "python", "content": "x = 1"}],
+            }
+        ],
+    }
+    response = logged_in_client.post(
+        "/snippets/import",
+        files={"import_file": ("export.json", json.dumps(payload), "application/json")},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "import_success=1" in response.headers["location"]
+
+    listing = logged_in_client.get("/snippets").text
+    assert "Geïmporteerde snippet" in listing
+    assert "Uit een export" in listing
+    assert "geimporteerd" in listing
+
+
+def test_import_snippets_rejects_invalid_json(logged_in_client):
+    response = logged_in_client.post(
+        "/snippets/import",
+        files={"import_file": ("broken.json", b"dit is geen json", "application/json")},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "import_error=" in response.headers["location"]
+
+    listing = logged_in_client.get(response.headers["location"]).text
+    assert "Ongeldig of beschadigd JSON-bestand" in listing
+
+
+def test_import_requires_login(client):
+    response = client.post("/snippets/import", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"

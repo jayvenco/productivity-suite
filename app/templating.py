@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from datetime import UTC, datetime
 
 import bleach
 import markdown as md
@@ -29,6 +30,36 @@ def render_card_description(description: str, card_id: int) -> str:
     return render_description_html(description, card_id, render_markdown)
 
 
+def relative_time(dt: datetime | None) -> str:
+    """Relatieve tijdsaanduiding (bv. "3 dagen geleden") i.p.v. een kale datum -- gebruikt
+    op de ByteStash-achtige snippet-kaarten (zie app/templates/snippets/list.html), die
+    de laatste-wijziging-tijd prominent rechtsboven in de kaart tonen."""
+    if dt is None:
+        return ""
+    delta = datetime.now(UTC).replace(tzinfo=None) - dt
+    seconds = delta.total_seconds()
+    if seconds < 60:
+        return "zojuist"
+    minutes = int(seconds // 60)
+    if minutes < 60:
+        return f"{minutes} min. geleden"
+    hours = int(minutes // 60)
+    if hours < 24:
+        return f"{hours} uur geleden"
+    days = delta.days
+    if days < 1:
+        return "vandaag"
+    if days == 1:
+        return "1 dag geleden"
+    if days < 30:
+        return f"{days} dagen geleden"
+    months = days // 30
+    if months < 12:
+        return f"ongeveer {months} maand{'en' if months != 1 else ''} geleden"
+    years = days // 365
+    return f"ongeveer {years} jaar{'en' if years != 1 else ''} geleden"
+
+
 def static_url(path: str) -> str:
     """Statische bestanden (CSS/JS) krijgen een ?v=<mtime>-querystring, zodat
     een gewijzigd bestand na een deploy altijd een nieuwe URL heeft i.p.v. dat
@@ -44,4 +75,5 @@ def static_url(path: str) -> str:
 
 templates.env.filters["markdown"] = render_markdown
 templates.env.filters["checklist_html"] = render_card_description
+templates.env.filters["relative_time"] = relative_time
 templates.env.globals["static_url"] = static_url

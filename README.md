@@ -121,24 +121,38 @@ Gebouwd:
   De notitiekaarten zelf zijn herontworpen naar de vormgeving van
   [zhfahim/anchor](https://github.com/zhfahim/anchor): sterk afgeronde hoeken, volledig
   ronde tag-pills met een "#"-prefix, en de datum onderaan de kaart
-- **Code snippets** (ByteStash-stijl): een snippet kan **meerdere bestanden** bevatten (bv.
-  `main.py` + `requirements.txt` bij elkaar), elk met een eigen taal voor **syntax
-  highlighting** (highlight.js) — de taal wordt **automatisch afgeleid uit de
-  bestandsextensie** zodra je een bestandsnaam typt (bv. `config.json` → json,
-  `app.py` → python), en blijft daarna gewoon handmatig aan te passen via de select. Kaarten
-  staan **in een raster** (net als notities) en **standaard ingeklapt** (alleen titel, tags en
-  bestandsnamen) — klik op de titel om de code te bekijken in een **bijna-volledig-scherm
-  paneel** (i.p.v. een klein regeltje binnen de kaart), met **regelnummers**
+- **Code snippets** (ByteStash-stijl, zie [github.com/jordan-dalby/ByteStash](https://github.com/jordan-dalby/ByteStash)):
+  een snippet kan **meerdere bestanden** bevatten (bv. `main.py` + `requirements.txt` bij
+  elkaar), elk met een eigen taal voor **syntax highlighting** (highlight.js) — de taal
+  wordt **automatisch afgeleid uit de bestandsextensie** zodra je een bestandsnaam typt
+  (bv. `config.json` → json, `app.py` → python), en blijft daarna gewoon handmatig aan te
+  passen via de select. Kaarten staan **in een raster** (net als notities), qua opbouw
+  gemodelleerd naar ByteStash: **titel + relatieve tijd** ("3 dagen geleden") bovenaan,
+  een optionele **beschrijving** (2 regels, "Geen beschrijving beschikbaar" als er geen
+  is), **tags als pillen** ("Geen tags" als placeholder), en direct een **live preview van
+  het eerste bestand** — een bestandsnaam-balkje met **kopieer-** en **uitklap-iconen**,
+  daaronder de gesyntax-highlighte code (bij meerdere bestanden: "+ N meer bestanden"
+  eronder). Klik op de titel, het uitklap-icoon, of "+ N meer bestanden" om alles te
+  bekijken in een **bijna-volledig-scherm paneel**, met **regelnummers**
   (highlightjs-line-numbers.js) naast de syntax highlighting, voor een stuk betere
   leesbaarheid bij langere snippets. In dat paneel kun je de code ook direct **bewerken**
   ("Bewerken" → tekstvak(-ken) per bestand → "Opslaan" of "Annuleren") zonder naar het
   volledige bewerkformulier te hoeven — handig voor een snelle correctie, terwijl
-  titel/tags/bestand-toevoegen nog steeds via "Bewerken" op de kaart zelf gaat. Eén zoekveld
-  doorzoekt titel, tag én code-inhoud tegelijk, taggable met hetzelfde gedeelde tag-systeem.
-  De "Bewerken"/"Verwijder"-knoppen op de kaart zijn **kleiner** (`.btn-sm`) zodat ze minder
-  aandacht opeisen dan de titel, en een **selectievak per snippet** maakt (net als bij
-  notities) **bulk-verwijderen** van meerdere snippets in één keer mogelijk — de hele lijst
-  staat in één formulier, met een selectiebalk die verschijnt zodra je iets aanvinkt
+  titel/beschrijving/tags/bestand-toevoegen nog steeds via "Bewerken" op de kaart zelf gaat.
+  Eén zoekveld doorzoekt titel, tag én code-inhoud tegelijk, taggable met hetzelfde gedeelde
+  tag-systeem. De "Bewerken"/"Verwijder"-knoppen op de kaart zijn **kleiner** (`.btn-sm`)
+  zodat ze minder aandacht opeisen dan de titel, en een **selectievak per snippet** maakt
+  (net als bij notities) **bulk-verwijderen** van meerdere snippets in één keer mogelijk —
+  de hele lijst staat in één formulier, met een selectiebalk die verschijnt zodra je iets
+  aanvinkt
+- **Snippets exporteren/importeren**: een **"⇅ Export / Import"-paneel** boven de
+  snippetlijst laat je al je snippets **exporteren als JSON** (herimporteerbaar, geen
+  database-id's, dus ook bruikbaar om over te zetten naar een andere installatie) of als
+  **Markdown** (leesbaar/deelbaar document, niet bedoeld om terug te importeren). JSON
+  **importeren** voegt de snippets uit het bestand toe aan je bestaande snippets (overschrijft
+  niks) — bij een ongeldig/beschadigd bestand krijg je een duidelijke foutmelding i.p.v. een
+  kale foutpagina. Bewust een lichtgewicht, snippet-only export/import, los van de
+  hele-database-backup onder Account → Backup
 - **Mindmap**: je kunt **meerdere, losse mindmaps aanmaken en opslaan** (net als notities of
   snippets, i.p.v. één vast bord) — de lijstpagina toont ze als **preview-kaarten** (net als
   notities): naam, **beschrijving**, aantal componenten en gekleurde **tags**, met
@@ -756,6 +770,21 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     de kolommen heten Backlog/To Do/In Progress/Review/Done (5 stuks). Tussen elke kolom
     staat een verticale stippenlijn die van kleur wisselt (roze, oranje, blauw, groen) met
     een zachte gloed eromheen die naar de achtergrond vervaagt.
+54. Maak een snippet aan met een beschrijving en één bestand → op de kaart in de lijst zie
+    je meteen de titel + "zojuist" rechtsboven, de beschrijving, tags (of "Geen tags"), en
+    een live preview van het bestand met een bestandsnaam-balkje. Klik het kopieer-icoontje
+    → de code staat op je klembord. Klik het uitklap-icoontje (of de titel) → hetzelfde
+    bijna-volledig-scherm paneel als voorheen. Maak een tweede snippet aan zonder
+    beschrijving en met 2 bestanden → de kaart toont "Geen beschrijving beschikbaar", het
+    eerste bestand als preview, en een "+ 1 meer bestand"-knop die ook het volledige-scherm-
+    paneel opent.
+55. Ga naar Snippets → "⇅ Export / Import" → klik "Exporteren als JSON" → een `.json`-
+    bestand met al je snippets wordt gedownload. Klik "Exporteren als Markdown" → een
+    leesbaar `.md`-bestand met dezelfde inhoud. Upload het JSON-bestand weer via
+    "Importeren (JSON)" → een melding "N snippet(s) geïmporteerd" verschijnt, en je hebt nu
+    dubbele snippets (de import voegt toe, overschrijft niet). Probeer een willekeurig
+    tekstbestand (geen geldige JSON) te importeren → een duidelijke foutmelding i.p.v. een
+    kale foutpagina.
 
 ## Architectuur
 
@@ -1401,3 +1430,31 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   precies het soort positionerings-/z-index-gedoe is waar de swimlane-hernoem-popup-bugfix
   hierboven al tegenaan liep. Een gewoon flex-sibling-element met een eigen breedte (24px)
   is voorspelbaar en heeft geen last van overlap-issues.
+- **Snippet-kaart: eerste bestand blijft "hidden" delen met de fullscreen-clone**: `#snippet-
+  files-<id>` is niet langer zelf `hidden` (de kaart toont juist een live preview), maar elk
+  `.snippet-file`-blok daarbinnen behalve het eerste heeft dat attribuut nog wel, zodat de
+  kaart alleen het eerste bestand toont. `renderView()` in `snippets-list.js` kloont die hele
+  container voor het volledige-scherm-paneel en verwijdert daar expliciet `hidden` van alle
+  bestanden (`clone.querySelectorAll(".snippet-file[hidden]")...removeAttribute("hidden")`)
+  — zonder die stap zouden bestand 2+ nooit zichtbaar worden in dat paneel, want ze zouden
+  het `hidden`-attribuut van de kaart-bron meekopiëren.
+- **`.snippet-toggle` is nu een kale functionele reset-class, geen visuele stijl**: staat
+  inmiddels op drie verschillend gevormde knoppen (titel, uitklap-icoontje, "+ N meer
+  bestanden") die alle drie hetzelfde volledige-scherm-paneel openen maar er heel anders
+  uitzien — de daadwerkelijke vormgeving zit op specifiekere classes
+  (`.snippet-card-title-btn`/`.snippet-expand-btn`/`.snippet-card-more-files`). De titel
+  wordt niet meer uit een `.snippet-card-title-text`-childnode gelezen (dat bestaat niet in
+  de andere twee knoppen) maar uit een `data-snippet-title`-attribuut dat op alle drie staat.
+- **`Snippet.description` nieuw, optioneel veld**: toegevoegd om de ByteStash-look na te
+  bootsen (die toont altijd een beschrijving, met "No description available" als
+  placeholder) -- bestond hiervoor niet op het model. Additive migratie
+  (`app/services/migrate.py`), dus bestaande snippets krijgen gewoon een lege beschrijving
+  totdat je 'm zelf invult via "Bewerken".
+- **Snippets-export/import is bewust snippet-only, geen deel van de hele-database-backup**:
+  `GET /snippets/export` en `POST /snippets/import` (`app/routers/snippets.py`) draaien
+  volledig los van Account → Backup (die exporteert/importeert de hele SQLite-database als
+  `.db`-bestand). Het JSON-exportformaat bevat bewust geen database-id's (`{title,
+  description, tags, files: [{filename, language, content}]}`), zodat een import niet kan
+  botsen met bestaande id's en ook werkt als je 'm naar een andere installatie overzet.
+  Markdown-export is puur voor lezen/delen (geen vaste, herimporteerbare structuur) -- er is
+  dan ook bewust geen markdown-import gebouwd.

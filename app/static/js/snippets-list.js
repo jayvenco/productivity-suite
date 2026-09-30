@@ -40,6 +40,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const clone = source.cloneNode(true);
     clone.hidden = false;
     clone.removeAttribute("id");
+    // In de kaart zelf staat alleen het eerste bestand open (ByteStash-achtige preview,
+    // zie app/templates/snippets/list.html) -- de overige bestanden hebben daar het
+    // `hidden`-attribuut, dat hier weer verwijderd moet worden zodat het volledige-
+    // scherm-paneel wél alle bestanden toont.
+    clone.querySelectorAll(".snippet-file[hidden]").forEach((file) => file.removeAttribute("hidden"));
     bodyEl.innerHTML = "";
     bodyEl.appendChild(clone);
     applyHighlighting(clone);
@@ -124,8 +129,26 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("click", (event) => {
     const toggle = event.target.closest(".snippet-toggle");
     if (!toggle) return;
-    const title = toggle.querySelector(".snippet-card-title-text").textContent;
-    openModal(toggle.dataset.snippetId, title);
+    openModal(toggle.dataset.snippetId, toggle.dataset.snippetTitle || "");
+  });
+
+  // Kopieer-icoontje op de code-preview in de kaart (ByteStash-achtig) -- kopieert de
+  // rauwe tekst van het bijbehorende <code>-element, ongeacht de <span>-tags die
+  // hljs.highlightAll() erin gezet heeft voor de syntax-kleuring (textContent negeert
+  // die sowieso, dus geen aparte "rauwe" kopie nodig zoals bij de bewerk-modus hierboven).
+  document.addEventListener("click", (event) => {
+    const copyBtn = event.target.closest(".snippet-copy-btn");
+    if (!copyBtn) return;
+    const codeEl = document.getElementById(copyBtn.dataset.copyTarget);
+    if (!codeEl || !navigator.clipboard) return;
+
+    navigator.clipboard.writeText(codeEl.textContent).then(() => {
+      const original = copyBtn.textContent;
+      copyBtn.textContent = "✓";
+      setTimeout(() => {
+        copyBtn.textContent = original;
+      }, 1200);
+    });
   });
 
   editBtn.addEventListener("click", enterEditMode);

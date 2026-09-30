@@ -16,6 +16,7 @@ _COLUMNS_TO_ENSURE = {
     "kanban_columns": [("swimlane_id", "INTEGER")],
     "kanban_swimlanes": [("color", "VARCHAR(20)")],
     "notes": [("is_temp", "BOOLEAN DEFAULT 0")],
+    "snippets": [("description", "TEXT DEFAULT ''")],
     "mindmap_boards": [("description", "TEXT DEFAULT ''")],
     "users": [
         ("font_family", "VARCHAR(50) DEFAULT 'system'"),

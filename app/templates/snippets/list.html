@@ -14,6 +14,22 @@
   {% if active_tag or q %}<a href="/snippets" class="btn btn-secondary">Filters wissen</a>{% endif %}
 </form>
 
+<details class="filter-panel">
+  <summary class="filter-panel-toggle">⇅ Export / Import</summary>
+  <div class="filter-panel-body">
+    {% if import_error %}<p class="badge-danger" style="display:inline-block">{{ import_error }}</p>{% endif %}
+    {% if import_success %}<p class="badge-warning" style="display:inline-block">{{ import_success }} snippet(s) geïmporteerd.</p>{% endif %}
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="/snippets/export?format=json" class="btn btn-secondary">⬇ Exporteren als JSON</a>
+      <a href="/snippets/export?format=markdown" class="btn btn-secondary">⬇ Exporteren als Markdown</a>
+    </div>
+    <form method="post" action="/snippets/import" enctype="multipart/form-data" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input type="file" name="import_file" accept="application/json" required>
+      <button type="submit" class="btn btn-secondary">⬆ Importeren (JSON)</button>
+    </form>
+  </div>
+</details>
+
 <form method="post" id="snippets-bulk-form">
   <input type="hidden" name="q" value="{{ q }}">
   <input type="hidden" name="tag" value="{{ active_tag or '' }}">
@@ -26,28 +42,47 @@
   <div class="snippets-list">
     {% for snippet in snippets %}
     <div class="snippet-card" style="{{ snippet.row_tint_style }}">
-      <div class="snippet-card-header">
+      <div class="snippet-card-topbar">
         <input type="checkbox" class="snippet-select" name="snippet_ids" value="{{ snippet.id }}">
-        <button type="button" class="snippet-toggle" data-snippet-id="{{ snippet.id }}" title="Openen in volledig scherm">
-          <span class="snippet-toggle-arrow">⛶</span>
+        <button type="button" class="snippet-toggle snippet-card-title-btn" data-snippet-id="{{ snippet.id }}" data-snippet-title="{{ snippet.title }}" title="Openen in volledig scherm">
           <span class="snippet-card-title-text">{{ snippet.title }}</span>
         </button>
-        <div class="snippet-card-header-actions">
-          <a href="/snippets/{{ snippet.id }}/edit" class="btn btn-secondary btn-sm">Bewerken</a>
-          <button type="submit" formaction="/snippets/{{ snippet.id }}/delete" formnovalidate class="btn btn-danger btn-sm snippet-delete-btn" onclick="return confirm('Snippet verwijderen?')">Verwijder</button>
-        </div>
+        <span class="snippet-card-time" title="{{ snippet.updated_at.isoformat() }}">🕐 {{ snippet.updated_at|relative_time }}</span>
       </div>
+
+      <p class="snippet-card-description">{{ snippet.description or "Geen beschrijving beschikbaar" }}</p>
+
       <div class="snippet-card-tags">
-        {% for t in snippet.tags %}<a class="tag" style="{{ t.badge_style }}" href="/snippets?tag={{ t.name }}">{{ t.name }}</a>{% endfor %}
-        {% for file in snippet.files %}<span class="tag snippet-file-badge">{{ file.filename }}</span>{% endfor %}
+        {% if snippet.tags %}
+          {% for t in snippet.tags %}<a class="tag" style="{{ t.badge_style }}" href="/snippets?tag={{ t.name }}">{{ t.name }}</a>{% endfor %}
+        {% else %}
+          <span class="tag snippet-tag-empty">Geen tags</span>
+        {% endif %}
       </div>
-      <div class="snippet-files" id="snippet-files-{{ snippet.id }}" hidden>
+
+      <div class="snippet-files" id="snippet-files-{{ snippet.id }}">
         {% for file in snippet.files %}
-        <div class="snippet-file" data-file-id="{{ file.id }}" data-language="{{ file.language }}">
-          <div class="snippet-file-name">{{ file.filename }} <span class="snippet-file-lang">{{ file.language }}</span></div>
-          <pre><code class="language-{{ file.language }}">{{ file.content }}</code></pre>
+        <div class="snippet-file" data-file-id="{{ file.id }}" data-language="{{ file.language }}" {{ 'hidden' if not loop.first }}>
+          <div class="snippet-file-name">
+            <span>📄 {{ file.filename }}</span>
+            <div class="snippet-file-actions">
+              <button type="button" class="snippet-copy-btn" data-copy-target="snippet-copy-{{ file.id }}" title="Code kopiëren">⧉</button>
+              <button type="button" class="snippet-toggle snippet-expand-btn" data-snippet-id="{{ snippet.id }}" data-snippet-title="{{ snippet.title }}" title="Volledig scherm openen">⤢</button>
+            </div>
+          </div>
+          <pre><code class="language-{{ file.language }}" id="snippet-copy-{{ file.id }}">{{ file.content }}</code></pre>
         </div>
         {% endfor %}
+      </div>
+      {% if snippet.files|length > 1 %}
+      <button type="button" class="snippet-card-more-files snippet-toggle" data-snippet-id="{{ snippet.id }}" data-snippet-title="{{ snippet.title }}">
+        + {{ snippet.files|length - 1 }} meer bestand{{ 'en' if snippet.files|length - 1 > 1 }}
+      </button>
+      {% endif %}
+
+      <div class="snippet-card-actions-row">
+        <a href="/snippets/{{ snippet.id }}/edit" class="btn btn-secondary btn-sm">Bewerken</a>
+        <button type="submit" formaction="/snippets/{{ snippet.id }}/delete" formnovalidate class="btn btn-danger btn-sm snippet-delete-btn" onclick="return confirm('Snippet verwijderen?')">Verwijder</button>
       </div>
     </div>
     {% else %}
