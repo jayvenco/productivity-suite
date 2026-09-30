@@ -1597,6 +1597,30 @@ textarea {
   border-radius: 0;
   overflow-x: auto;
   max-height: 260px;
+  /* Vaste (thema-onafhankelijke) donkere scrollbar-kleuren -- de code-achtergrond komt
+     van highlight.js' atom-one-dark-stylesheet, die altijd donker is ongeacht het actieve
+     app-thema, dus een scrollbar in de thema-kleur (bv. wit bij het "white"-thema) zou
+     hier juist tegen die vaste donkere achtergrond opvallen i.p.v. er juist bij horen. */
+  scrollbar-width: thin;
+  scrollbar-color: #4b5263 transparent;
+}
+
+.snippet-file pre::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.snippet-file pre::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.snippet-file pre::-webkit-scrollbar-thumb {
+  background: #4b5263;
+  border-radius: 4px;
+}
+
+.snippet-file pre::-webkit-scrollbar-thumb:hover {
+  background: #5c6370;
 }
 
 .snippet-file pre code {
@@ -1732,6 +1756,29 @@ textarea {
   padding: 10px;
   resize: vertical;
   tab-size: 4;
+  /* Hier wél thema-afhankelijk (i.t.t. .snippet-file pre hierboven) -- de achtergrond van
+     deze textarea volgt gewoon var(--bg), dus de scrollbar moet ook meebewegen met het
+     actieve thema i.p.v. een vast donkere kleur te zijn. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.snippet-edit-textarea::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.snippet-edit-textarea::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.snippet-edit-textarea::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.snippet-edit-textarea::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 /* highlightjs-line-numbers.js output-structuur (geen aparte CDN-CSS, bewust minimaal

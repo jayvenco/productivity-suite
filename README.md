@@ -144,7 +144,11 @@ Gebouwd:
   zodat ze minder aandacht opeisen dan de titel, en een **selectievak per snippet** maakt
   (net als bij notities) **bulk-verwijderen** van meerdere snippets in één keer mogelijk —
   de hele lijst staat in één formulier, met een selectiebalk die verschijnt zodra je iets
-  aanvinkt
+  aanvinkt. De **scrollbar in de code-preview is een vaste, donkere kleur** i.p.v. de
+  systeemstandaard (vaak wit) — de code-achtergrond komt van highlight.js'
+  atom-one-dark-stylesheet, die altijd donker is ongeacht het actieve app-thema, dus een
+  scrollbar in de thema-kleur (wit bij bv. het "white"-thema) zou er juist tussenuit
+  springen i.p.v. erbij horen
 - **Snippets exporteren/importeren**: een **"⇅ Export / Import"-paneel** boven de
   snippetlijst laat je al je snippets **exporteren als JSON** (herimporteerbaar, geen
   database-id's, dus ook bruikbaar om over te zetten naar een andere installatie) of als
@@ -785,6 +789,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     dubbele snippets (de import voegt toe, overschrijft niet). Probeer een willekeurig
     tekstbestand (geen geldige JSON) te importeren → een duidelijke foutmelding i.p.v. een
     kale foutpagina.
+56. Maak een snippet aan met een bestand dat lange regels + veel regels heeft (genoeg om
+    zowel horizontaal als verticaal te moeten scrollen in de preview) → de scrollbars zijn
+    subtiel donkergrijs, niet de witte systeemstandaard. Wissel van thema naar "white" of
+    "light" → de code-preview blijft donker (highlight.js' eigen kleurschema) en de
+    scrollbar blijft er donkergrijs bij passen i.p.v. wit te worden.
 
 ## Architectuur
 
