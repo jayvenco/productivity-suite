@@ -527,6 +527,61 @@ textarea {
   margin-bottom: 12px;
 }
 
+/* Filter/sorteer-paneel achter een knop i.p.v. altijd-zichtbare controls (taken/notities) --
+   een druk scherm met de sorteer-keuzelijst + alle tags als checkboxes permanent open was
+   de klacht; nu blijft dat standaard dicht, met een badge die laat zien of er een
+   tag-filter actief is zonder het paneel te hoeven openen. */
+.filter-panel {
+  margin-bottom: 14px;
+}
+
+.filter-panel summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.filter-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.filter-panel summary:hover,
+.filter-panel[open] summary {
+  border-color: var(--accent);
+}
+
+.filter-panel-badge {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  min-width: 16px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  line-height: 16px;
+}
+
+.filter-panel-body {
+  margin-top: 10px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .task-controls {
   display: flex;
   align-items: center;
@@ -741,7 +796,10 @@ textarea {
   position: absolute;
   z-index: 5;
   top: 100%;
-  left: 0;
+  /* Groeit naar links i.p.v. naar rechts -- het ✎-icoontje staat al helemaal rechts in de
+     (mogelijk brede, horizontaal scrollbare) swimlane-kop, dus een popup die naar rechts
+     opent viel goeddeels buiten beeld en het tekstveld was daardoor amper te zien. */
+  right: 0;
   display: flex;
   gap: 4px;
   margin-top: 4px;
@@ -749,6 +807,10 @@ textarea {
   padding: 6px;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.swimlane-rename-form form input[type="text"] {
+  width: 150px;
 }
 
 .swimlane-delete-form {
@@ -1231,7 +1293,10 @@ textarea {
 .notes-toolbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* Sorteren zit nu in het filter-paneel eronder -- alleen de weergave-toggle staat hier
+     nog, dus rechts uitgelijnd i.p.v. space-between (dat met één kind aan de linkerkant
+     zou blijven hangen). */
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 12px;
@@ -1629,11 +1694,17 @@ textarea {
 .pomodoro-float {
   position: fixed;
   right: 20px;
-  bottom: 20px;
+  /* Ruimte vrijhouden boven de ticker-band (zie .task-ticker verderop) -- schuift terug
+     naar 20px zodra de ticker verborgen is, via de body:has()-regel hieronder. */
+  bottom: 54px;
   width: 266px;
   height: 266px;
   z-index: 1000;
   user-select: none;
+}
+
+body:has(#task-ticker[hidden]) .pomodoro-float {
+  bottom: 20px;
 }
 
 .pomodoro-float[hidden] {
@@ -2578,10 +2649,15 @@ body.mindmap-editor .mindmap-canvas {
 .quickadd-wheel-wrap {
   position: fixed;
   right: 20px;
-  bottom: 20px;
+  /* Zie de toelichting bij .pomodoro-float hierboven -- zelfde reden. */
+  bottom: 54px;
   width: 45px;
   height: 45px;
   z-index: 900;
+}
+
+body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
+  bottom: 20px;
 }
 
 .quickadd-wheel-wrap.open {
@@ -3121,7 +3197,7 @@ body.mindmap-editor .mindmap-canvas {
     width: 220px;
     height: 220px;
     right: 12px;
-    bottom: 12px;
+    bottom: 46px;
   }
 
   .quickadd-wheel-wrap.open {
@@ -3131,6 +3207,14 @@ body.mindmap-editor .mindmap-canvas {
 
   .quickadd-wheel-wrap {
     right: 12px;
+    bottom: 46px;
+  }
+
+  body:has(#task-ticker[hidden]) .pomodoro-float {
+    bottom: 12px;
+  }
+
+  body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
     bottom: 12px;
   }
 
@@ -3201,4 +3285,94 @@ body.mindmap-editor .mindmap-canvas {
 .search-result-date {
   color: var(--text-secondary);
   font-size: 13px;
+}
+
+/* ---- Nieuws-ticker onderin: alle open taken glijden langzaam van rechts naar links,
+   zoals een nieuwsband onder een tv-uitzending (zie app/static/js/ticker.js). ---- */
+
+.task-ticker {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34px;
+  background: rgba(20, 20, 25, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(255, 122, 61, 0.35);
+  z-index: 800;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+.task-ticker[hidden] {
+  display: none;
+}
+
+.task-ticker-track {
+  display: flex;
+  white-space: nowrap;
+  will-change: transform;
+  animation-name: task-ticker-scroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-duration: 45s;
+}
+
+.task-ticker-content {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.task-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 56px;
+  color: #f5f5f5;
+  text-decoration: none;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.task-ticker-item:hover {
+  text-decoration: underline;
+}
+
+.task-ticker-item-priority {
+  color: #f1c40f;
+}
+
+@keyframes task-ticker-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* Precies de helft van de totale breedte (twee identieke kopieën achter elkaar) --
+       zodra de eerste kopie volledig links van beeld is, staat de tweede exact waar de
+       eerste begon, dus de lus herstart onzichtbaar i.p.v. met een zichtbare sprong. */
+    transform: translateX(-50%);
+  }
+}
+
+.task-ticker-close {
+  flex-shrink: 0;
+  margin-left: auto;
+  margin-right: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  color: #f5f5f5;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.task-ticker-close:hover {
+  background: rgba(255, 255, 255, 0.18);
 }

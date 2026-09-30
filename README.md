@@ -302,6 +302,22 @@ Gebouwd:
   notities). Een taak die meer dan **7 dagen niet bewerkt** is (ongeacht status) krijgt een
   witte linkerrand + lichte tint op de kaart, zodat je in één oogopslag ziet wat is blijven
   liggen.
+- **Filter & sorteren achter één knop** (Taken, Notities): de sorteer-keuzelijst en alle
+  tags-als-checkboxes stonden eerst permanent open in de toolbar — nu zitten ze achter een
+  **"⚙ Filter & sorteren"-knop** die standaard dichtklapt, met een badge die het aantal
+  actieve tag-filters toont zolang het paneel dicht is. Rustiger standaardscherm zonder dat
+  je de filter/sorteer-opties kwijtraakt.
+- **Swimlane hernoemen — pop-up bleef eerst buiten beeld (BUGFIX)**: het ✎-formuliertje
+  opende naar rechts vanaf een icoon dat al helemaal rechts in de (mogelijk brede,
+  horizontaal scrollbare) swimlane-kop stond, waardoor het tekstveld goeddeels onzichtbaar
+  was. Het pop-up opent nu naar links i.p.v. naar rechts, met een vaste breedte voor het
+  tekstveld.
+- **Nieuws-ticker onderin**: een dunne balk onderaan elke pagina laat al je nog niet
+  afgeronde taken langzaam van rechts naar links voorbij glijden (net als een nieuwsband
+  onder een tv-uitzending), met prioriteit-taken herkenbaar aan een ★ en elke taak
+  klikbaar naar de bewerkpagina. Met een sluitknopje te verbergen (onthouden in
+  `localStorage`); de quick-add-wheel en Pomodoro-widget schuiven automatisch een stukje
+  omhoog zolang de ticker zichtbaar is, en weer terug zodra 'm verborgen is.
 
 Nog niet gebouwd: CI/CD, voice-commando's matchen op een al bestaand item i.p.v. altijd een
 nieuw item aanmaken (bv. "voeg dit toe aan mijn boodschappenlijst-notitie" i.p.v. een nieuwe
@@ -712,6 +728,21 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     dezelfde kolommen als een via de browser aangemaakte swimlane. Doe dezelfde aanroep
     zonder de `Authorization`-header → 401 i.p.v. de eerdere 303-redirect-naar-inlog van de
     gewone web-route.
+50. Ga naar Taken → de sorteer-/tag-filter-controls zijn weg uit het standaardbeeld, alleen
+    een "⚙ Filter & sorteren"-knop staat er nog. Klik erop → hetzelfde paneel (sorteren,
+    groeperen, tags) klapt open. Filter op een tag en klap het paneel weer dicht → de knop
+    toont nu een badge met het aantal actieve tag-filters. Zelfde check bij Notities
+    (sorteren + tags, de raster/lijst-toggle blijft wel altijd zichtbaar).
+51. Ga naar Kanban, klik het ✎-icoontje naast een swimlane-naam → het tekstveld met de
+    huidige naam is nu volledig zichtbaar (niet meer afgesneden aan de rechterkant), en je
+    kunt gewoon zien wat je intypt.
+52. Maak een paar taken aan (waarvan minstens één met "Prioriteit" aangevinkt) → onderaan
+    elke pagina glijdt een donkere balk met die taken langzaam van rechts naar links, de
+    prioriteitstaak met een ★. Klik op een taak in de balk → je komt op de bewerkpagina van
+    die taak. Vink een taak af → die verdwijnt uit de balk (ververst pas bij een volgend
+    paginabezoek, niet live). Klik het kruisje rechts in de balk → de balk verdwijnt en de
+    quick-add-wheel/Pomodoro-knop schuiven een stukje omlaag; herlaad de pagina → de balk
+    blijft verborgen.
 
 ## Architectuur
 
@@ -1309,3 +1340,30 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   (`app/routers/api.py`) met dezelfde `require_api_user`-afhankelijkheid als de rest van de
   agent-API, en dezelfde logica als de web-route (nieuwe swimlane krijgt de
   standaardkolommen uit `app/services/seed.py::DEFAULT_COLUMNS`).
+- **`.filter-panel` als gedeelde `<details>`-wrapper (Taken/Notities)**: bewust een gewone
+  `<details>`/`<summary>` i.p.v. een JS-gestuurd dropdown-paneel (zelfde patroon als
+  "+ Kaart toevoegen" op het kanbanbord) -- geen extra JS nodig voor open/dicht-gedrag, en
+  het klapt in-flow open (duwt de rest van de pagina naar beneden) i.p.v. als overlay, wat
+  het risico op de "valt buiten beeld"-bug hieronder bij de swimlane-rename vermijdt. De
+  badge (`.filter-panel-badge`) telt alleen actieve tag-filters -- sorteren/groeperen zijn
+  geen "filters" in de zin dat ze items verbergen, dus die tellen bewust niet mee.
+- **BUGFIX — swimlane-hernoem-popup viel buiten beeld**: `.swimlane-rename-form form` had
+  `left: 0`, wat de popup naar rechts liet groeien vanaf een ✎-icoontje dat door
+  `flex: 1` op `.swimlane-toggle` al helemaal rechts in de (mogelijk brede, horizontaal
+  scrollbare) swimlane-kop stond -- op smallere/gescrollde boards viel het tekstveld
+  daardoor grotendeels of helemaal buiten het zichtbare scherm. Nu `right: 0` (groeit naar
+  links, richting reeds-zichtbare inhoud) plus een vaste `width: 150px` op het tekstveld
+  zelf (zonder expliciete breedte kon een flex-child in een ongeclipte popup alsnog te
+  smal renderen om iets van de getypte tekst te tonen).
+- **Nieuws-ticker (`app/static/js/ticker.js`, `GET /tasks/ticker`)**: de inhoud staat
+  dubbel achter elkaar (`#task-ticker-content` + een identieke `-dup`-kopie) en de
+  CSS-animatie schuift precies 50% van de totale breedte op -- zodra de eerste kopie
+  volledig van beeld is verdwenen, staat de tweede (identieke) kopie exact op de plek waar
+  de eerste begon, wat een naadloze, oneindige lus geeft zonder zichtbare sprong bij het
+  herstarten. De animatieduur schaalt licht mee met het aantal taken
+  (`Math.max(20, Math.min(120, tasks.length * 4))` seconden) zodat de band niet te snel
+  voorbijflitst bij weinig taken en niet eeuwig duurt om rond te komen bij heel veel taken.
+  De ticker en de zwevende widgets (quick-add-wheel, Pomodoro) houden elkaar in de gaten via
+  een CSS-only `body:has(#task-ticker[hidden])`-selector i.p.v. een JS-klasse op `<body>` --
+  scheelt een stukje coördinatie-JS tussen losse scripts (`ticker.js` weet niets van
+  `quickadd.js`/`pomodoro.js` en andersom).

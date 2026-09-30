@@ -7,34 +7,42 @@
 </div>
 
 <div class="notes-toolbar">
-  <label class="notes-sort-label">
-    Sorteren op
-    <select form="notes-tag-filter-form" name="sort" onchange="this.form.submit()">
-      <option value="updated" {{ 'selected' if sort == 'updated' }}>Laatst gewijzigd</option>
-      <option value="title" {{ 'selected' if sort == 'title' }}>Titel</option>
-      <option value="created" {{ 'selected' if sort == 'created' }}>Aangemaakt</option>
-    </select>
-  </label>
   <div class="notes-view-toggle" id="notes-view-toggle" role="group" aria-label="Weergave">
     <button type="button" class="notes-view-btn" data-view="grid" title="Raster">▦ Raster</button>
     <button type="button" class="notes-view-btn" data-view="list" title="Lijst">☰ Lijst</button>
   </div>
 </div>
 
-{% if all_tags %}
-<div class="task-tag-filter" style="margin-bottom:12px">
-  <span class="task-tag-filter-label">Tags:</span>
-  {% for t in all_tags %}
-  <label class="tag-checkbox" style="{{ t.badge_style }}">
-    <input type="checkbox" form="notes-tag-filter-form" name="tags" value="{{ t.name }}" onchange="this.form.submit()" {{ 'checked' if t.name in active_tags }}>
-    {{ t.name }}
-  </label>
-  {% endfor %}
-</div>
-{% endif %}
 <form method="get" action="/notes" id="notes-tag-filter-form"></form>
 
-{% if active_tags %}<a href="/notes?sort={{ sort }}" class="btn btn-secondary" style="margin-bottom:12px;display:inline-block">Tag-filter wissen</a>{% endif %}
+<details class="filter-panel" {{ 'open' if active_tags }}>
+  <summary class="filter-panel-toggle">
+    ⚙ Filter &amp; sorteren
+    {% if active_tags %}<span class="filter-panel-badge">{{ active_tags|length }}</span>{% endif %}
+  </summary>
+  <div class="filter-panel-body">
+    <label class="notes-sort-label">
+      Sorteren op
+      <select form="notes-tag-filter-form" name="sort" onchange="this.form.submit()">
+        <option value="updated" {{ 'selected' if sort == 'updated' }}>Laatst gewijzigd</option>
+        <option value="title" {{ 'selected' if sort == 'title' }}>Titel</option>
+        <option value="created" {{ 'selected' if sort == 'created' }}>Aangemaakt</option>
+      </select>
+    </label>
+    {% if all_tags %}
+    <div class="task-tag-filter">
+      <span class="task-tag-filter-label">Tags:</span>
+      {% for t in all_tags %}
+      <label class="tag-checkbox" style="{{ t.badge_style }}">
+        <input type="checkbox" form="notes-tag-filter-form" name="tags" value="{{ t.name }}" onchange="this.form.submit()" {{ 'checked' if t.name in active_tags }}>
+        {{ t.name }}
+      </label>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if active_tags %}<a href="/notes?sort={{ sort }}" class="btn btn-secondary">Tag-filter wissen</a>{% endif %}
+  </div>
+</details>
 
 <form method="post" id="notes-bulk-form">
   {% for t in active_tags %}<input type="hidden" name="tag_filter" value="{{ t }}">{% endfor %}

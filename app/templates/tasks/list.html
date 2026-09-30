@@ -53,35 +53,41 @@
   <a href="/tasks/new" class="btn">+ Nieuwe taak</a>
 </div>
 
-<form method="get" action="/tasks" class="task-controls">
-  {% if active_status %}<input type="hidden" name="status_filter" value="{{ active_status }}">{% endif %}
-  <label>Sorteren op
-    <select name="sort" onchange="this.form.submit()">
-      <option value="deadline" {{ 'selected' if sort == 'deadline' }}>Deadline</option>
-      <option value="title" {{ 'selected' if sort == 'title' }}>Titel</option>
-      <option value="priority" {{ 'selected' if sort == 'priority' }}>Prioriteit</option>
-      <option value="status" {{ 'selected' if sort == 'status' }}>Status</option>
-    </select>
-  </label>
-  <label>Groeperen op
-    <select name="group_by" onchange="this.form.submit()">
-      <option value="none" {{ 'selected' if group_by == 'none' }}>Geen</option>
-      <option value="tag" {{ 'selected' if group_by == 'tag' }}>Tag / project</option>
-    </select>
-  </label>
-  {% if all_tags %}
-  <div class="task-tag-filter">
-    <span class="task-tag-filter-label">Tags:</span>
-    {% for t in all_tags %}
-    <label class="tag-checkbox" style="{{ t.badge_style }}">
-      <input type="checkbox" name="tags" value="{{ t.name }}" onchange="this.form.submit()" {{ 'checked' if t.name in active_tags }}>
-      {{ t.name }}
+<details class="filter-panel" {{ 'open' if active_tags }}>
+  <summary class="filter-panel-toggle">
+    ⚙ Filter &amp; sorteren
+    {% if active_tags %}<span class="filter-panel-badge">{{ active_tags|length }}</span>{% endif %}
+  </summary>
+  <form method="get" action="/tasks" class="task-controls filter-panel-body">
+    {% if active_status %}<input type="hidden" name="status_filter" value="{{ active_status }}">{% endif %}
+    <label>Sorteren op
+      <select name="sort" onchange="this.form.submit()">
+        <option value="deadline" {{ 'selected' if sort == 'deadline' }}>Deadline</option>
+        <option value="title" {{ 'selected' if sort == 'title' }}>Titel</option>
+        <option value="priority" {{ 'selected' if sort == 'priority' }}>Prioriteit</option>
+        <option value="status" {{ 'selected' if sort == 'status' }}>Status</option>
+      </select>
     </label>
-    {% endfor %}
-  </div>
-  {% endif %}
-  {% if active_tags %}<a href="/tasks?sort={{ sort }}&group_by={{ group_by }}" class="btn btn-secondary">Tag-filter wissen</a>{% endif %}
-</form>
+    <label>Groeperen op
+      <select name="group_by" onchange="this.form.submit()">
+        <option value="none" {{ 'selected' if group_by == 'none' }}>Geen</option>
+        <option value="tag" {{ 'selected' if group_by == 'tag' }}>Tag / project</option>
+      </select>
+    </label>
+    {% if all_tags %}
+    <div class="task-tag-filter">
+      <span class="task-tag-filter-label">Tags:</span>
+      {% for t in all_tags %}
+      <label class="tag-checkbox" style="{{ t.badge_style }}">
+        <input type="checkbox" name="tags" value="{{ t.name }}" onchange="this.form.submit()" {{ 'checked' if t.name in active_tags }}>
+        {{ t.name }}
+      </label>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if active_tags %}<a href="/tasks?sort={{ sort }}&group_by={{ group_by }}" class="btn btn-secondary">Tag-filter wissen</a>{% endif %}
+  </form>
+</details>
 
 {% if groups is not none %}
   {% for group_name, group_tasks in groups %}

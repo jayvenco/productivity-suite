@@ -377,3 +377,34 @@ def test_recently_touched_task_is_not_marked_stale(logged_in_client):
 
     task_id = _task_id_for_title(listing, "Verse taak")
     logged_in_client.post(f"/tasks/{task_id}/delete")
+
+
+def test_ticker_requires_login(client):
+    response = client.get("/tasks/ticker", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/login"
+
+
+def test_ticker_includes_open_tasks_but_not_done(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Ticker open taak", "description": "", "deadline": "", "tags": ""}
+    )
+    logged_in_client.post(
+        "/tasks", data={"title": "Ticker afgeronde taak", "description": "", "deadline": "", "tags": ""}
+    )
+    listing = logged_in_client.get("/tasks").text
+    done_id = _task_id_for_title(listing, "Ticker afgeronde taak")
+    logged_in_client.post(f"/tasks/{done_id}/toggle-done")
+
+    response = logged_in_client.get("/tasks/ticker")
+    assert response.status_code == 200
+    titles = [t["title"] for t in response.json()]
+    assert "Ticker open taak" in titles
+    assert "Ticker afgeronde taak" not in titles
+
+    # Opruimen: een afgeronde taak zou anders pas na 4 dagen vanzelf verdwijnen (zie de
+    # eerdere done-task-cleanup-tests), en zou tot die tijd brede "task-card-done"-checks
+    # in andere tests in deze gedeelde testrun kunnen laten falen.
+    open_id = _task_id_for_title(listing, "Ticker open taak")
+    logged_in_client.post(f"/tasks/{open_id}/delete")
+    logged_in_client.post(f"/tasks/{done_id}/delete")

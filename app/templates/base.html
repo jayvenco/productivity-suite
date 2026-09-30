@@ -219,12 +219,21 @@
     </div>
   </div>
 
+  <div class="task-ticker" id="task-ticker" hidden>
+    <div class="task-ticker-track" id="task-ticker-track">
+      <div class="task-ticker-content" id="task-ticker-content"></div>
+      <div class="task-ticker-content" id="task-ticker-content-dup" aria-hidden="true"></div>
+    </div>
+    <button type="button" class="task-ticker-close" id="task-ticker-close" title="Ticker verbergen">×</button>
+  </div>
+
   <script src="{{ static_url('js/pomodoro.js') }}"></script>
   <script src="{{ static_url('js/quickadd.js') }}"></script>
   <script src="{{ static_url('js/voice.js') }}"></script>
   <script src="{{ static_url('js/mobile-nav.js') }}"></script>
   <script src="{{ static_url('js/deadlines.js') }}"></script>
   <script src="{{ static_url('js/mini-calendar.js') }}"></script>
+  <script src="{{ static_url('js/ticker.js') }}"></script>
   {% else %}
     {% block content_anon %}{% endblock %}
   {% endif %}
