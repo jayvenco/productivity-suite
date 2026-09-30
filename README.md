@@ -312,9 +312,10 @@ Gebouwd:
   horizontaal scrollbare) swimlane-kop stond, waardoor het tekstveld goeddeels onzichtbaar
   was. Het pop-up opent nu naar links i.p.v. naar rechts, met een vaste breedte voor het
   tekstveld.
-- **Nieuws-ticker onderin**: een dunne balk onderaan elke pagina laat al je nog niet
-  afgeronde taken langzaam van rechts naar links voorbij glijden (net als een nieuwsband
-  onder een tv-uitzending), met prioriteit-taken herkenbaar aan een ★ en elke taak
+- **Nieuws-ticker onderin**: een dunne balk onderaan elke pagina laat je nog niet
+  afgeronde **prioriteit-taken** (alleen die met "Prioriteit" aangevinkt — anders zou de
+  band bij veel taken al snel te druk/lang worden) langzaam van rechts naar links voorbij
+  glijden (net als een nieuwsband onder een tv-uitzending), elk herkenbaar aan een ★ en
   klikbaar naar de bewerkpagina. Met een sluitknopje te verbergen (onthouden in
   `localStorage`); de quick-add-wheel en Pomodoro-widget schuiven automatisch een stukje
   omhoog zolang de ticker zichtbaar is, en weer terug zodra 'm verborgen is.
@@ -743,12 +744,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 51. Ga naar Kanban, klik het ✎-icoontje naast een swimlane-naam → het tekstveld met de
     huidige naam is nu volledig zichtbaar (niet meer afgesneden aan de rechterkant), en je
     kunt gewoon zien wat je intypt.
-52. Maak een paar taken aan (waarvan minstens één met "Prioriteit" aangevinkt) → onderaan
-    elke pagina glijdt een donkere balk met die taken langzaam van rechts naar links, de
-    prioriteitstaak met een ★. Klik op een taak in de balk → je komt op de bewerkpagina van
-    die taak. Vink een taak af → die verdwijnt uit de balk (ververst pas bij een volgend
-    paginabezoek, niet live). Klik het kruisje rechts in de balk → de balk verdwijnt en de
-    quick-add-wheel/Pomodoro-knop schuiven een stukje omlaag; herlaad de pagina → de balk
+52. Maak een gewone taak aan (geen prioriteit) en een taak mét "Prioriteit" aangevinkt →
+    onderaan elke pagina glijdt een donkere balk, maar alleen met de prioriteitstaak (★),
+    de gewone taak staat er niet in. Klik op de taak in de balk → je komt op de
+    bewerkpagina. Vink de prioriteitstaak af → die verdwijnt uit de balk (ververst pas bij
+    een volgend paginabezoek, niet live). Klik het kruisje rechts in de balk → de balk
+    verdwijnt en de quick-add-wheel/Pomodoro-knop schuiven een stukje omlaag; herlaad de
+    pagina → de balk
     blijft verborgen.
 53. Maak een nieuwe swimlane aan (of, op een verse installatie, kijk naar "Mijn bord") →
     de kolommen heten Backlog/To Do/In Progress/Review/Done (5 stuks). Tussen elke kolom
@@ -1372,8 +1374,12 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   volledig van beeld is verdwenen, staat de tweede (identieke) kopie exact op de plek waar
   de eerste begon, wat een naadloze, oneindige lus geeft zonder zichtbare sprong bij het
   herstarten. De animatieduur schaalt licht mee met het aantal taken
-  (`Math.max(20, Math.min(120, tasks.length * 4))` seconden) zodat de band niet te snel
-  voorbijflitst bij weinig taken en niet eeuwig duurt om rond te komen bij heel veel taken.
+  (`Math.max(20, Math.min(120, tasks.length * 4)) * 1.1` seconden -- de `* 1.1` is een losse
+  "10% langzamer"-correctie bovenop de basisformule, op verzoek toegevoegd) zodat de band
+  niet te snel voorbijflitst bij weinig taken en niet eeuwig duurt om rond te komen bij heel
+  veel taken. De feed zelf (`GET /tasks/ticker`) geeft bewust alleen taken met "Prioriteit"
+  aangevinkt terug, niet alle open taken -- anders zou de band bij een volle takenlijst al
+  snel te druk/lang worden om nog een nieuwsband-gevoel te geven.
   De ticker en de zwevende widgets (quick-add-wheel, Pomodoro) houden elkaar in de gaten via
   een CSS-only `body:has(#task-ticker[hidden])`-selector i.p.v. een JS-klasse op `<body>` --
   scheelt een stukje coördinatie-JS tussen losse scripts (`ticker.js` weet niets van

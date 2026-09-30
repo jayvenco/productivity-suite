@@ -385,26 +385,42 @@ def test_ticker_requires_login(client):
     assert response.headers["location"] == "/login"
 
 
-def test_ticker_includes_open_tasks_but_not_done(logged_in_client):
+def test_ticker_only_includes_priority_tasks(logged_in_client):
     logged_in_client.post(
-        "/tasks", data={"title": "Ticker open taak", "description": "", "deadline": "", "tags": ""}
+        "/tasks",
+        data={"title": "Ticker prioriteit taak", "description": "", "deadline": "", "tags": "", "priority": "true"},
     )
     logged_in_client.post(
-        "/tasks", data={"title": "Ticker afgeronde taak", "description": "", "deadline": "", "tags": ""}
+        "/tasks", data={"title": "Ticker gewone taak", "description": "", "deadline": "", "tags": ""}
     )
     listing = logged_in_client.get("/tasks").text
-    done_id = _task_id_for_title(listing, "Ticker afgeronde taak")
-    logged_in_client.post(f"/tasks/{done_id}/toggle-done")
+    done_id = _task_id_for_title(listing, "Ticker gewone taak")
 
     response = logged_in_client.get("/tasks/ticker")
     assert response.status_code == 200
     titles = [t["title"] for t in response.json()]
-    assert "Ticker open taak" in titles
-    assert "Ticker afgeronde taak" not in titles
+    assert "Ticker prioriteit taak" in titles
+    assert "Ticker gewone taak" not in titles
+
+    priority_id = _task_id_for_title(listing, "Ticker prioriteit taak")
+    logged_in_client.post(f"/tasks/{priority_id}/delete")
+    logged_in_client.post(f"/tasks/{done_id}/delete")
+
+
+def test_ticker_excludes_done_priority_tasks(logged_in_client):
+    logged_in_client.post(
+        "/tasks",
+        data={"title": "Ticker afgeronde prioriteit", "description": "", "deadline": "", "tags": "", "priority": "true"},
+    )
+    listing = logged_in_client.get("/tasks").text
+    task_id = _task_id_for_title(listing, "Ticker afgeronde prioriteit")
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+
+    response = logged_in_client.get("/tasks/ticker")
+    titles = [t["title"] for t in response.json()]
+    assert "Ticker afgeronde prioriteit" not in titles
 
     # Opruimen: een afgeronde taak zou anders pas na 4 dagen vanzelf verdwijnen (zie de
     # eerdere done-task-cleanup-tests), en zou tot die tijd brede "task-card-done"-checks
     # in andere tests in deze gedeelde testrun kunnen laten falen.
-    open_id = _task_id_for_title(listing, "Ticker open taak")
-    logged_in_client.post(f"/tasks/{open_id}/delete")
-    logged_in_client.post(f"/tasks/{done_id}/delete")
+    logged_in_client.post(f"/tasks/{task_id}/delete")

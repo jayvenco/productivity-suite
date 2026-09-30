@@ -61,8 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Snelheid meeschalen met het aantal taken -- bij weinig taken anders zou de band
       // ofwel te snel voorbijflitsen (vaste korte duur) ofwel eeuwig duren om één keer rond
-      // te komen (vaste lange duur) als er heel veel taken zijn.
-      const duration = Math.max(20, Math.min(120, tasks.length * 4));
+      // te komen (vaste lange duur) als er heel veel taken zijn. De *1.1 is een losse
+      // "10% langzamer"-correctie bovenop die basisformule (op verzoek).
+      const duration = Math.max(20, Math.min(120, tasks.length * 4)) * 1.1;
       track.style.animationDuration = `${duration}s`;
 
       ticker.hidden = false;

@@ -164,12 +164,13 @@ def upcoming_deadlines(user: User = Depends(require_user), db: Session = Depends
 @router.get("/ticker")
 def ticker_tasks(user: User = Depends(require_user), db: Session = Depends(get_db)):
     """Kleine JSON-feed voor de nieuws-ticker onderin elke pagina (zie
-    app/static/js/ticker.js) -- alle nog niet afgeronde taken, prioriteit eerst en dan
-    op deadline (geen deadline achteraan), net als de standaardsortering van de takenlijst."""
+    app/static/js/ticker.js) -- alleen nog niet afgeronde taken met "Prioriteit"
+    aangevinkt (anders zou de band bij veel taken snel te druk/lang worden), op deadline
+    gesorteerd (geen deadline achteraan)."""
     tasks = (
         db.query(Task)
-        .filter(Task.user_id == user.id, Task.status != TaskStatus.DONE)
-        .order_by(Task.priority.desc(), Task.deadline.is_(None), Task.deadline, Task.created_at.desc())
+        .filter(Task.user_id == user.id, Task.status != TaskStatus.DONE, Task.priority.is_(True))
+        .order_by(Task.deadline.is_(None), Task.deadline, Task.created_at.desc())
         .all()
     )
     return [{"id": t.id, "title": t.title, "priority": t.priority} for t in tasks]
