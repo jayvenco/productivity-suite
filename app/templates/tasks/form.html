@@ -44,13 +44,13 @@
   </div>
   <div class="field">
     <label style="display:flex;align-items:center;gap:6px;color:var(--text)">
-      <input type="checkbox" name="priority" value="true" style="width:auto" {{ 'checked' if task and task.priority }}>
+      <input type="checkbox" name="priority" value="true" class="round-checkbox" {{ 'checked' if task and task.priority }}>
       Prioriteit (★ herkenbaar in de takenlijst, staat bovenaan)
     </label>
   </div>
   <div class="field">
     <label style="display:flex;align-items:center;gap:6px;color:var(--text)">
-      <input type="checkbox" name="daily_task" value="true" style="width:auto" {{ 'checked' if task and task.daily_task }}>
+      <input type="checkbox" name="daily_task" value="true" class="round-checkbox" {{ 'checked' if task and task.daily_task }}>
       Dagtaak (oranje herkenbaar in de takenlijst)
     </label>
   </div>

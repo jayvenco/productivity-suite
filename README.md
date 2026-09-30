@@ -693,6 +693,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     weg. Maak nog een taak aan en zet z'n `updated_at` 8 dagen terug → de kaart krijgt een
     witte linkerrand en lichte witte tint. Wijzig de taak (bv. de titel) → de witte markering
     verdwijnt (updated_at is weer "nu").
+48. Open Taken/Notities/Mindmap → de tag-filter-checkboxes bij "Tags:" zijn kleine ronde
+    rondjes in de kleur van de tag, geen vierkante native checkboxes meer. Open Taken →
+    Nieuwe taak → "Prioriteit"/"Dagtaak" zijn nu ook ronde vinkjes; zelfde bij Notities →
+    Nieuwe notitie → "Tijdelijke notitie". Bewerk een kanban-kaart → de "Geen kleur"-checkbox
+    bij de kleurkiezer is ook rond.
 
 ## Architectuur
 
@@ -1252,12 +1257,19 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   (één bewerkbaar tekstvak, wat erin staat wordt opgeslagen) alleen maar verwart. Wie de
   samenvatting niet wil, negeert de knop gewoon; wie 'm niet meer wil nadat die is
   toegepast, neemt het transcript opnieuw op/upload het opnieuw.
-- **Ronde bulk-select-checkboxes i.p.v. vierkant**: `.note-select`/`.snippet-select`
-  (`app/static/css/app.css`) gebruiken `appearance: none` + een eigen cirkelvormige
-  `border-radius: 50%`-styling (zelfde patroon als `.task-check`, dat al langer rond was),
-  met `color-mix(in srgb, var(--accent) 50%, transparent)` als gevulde kleur zodra
-  aangevinkt -- consistent met de rest van de app, die `color-mix` vaker gebruikt voor
-  semi-transparante accentkleuren i.p.v. een losse, hardgecodeerde rgba-waarde.
+- **Ronde checkboxes door de hele app heen i.p.v. vierkant**: begon bij `.note-select`/
+  `.snippet-select` (bulk-select), later doorgetrokken naar **alle** checkboxes in de app.
+  `appearance: none` + een eigen cirkelvormige `border-radius: 50%`-styling (zelfde patroon
+  als `.task-check`, dat al langer rond was), met `color-mix(in srgb, var(--accent) 50%,
+  transparent)` als gevulde kleur zodra aangevinkt. Een nieuwe gedeelde class
+  `.round-checkbox` (`app/static/css/app.css`) staat nu op de losse formulier-checkboxes
+  (taak-Prioriteit/Dagtaak, notitie-Tijdelijk, kanban-kaart-"Geen kleur") — `.note-select`/
+  `.snippet-select` bleven hun eigen classnaam houden (JS gebruikt die als hooks voor
+  bulk-acties) maar delen dezelfde CSS-regel via een gecombineerde selector, i.p.v. de
+  stijl te dupliceren. De kleine tag-filter-checkboxes (`.tag-checkbox input`, in taken/
+  notities/mindmap) kregen een eigen, kleinere ronde variant die `currentColor` gebruikt
+  i.p.v. de vaste accentkleur, zodat het rondje de kleur van de tag zelf overneemt (past
+  bij de per-tag-kleur die de omliggende pil-badge al had via `badge_style`).
 - **`Task.completed_at` apart van `updated_at`**: `updated_at` verandert bij élke wijziging
   (titel, tags, deadline, ...), dus die alleen gebruiken zou een taak die je ná het afronden
   nog even bewerkt telkens weer 4 dagen "vers" maken. `completed_at` wordt alleen gezet/

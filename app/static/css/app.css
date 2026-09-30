@@ -572,8 +572,19 @@ textarea {
 }
 
 .tag-checkbox input {
-  width: auto;
+  appearance: none;
+  width: 11px;
+  height: 11px;
+  margin: 0;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  background: transparent;
   cursor: pointer;
+  flex-shrink: 0;
+}
+
+.tag-checkbox input:checked {
+  background: color-mix(in srgb, currentColor 50%, transparent);
 }
 
 .task-group-heading {
@@ -1150,8 +1161,13 @@ textarea {
   gap: 8px;
 }
 
+/* Ronde, halftransparante selectievakjes -- de standaard checkbox-look door de hele app
+   heen (i.p.v. losse vierkante native checkboxes per formulier). .note-select/
+   .snippet-select blijven eigen classes (JS gebruikt ze als hooks voor bulk-acties), maar
+   delen dezelfde stijl via .round-checkbox, dat op alle overige checkboxes in de app staat. */
 .note-select,
-.snippet-select {
+.snippet-select,
+.round-checkbox {
   appearance: none;
   width: 16px;
   height: 16px;
@@ -1164,12 +1180,14 @@ textarea {
 }
 
 .note-select:hover,
-.snippet-select:hover {
+.snippet-select:hover,
+.round-checkbox:hover {
   border-color: var(--accent);
 }
 
 .note-select:checked,
-.snippet-select:checked {
+.snippet-select:checked,
+.round-checkbox:checked {
   background: color-mix(in srgb, var(--accent) 50%, transparent);
   border-color: var(--accent);
 }

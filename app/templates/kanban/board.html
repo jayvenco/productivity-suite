@@ -69,7 +69,7 @@
               <input type="text" name="tags" placeholder="Tags (komma-gescheiden)" value="{{ card.tags|map(attribute='name')|join(', ') }}">
               <div class="card-color-row">
                 <input type="color" name="color" value="{{ card.color or '#6c7086' }}">
-                <label><input type="checkbox" name="clear_color" value="true"> Geen kleur</label>
+                <label><input type="checkbox" name="clear_color" value="true" class="round-checkbox"> Geen kleur</label>
               </div>
               <div class="kanban-modal-actions">
                 <button type="submit" class="btn">Opslaan</button>
