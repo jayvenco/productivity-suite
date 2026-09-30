@@ -83,6 +83,34 @@ def test_api_create_task_requires_title(logged_in_client):
     assert response.status_code == 400
 
 
+def test_api_create_swimlane(logged_in_client):
+    token = _get_api_token(logged_in_client)
+    response = logged_in_client.post(
+        "/api/v1/kanban/swimlanes", json={"name": "Swimlane via API"}, headers=_auth_headers(token)
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["name"] == "Swimlane via API"
+    assert len(body["columns"]) == 4
+    assert [c["name"] for c in body["columns"]] == ["Backlog", "Todo", "In Progress", "Done"]
+
+    board_html = logged_in_client.get("/kanban").text
+    assert "Swimlane via API" in board_html
+
+
+def test_api_create_swimlane_requires_name(logged_in_client):
+    token = _get_api_token(logged_in_client)
+    response = logged_in_client.post(
+        "/api/v1/kanban/swimlanes", json={"name": "   "}, headers=_auth_headers(token)
+    )
+    assert response.status_code == 400
+
+
+def test_api_create_swimlane_requires_token(client):
+    response = client.post("/api/v1/kanban/swimlanes", json={"name": "Zonder token"})
+    assert response.status_code == 401
+
+
 def test_api_create_kanban_card_uses_default_cell(logged_in_client):
     token = _get_api_token(logged_in_client)
     response = logged_in_client.post(

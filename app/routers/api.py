@@ -15,6 +15,7 @@ from app.models.task import Task
 from app.models.user import User
 from app.services.richtext import sanitize_note_html
 from app.services.kanban_cells import get_or_create_default_cell
+from app.services.seed import DEFAULT_COLUMNS
 from app.services.tags import resolve_tags
 
 router = APIRouter(prefix="/api/v1", tags=["api"])
@@ -49,6 +50,52 @@ def create_task_api(body: TaskIn, user: User = Depends(require_api_user), db: Se
         "priority": task.priority,
         "tags": [t.name for t in task.tags],
         "url": f"/tasks/{task.id}/edit",
+    }
+
+
+# ---- Kanban-swimlanes ----
+
+
+class SwimlaneIn(BaseModel):
+    name: str
+
+
+@router.post("/kanban/swimlanes")
+def create_swimlane_api(
+    body: SwimlaneIn, user: User = Depends(require_api_user), db: Session = Depends(get_db)
+):
+    """Zelfde als de web-route POST /kanban/swimlanes (app/routers/kanban.py), maar met
+    API-token-auth i.p.v. sessie-cookie -- de web-route bestond al langer maar was nooit
+    voor de agent-API ontsloten, waardoor een swimlane aanmaken alleen via de ingelogde
+    browser kon."""
+    name = body.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Naam is verplicht")
+
+    board = db.query(KanbanBoard).filter(KanbanBoard.user_id == user.id).first()
+    if board is None:
+        raise HTTPException(status_code=404, detail="Geen kanbanbord gevonden")
+
+    position = db.query(KanbanSwimlane).filter(KanbanSwimlane.board_id == board.id).count()
+    swimlane = KanbanSwimlane(board_id=board.id, name=name, position=position)
+    db.add(swimlane)
+    db.flush()
+
+    for col_position, col_name in enumerate(DEFAULT_COLUMNS):
+        db.add(KanbanColumn(board_id=board.id, swimlane_id=swimlane.id, name=col_name, position=col_position))
+    db.commit()
+
+    columns = (
+        db.query(KanbanColumn)
+        .filter(KanbanColumn.swimlane_id == swimlane.id)
+        .order_by(KanbanColumn.position)
+        .all()
+    )
+    return {
+        "id": swimlane.id,
+        "name": swimlane.name,
+        "columns": [{"id": c.id, "name": c.name} for c in columns],
+        "url": "/kanban",
     }
 
 

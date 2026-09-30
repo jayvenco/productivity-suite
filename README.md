@@ -174,11 +174,13 @@ Gebouwd:
   link naar de volledige kalenderpagina (maand-/weekweergave)
 - **API voor externe agents/scripts** (Account → API-token): een los token (los van je
   wachtwoord, `Authorization: Bearer <token>`-header) waarmee een extern script taken,
-  kanban-kaarten, notities en code-snippets kan aanmaken via `/api/v1/tasks`,
-  `/api/v1/kanban/cards`, `/api/v1/notes` en `/api/v1/snippets` (JSON in, JSON uit). Een
-  kanban-kaart aanmaken zonder swimlane/kolom op te geven belandt automatisch in de eerste
-  kolom van de eerste swimlane. Het token wordt maar één keer getoond (alleen de hash wordt
-  bewaard) en is op elk moment in te trekken
+  kanban-kaarten/-swimlanes, notities en code-snippets kan aanmaken via `/api/v1/tasks`,
+  `/api/v1/kanban/swimlanes`, `/api/v1/kanban/cards`, `/api/v1/notes` en `/api/v1/snippets`
+  (JSON in, JSON uit). Een kanban-kaart aanmaken zonder swimlane/kolom op te geven belandt
+  automatisch in de eerste kolom van de eerste swimlane; een nieuwe swimlane krijgt meteen
+  de standaardkolommen (Backlog/Todo/In Progress/Done), net als via de browser-UI. Het token
+  wordt maar één keer getoond (alleen de hash wordt bewaard) en is op elk moment in te
+  trekken
 - **Backup** (Account → Backup): de hele database (taken, kanban, notities, snippets,
   kalender, mindmap, instellingen) in één keer **exporteren** als downloadbaar `.db`-bestand,
   en later weer **importeren** om alles terug te zetten — er wordt automatisch eerst een
@@ -698,6 +700,18 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     Nieuwe taak → "Prioriteit"/"Dagtaak" zijn nu ook ronde vinkjes; zelfde bij Notities →
     Nieuwe notitie → "Tijdelijke notitie". Bewerk een kanban-kaart → de "Geen kleur"-checkbox
     bij de kleurkiezer is ook rond.
+49. Genereer een API-token (Account → API-token) en doe (met een echt token, zonder
+    sessie-cookie):
+    ```bash
+    curl -X POST http://localhost:8887/api/v1/kanban/swimlanes \
+      -H "Authorization: Bearer <token>" -H "Content-Type: application/json" \
+      -d '{"name": "Support"}'
+    ```
+    → 200 met de nieuwe swimlane-id en de 4 standaardkolommen (Backlog/Todo/In
+    Progress/Done) in de JSON-response. Ga naar `/kanban` → de swimlane staat er, met
+    dezelfde kolommen als een via de browser aangemaakte swimlane. Doe dezelfde aanroep
+    zonder de `Authorization`-header → 401 i.p.v. de eerdere 303-redirect-naar-inlog van de
+    gewone web-route.
 
 ## Architectuur
 
@@ -1286,3 +1300,12 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   dan "al een tijdje geleden afgerond" (opruimen, 4 dagen, alleen 'done'). Een net
   aangemaakte, nog niet afgeronde taak die je een week laat liggen moet wél als stale
   opvallen, ook al is-ie nooit "done" geweest.
+- **BUGFIX — swimlane aanmaken kon niet via de agent-API**: de web-route
+  `POST /kanban/swimlanes` bestond al veel langer, maar was nooit als `/api/v1/...`-endpoint
+  ontsloten (alleen taken/kaarten/notities/snippets waren dat) — een extern script/agent kon
+  dus geen swimlane aanmaken zonder een browser-sessie te faken, wat met een los API-token
+  sowieso niet kan (de web-routes controleren op de sessie-cookie, niet op
+  `Authorization: Bearer`). Nieuwe `POST /api/v1/kanban/swimlanes`
+  (`app/routers/api.py`) met dezelfde `require_api_user`-afhankelijkheid als de rest van de
+  agent-API, en dezelfde logica als de web-route (nieuwe swimlane krijgt de
+  standaardkolommen uit `app/services/seed.py::DEFAULT_COLUMNS`).
