@@ -318,6 +318,13 @@ Gebouwd:
   klikbaar naar de bewerkpagina. Met een sluitknopje te verbergen (onthouden in
   `localStorage`); de quick-add-wheel en Pomodoro-widget schuiven automatisch een stukje
   omhoog zolang de ticker zichtbaar is, en weer terug zodra 'm verborgen is.
+- **Kanban: 5 standaardkolommen + gekleurde stippenlijn-dividers**: nieuwe swimlanes (en het
+  bord van een gloednieuwe installatie) krijgen nu **Backlog / To Do / In Progress / Review /
+  Done** i.p.v. de eerdere 4 (Backlog/Todo/In Progress/Done) — bestaande swimlanes op een
+  al langer lopende installatie veranderen niet met terugwerkende kracht, dit geldt alleen
+  voor nieuw aangemaakte. Tussen de kolommen staat nu een **gekleurde stippenlijn** die per
+  kolomgrens van kleur wisselt (roze → oranje → blauw → groen, dan weer opnieuw), met een
+  korte gradient die vanaf de lijn vervaagt naar transparant.
 
 Nog niet gebouwd: CI/CD, voice-commando's matchen op een al bestaand item i.p.v. altijd een
 nieuw item aanmaken (bv. "voeg dit toe aan mijn boodschappenlijst-notitie" i.p.v. een nieuwe
@@ -743,6 +750,10 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     paginabezoek, niet live). Klik het kruisje rechts in de balk → de balk verdwijnt en de
     quick-add-wheel/Pomodoro-knop schuiven een stukje omlaag; herlaad de pagina → de balk
     blijft verborgen.
+53. Maak een nieuwe swimlane aan (of, op een verse installatie, kijk naar "Mijn bord") →
+    de kolommen heten Backlog/To Do/In Progress/Review/Done (5 stuks). Tussen elke kolom
+    staat een verticale stippenlijn die van kleur wisselt (roze, oranje, blauw, groen) met
+    een zachte gloed eromheen die naar de achtergrond vervaagt.
 
 ## Architectuur
 
@@ -1367,3 +1378,20 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   een CSS-only `body:has(#task-ticker[hidden])`-selector i.p.v. een JS-klasse op `<body>` --
   scheelt een stukje coördinatie-JS tussen losse scripts (`ticker.js` weet niets van
   `quickadd.js`/`pomodoro.js` en andersom).
+- **`DEFAULT_COLUMNS` uitgebreid naar 5, niet met terugwerkende kracht**: `app/services/
+  seed.py::DEFAULT_COLUMNS` is een lijst die alleen gebruikt wordt op het *moment van
+  aanmaken* van een swimlane (nieuwe installatie, "+ Swimlane toevoegen", of via de
+  agent-API) -- er is bewust geen migratie die bestaande swimlanes op oudere installaties
+  een "Review"-kolom erbij geeft, want dat zou ongevraagd de layout van een al ingericht
+  bord veranderen. Wie dat alsnog wil, voegt 'm zelf toe via "+ Kolom" op de betreffende
+  swimlane.
+- **Kolom-dividers als losse elementen i.p.v. CSS `::before` op `.column` zelf**: elke
+  divider is een eigen `<div class="column-divider column-divider-N">` tussen twee
+  `.column`-elementen in de kolommenrij (`app/templates/kanban/board.html`), N =
+  `(loop.index0 - 1) % 4` (cyclet door 4 kleuren, dus bij meer dan 5 kolommen in één
+  swimlane herhaalt de kleurvolgorde vanaf roze). Bewust géén absoluut gepositioneerd
+  pseudo-element op de kolom zelf (bv. `.column::before`) -- dat zou de dotted-line +
+  gradient-gloed buiten de kolomgrenzen moeten laten overlappen op een naburige kolom, wat
+  precies het soort positionerings-/z-index-gedoe is waar de swimlane-hernoem-popup-bugfix
+  hierboven al tegenaan liep. Een gewoon flex-sibling-element met een eigen breedte (24px)
+  is voorspelbaar en heeft geen last van overlap-issues.

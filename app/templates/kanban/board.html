@@ -41,6 +41,9 @@
     </div>
     <div class="board-row">
       {% for column in swimlane.columns %}
+      {% if not loop.first %}
+      <div class="column-divider column-divider-{{ (loop.index0 - 1) % 4 }}" aria-hidden="true"></div>
+      {% endif %}
       {% set column_cards = cards_by_cell.get((swimlane.id, column.id), []) %}
       <div class="column">
         <div class="column-header">

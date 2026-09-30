@@ -62,10 +62,13 @@ def test_board_has_seeded_columns_and_swimlane(logged_in_client):
     response = logged_in_client.get("/kanban")
     assert response.status_code == 200
     assert "Backlog" in response.text
-    assert "Todo" in response.text
+    assert "To Do" in response.text
+    assert "In Progress" in response.text
+    assert "Review" in response.text
+    assert "Done" in response.text
     assert "Algemeen" in response.text
-    # Backlog hoort vóór Todo te staan (eerste kolom van de Algemeen-swimlane).
-    assert response.text.index("Backlog") < response.text.index(">Todo<")
+    # Backlog hoort vóór To Do te staan (eerste kolom van de Algemeen-swimlane).
+    assert response.text.index("Backlog") < response.text.index(">To Do<")
 
 
 def test_create_card_with_checklist_and_toggle(logged_in_client):
@@ -265,12 +268,12 @@ def test_edit_card_title_description_tags_and_color(logged_in_client):
 
 def test_new_swimlane_gets_its_own_default_columns(logged_in_client):
     before = logged_in_client.get("/kanban").text
-    todo_count_before = before.count(">Todo<")
+    todo_count_before = before.count(">To Do<")
 
     logged_in_client.post("/kanban/swimlanes", data={"name": "Design"})
 
     after = logged_in_client.get("/kanban").text
-    assert after.count(">Todo<") == todo_count_before + 1
+    assert after.count(">To Do<") == todo_count_before + 1
     assert "Design" in after
 
 
@@ -280,12 +283,12 @@ def test_add_custom_column_to_swimlane(logged_in_client):
     swimlane_id = _swimlane_id_for_name(board_html, "Marketing")
 
     response = logged_in_client.post(
-        f"/kanban/swimlanes/{swimlane_id}/columns", data={"name": "Review"}, follow_redirects=False
+        f"/kanban/swimlanes/{swimlane_id}/columns", data={"name": "Uitgesteld"}, follow_redirects=False
     )
     assert response.status_code == 303
 
     board_html_after = logged_in_client.get("/kanban").text
-    assert board_html_after.count(">Review<") == 1
+    assert board_html_after.count(">Uitgesteld<") == 1
 
 
 def test_cannot_create_card_with_column_from_other_swimlane(logged_in_client):

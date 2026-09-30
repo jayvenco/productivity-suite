@@ -91,8 +91,8 @@ def test_api_create_swimlane(logged_in_client):
     assert response.status_code == 200
     body = response.json()
     assert body["name"] == "Swimlane via API"
-    assert len(body["columns"]) == 4
-    assert [c["name"] for c in body["columns"]] == ["Backlog", "Todo", "In Progress", "Done"]
+    assert len(body["columns"]) == 5
+    assert [c["name"] for c in body["columns"]] == ["Backlog", "To Do", "In Progress", "Review", "Done"]
 
     board_html = logged_in_client.get("/kanban").text
     assert "Swimlane via API" in board_html
