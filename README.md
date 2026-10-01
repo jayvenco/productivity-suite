@@ -88,6 +88,10 @@ Gebouwd:
   (het merklabel was tot nu toe alleen gestylede tekst), dus is dit het eerste echte
   grafische "logo" van de app, gebruikt op precies twee plekken: de favicon en (indirect,
   qua kleurkeuze) het merklabel
+- **Kanban-kaarttitels in het merk-oranje**: dezelfde vaste `#ef8354` als het
+  "Productivity Suite"-merklabel en de favicon, i.p.v. de gewone tekstkleur — een derde
+  plek die nu dat merk-oranje gebruikt. Bewust hardgecodeerd i.p.v. `var(--accent)`, dat per
+  thema verschilt, want dit specifieke oranje moet er in élk thema hetzelfde uitzien
 - **Weergave-instellingen** (Account → Weergave): los van het thema kiesbaar **lettertype**
   (16 opties — systeemstandaard, de leesletters Inter/Roboto/Open Sans/Lato/Poppins/Nunito/
   Source Sans 3/Merriweather/Fira Sans/DM Sans, het sierlijke schreefletter Playfair Display,
@@ -794,6 +798,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     subtiel donkergrijs, niet de witte systeemstandaard. Wissel van thema naar "white" of
     "light" → de code-preview blijft donker (highlight.js' eigen kleurschema) en de
     scrollbar blijft er donkergrijs bij passen i.p.v. wit te worden.
+57. Maak een kanban-kaart aan → de titel staat in hetzelfde oranje als "Productivity Suite"
+    bovenaan de sidebar. Wissel van thema → de kaarttitel blijft exact datzelfde oranje
+    (verandert niet mee met het thema's eigen accentkleur).
 
 ## Architectuur
 

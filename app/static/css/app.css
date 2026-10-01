@@ -996,6 +996,10 @@ textarea {
 
 .kanban-card .card-title {
   font-weight: 600;
+  /* Zelfde vaste oranje als het "Productivity Suite"-merklabel in de sidebar (.sidebar
+     .brand) en de favicon -- bewust een hardgecodeerde kleur i.p.v. var(--accent), want
+     die verschilt per thema en dit moet juist overal hetzelfde merk-oranje blijven. */
+  color: #ef8354;
 }
 
 .card-task-link {
