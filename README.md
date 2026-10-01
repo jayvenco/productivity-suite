@@ -122,6 +122,8 @@ Gebouwd:
   bulk-acties mogelijk: meerdere notities in één keer verwijderen of er samen een tag aan
   toevoegen. Een **"Tijdelijke notitie"-vinkje** markeert een notitie als **temp** (zichtbaar
   als badge in de lijst) — zo'n notitie wordt automatisch verwijderd zodra ze een week oud is.
+  Een **afbeelding plakken** (bv. met cmd/ctrl+V vanaf een screenshot) voegt hem direct in op de
+  cursorpositie, met afgeronde hoeken, en blijft behouden na opslaan.
 - **Notities sorteren + raster-/lijstweergave**: een "Sorteren op"-keuzelijst (laatst
   gewijzigd / titel / aangemaakt, server-side, blijft staan bij tag-filteren en bulk-acties)
   en een **▦ Raster / ☰ Lijst-schakelaar** ernaast. Lijstweergave toont elke notitie als
@@ -814,6 +816,10 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     tag) met een zachte schaduw en geen rand; de kaarten zonder tag blijven een gewone
     neutrale kaart. Zet het thema terug naar bv. Dracula → alle kaarten zijn weer gewoon
     neutraal, ook die met een tag (de volle-kleur-kaart is uniek voor "Bubbles").
+59. Ga naar Notities → nieuwe notitie → plak een afbeelding (bv. een screenshot) in het
+    tekstvak → de afbeelding verschijnt meteen op de cursorpositie met afgeronde hoeken. Sla de
+    notitie op → ga terug naar de lijst → de afbeelding staat (met dezelfde afgeronde hoeken)
+    ook in de kaartpreview. Open de notitie opnieuw om te bewerken → de afbeelding staat er nog.
 
 ## Architectuur
 
@@ -918,6 +924,18 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   HTML. Vóór het opslaan wordt de HTML server-side gesanitized (`app/services/richtext.py`,
   via `bleach`) tegen een vaste tag/attribuut-whitelist, want de inhoud wordt met `|safe`
   gerenderd en `contenteditable` kan in theorie geplakte HTML van buitenaf bevatten.
+- **Notities-editor — geplakte afbeeldingen**: een `paste`-listener op de editor onderschept
+  clipboard-items van het type `image/*`, leest ze via `FileReader.readAsDataURL` uit en voegt
+  het resultaat in als `<img src="data:...">` op de cursorpositie (`document.execCommand
+  insertImage`) — bewust geen losse upload-route/static-map, de afbeelding leeft gewoon als
+  base64 in de notitie-HTML zelf, consistent met de rest van deze app (één SQLite-bestand, geen
+  extra infrastructuur). Trade-off: de opgeslagen notitie wordt ~33% groter dan de binaire
+  afbeelding, acceptabel voor een persoonlijke single-user app. `sanitize_note_html` staat
+  `img[src,alt]` toe en laat naast `http`/`https`/`mailto` ook het `data`-schema door bij
+  `bleach.clean` — dat geldt voor alle URL-dragende attributen die bleach herkent (dus ook
+  `a[href]`), een bewust aanvaarde verruiming gezien het single-user, self-hosted dreigingsmodel
+  van deze app. CSS (`'.rich-editor img', '.note-card-preview img'`) rondt de hoeken af en
+  begrenst de breedte zodat een grote geplakte afbeelding de editor/kaart niet opblaast.
 - **Notities-lijst — klikbare kaart + bulk-acties**: de hele kaart is klikbaar (via
   `app/static/js/notes-list.js`, dat klikken op checkbox/tags/links doorlaat maar de rest
   doorstuurt naar de bewerkpagina). Eén `<form>` omvat de hele grid plus de bulk-actiebalk;

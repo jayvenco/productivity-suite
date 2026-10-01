@@ -45,6 +45,23 @@ def test_note_html_is_sanitized(logged_in_client):
     assert "Hallo" in listing
 
 
+def test_pasted_image_data_uri_is_preserved(logged_in_client):
+    """Afbeeldingen die in de editor worden geplakt, komen als data-URI in de HTML
+    terecht (zie app/static/js/notes.js) -- de sanitizer moet <img> met een
+    data:-src dus doorlaten in plaats van te strippen."""
+    data_uri = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+    logged_in_client.post(
+        "/notes",
+        data={
+            "title": "Notitie met afbeelding",
+            "content": f'<p>Zie bijlage</p><img src="{data_uri}" alt="geplakte afbeelding">',
+            "tags": "",
+        },
+    )
+    listing = logged_in_client.get("/notes").text
+    assert f'<img src="{data_uri}" alt="geplakte afbeelding">' in listing
+
+
 def test_notes_list_shows_sort_and_view_controls(logged_in_client):
     page = logged_in_client.get("/notes").text
     assert 'name="sort"' in page

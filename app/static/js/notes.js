@@ -30,6 +30,24 @@ document.addEventListener("DOMContentLoaded", () => {
     document.execCommand("formatBlock", false, event.target.value);
   });
 
+  editor.addEventListener("paste", (event) => {
+    const items = event.clipboardData && event.clipboardData.items;
+    if (!items) return;
+
+    const imageItem = Array.from(items).find((item) => item.type.startsWith("image/"));
+    if (!imageItem) return; // gewone tekst-paste: standaardgedrag laten gebeuren
+
+    event.preventDefault();
+    const file = imageItem.getAsFile();
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      document.execCommand("insertImage", false, reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+
   function wrapSelectionInCode() {
     const selection = window.getSelection();
     if (!selection.rangeCount) return;
