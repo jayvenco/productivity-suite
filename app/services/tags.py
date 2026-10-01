@@ -13,6 +13,22 @@ def generate_tag_color() -> str:
     return f"hsl({random.randint(0, 359)}, 65%, 50%)"
 
 
+def first_tag_hue_style(tags: list[Tag]) -> str:
+    """Zet de tint van de eerste tag als CSS custom property (--tag-hue) i.p.v. een
+    kant-en-klare kleur -- gebruikt door Task/Note/Snippet.row_tint_style, zodat elk
+    thema zelf kan bepalen hoe (of óf) die tint toegepast wordt op de kaart (zie
+    .snippet-card[style*="--tag-hue"] in app.css voor de standaard lichte tint, en
+    themes/bubbles.css voor een thema met een volle kleur i.p.v. een lichte tint).
+    Geeft een lege string als er geen tags zijn of de eerste tag geen geldige hue heeft
+    (bv. een oude/handmatige hex-kleur)."""
+    if not tags:
+        return ""
+    hue = tags[0].hue
+    if hue is None:
+        return ""
+    return f"--tag-hue: {hue};"
+
+
 def resolve_tags(db: Session, raw: str) -> list[Tag]:
     """Parseert een komma-gescheiden tag-string en geeft bestaande/nieuwe Tag-objecten terug."""
     names = {name.strip() for name in raw.split(",") if name.strip()}

@@ -57,7 +57,7 @@
 
   <div class="notes-grid" id="notes-grid">
     {% for note in notes %}
-    <div class="note-card" data-href="/notes/{{ note.id }}/edit">
+    <div class="note-card" style="{{ note.row_tint_style }}" data-href="/notes/{{ note.id }}/edit">
       <div class="note-card-header">
         <input type="checkbox" class="note-select" name="note_ids" value="{{ note.id }}">
         <a href="/notes/{{ note.id }}/edit" class="note-card-title">{{ note.title }}</a>

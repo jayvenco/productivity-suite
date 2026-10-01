@@ -424,3 +424,31 @@ def test_ticker_excludes_done_priority_tasks(logged_in_client):
     # eerdere done-task-cleanup-tests), en zou tot die tijd brede "task-card-done"-checks
     # in andere tests in deze gedeelde testrun kunnen laten falen.
     logged_in_client.post(f"/tasks/{task_id}/delete")
+
+
+def test_task_card_exposes_tag_hue_for_themes_like_bubbles(logged_in_client):
+    """row_tint_style zet --tag-hue op de kaart zelf (gebruikt door het "bubbles"-thema
+    voor een volle kleur) -- de standaard-thema's doen er zelf niets zichtbaars mee, maar
+    de variabele moet er wel staan zodra de taak een tag heeft."""
+    logged_in_client.post(
+        "/tasks", data={"title": "Taak met tag-hue", "description": "", "deadline": "", "tags": "hue-test"}
+    )
+    logged_in_client.post(
+        "/tasks", data={"title": "Taak zonder tag-hue", "description": "", "deadline": "", "tags": ""}
+    )
+    listing = logged_in_client.get("/tasks").text
+
+    idx = listing.index("Taak met tag-hue")
+    card_start = listing.rindex('class="task-card ', 0, idx)
+    card_end = listing.index(">", card_start)
+    assert "--tag-hue" in listing[card_start:card_end]
+
+    idx2 = listing.index("Taak zonder tag-hue")
+    card_start2 = listing.rindex('class="task-card ', 0, idx2)
+    card_end2 = listing.index(">", card_start2)
+    assert "--tag-hue" not in listing[card_start2:card_end2]
+
+    for title in ("Taak met tag-hue", "Taak zonder tag-hue"):
+        listing = logged_in_client.get("/tasks").text
+        task_id = _task_id_for_title(listing, title)
+        logged_in_client.post(f"/tasks/{task_id}/delete")

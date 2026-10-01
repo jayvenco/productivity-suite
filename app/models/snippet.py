@@ -8,6 +8,7 @@ from sqlalchemy.sql import func
 
 from app.database import Base
 from app.models.tag import snippet_tags
+from app.services.tags import first_tag_hue_style
 
 
 class Snippet(Base):
@@ -29,13 +30,11 @@ class Snippet(Base):
 
     @property
     def row_tint_style(self) -> str:
-        """Zelfde patroon als Task/Note.row_tint_style: lichte tint van de eerste tag."""
-        if not self.tags:
-            return ""
-        hue = self.tags[0].hue
-        if hue is None:
-            return ""
-        return f"background-color: hsla({hue}, 60%, 50%, 0.08);"
+        """Zelfde patroon als Task/Note.row_tint_style: zet --tag-hue op basis van de
+        eerste tag (zie first_tag_hue_style); de standaard-thema's gebruiken dat voor een
+        lichte tint (.snippet-card[style*="--tag-hue"] in app.css), het "bubbles"-thema
+        voor een volle kleur (themes/bubbles.css)."""
+        return first_tag_hue_style(self.tags)
 
 
 class SnippetFile(Base):

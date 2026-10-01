@@ -289,3 +289,28 @@ def test_note_card_shows_date_but_not_tags(logged_in_client):
     note_id = re.findall(r'href="/notes/(\d+)/edit"', listing[:idx])[-1]
     edit_page = logged_in_client.get(f"/notes/{note_id}/edit").text
     assert 'value="werk"' in edit_page
+
+    logged_in_client.post("/notes/bulk-delete", data={"note_ids": note_id})
+
+
+def test_note_card_exposes_tag_hue_for_themes_like_bubbles(logged_in_client):
+    """row_tint_style zet --tag-hue op de kaart zelf (gebruikt door het "bubbles"-thema
+    voor een volle kleur) -- ook al zijn tags zelf niet zichtbaar op de kaart (zie
+    test_note_card_shows_date_but_not_tags), de variabele staat er wel als de notitie een
+    tag heeft."""
+    logged_in_client.post("/notes", data={"title": "Notitie met tag-hue", "content": "", "tags": "hue-test"})
+    logged_in_client.post("/notes", data={"title": "Notitie zonder tag-hue", "content": "", "tags": ""})
+    listing = logged_in_client.get("/notes").text
+
+    idx = listing.index("Notitie met tag-hue")
+    card_start = listing.rindex('<div class="note-card"', 0, idx)
+    card_end = listing.index(">", card_start)
+    assert "--tag-hue" in listing[card_start:card_end]
+
+    idx2 = listing.index("Notitie zonder tag-hue")
+    card_start2 = listing.rindex('<div class="note-card"', 0, idx2)
+    card_end2 = listing.index(">", card_start2)
+    assert "--tag-hue" not in listing[card_start2:card_end2]
+
+    ids = re.findall(r'href="/notes/(\d+)/edit"', listing)
+    logged_in_client.post("/notes/bulk-delete", data={"note_ids": ids})

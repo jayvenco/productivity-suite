@@ -1,0 +1,61 @@
+/* "Bubbles"-thema: taak-, notitie- en snippet-kaarten met een eigen tag krijgen een
+   volle, solide kleur (van de eerste tag) met een lichte schaduw i.p.v. een rand -- net
+   als de tag-"bubbels" zelf (zie .tag[style*="--tag-hue"] in app.css). Kaarten zonder tag
+   blijven een gewone, effen kaart (geen kleur om op te baseren), ook zonder rand maar met
+   dezelfde zachte schaduw. */
+:root[data-theme="bubbles"] {
+  --bg: #1b1d27;
+  --bg-elevated: #242736;
+  --bg-hover: #2d3146;
+  --border: #3a3e54;
+  --text: #eef0f8;
+  --text-muted: #9aa0c0;
+  --accent: #ef8354;
+  --accent-text: #ffffff;
+  --success: #81c995;
+  --warning: #f2b866;
+  --danger: #fc8181;
+  --link: #ef8354;
+}
+
+:root[data-theme="bubbles"] .task-card,
+:root[data-theme="bubbles"] .note-card,
+:root[data-theme="bubbles"] .snippet-card {
+  border: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="bubbles"] .task-card[style*="--tag-hue"],
+:root[data-theme="bubbles"] .note-card[style*="--tag-hue"],
+:root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] {
+  background: hsl(var(--tag-hue), 65%, 42%);
+}
+
+/* Primaire tekst (titel) op een vol-gekleurde kaart: altijd wit, net als de tag-bubbels
+   zelf -- de gewone tekstkleur is afgestemd op de neutrale kaartachtergrond, niet op een
+   willekeurige volle kleur. */
+:root[data-theme="bubbles"] .task-card[style*="--tag-hue"] .task-card-title-link,
+:root[data-theme="bubbles"] .note-card[style*="--tag-hue"] .note-card-title,
+:root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] .snippet-card-title-text {
+  color: #fff;
+}
+
+/* Secundaire tekst (preview/beschrijving/datum): semi-transparant wit i.p.v. de normale,
+   gedempte tekstkleur -- die laatste zou op een volle kleur te weinig contrast geven. */
+:root[data-theme="bubbles"] .task-card[style*="--tag-hue"] .task-card-preview,
+:root[data-theme="bubbles"] .task-card[style*="--tag-hue"] .task-card-status,
+:root[data-theme="bubbles"] .note-card[style*="--tag-hue"] .note-card-preview,
+:root[data-theme="bubbles"] .note-card[style*="--tag-hue"] .note-card-date,
+:root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] .snippet-card-description,
+:root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] .snippet-card-time {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* Het bestandsnaam-balkje in de snippet-preview heeft zelf al een eigen achtergrond
+   (--bg-hover) en blijft dus prima leesbaar zonder aanpassing; alleen de "Geen
+   tags"/"Geen beschrijving beschikbaar"-placeholders op een volle kleur verdienen iets
+   meer contrast dan de standaard gedempte tekstkleur. */
+:root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] .snippet-tag-empty {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}

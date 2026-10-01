@@ -203,6 +203,13 @@ a {
 .theme-swatch-anchor { background: #ef8354; border-color: #3a3f4b; }
 .theme-swatch-anchor-solid { background: #262a36; border-color: #ef8354; }
 .theme-swatch-white { background: #ffffff; border-color: #d4d4d8; }
+.theme-swatch-bubbles {
+  /* Kleine regenboog i.p.v. één egale kleur -- communiceert in één oogopslag waar dit
+     thema om draait (volle, per-tag kleuren) i.p.v. één vast accent zoals de andere
+     swatches. */
+  background: conic-gradient(#fc8181, #f2b866, #81c995, #61afef, #bd93f9, #fc8181);
+  border-color: #3a3e54;
+}
 
 button, input, select, textarea {
   font-family: inherit;
@@ -464,12 +471,20 @@ textarea {
   margin-right: 4px;
 }
 
-/* Tags met een tint (badge_style zet --tag-hue) krijgen een gekleurde vulling.
-   --tag-alpha/--tag-lightness zijn niet standaard gezet (dus 0.25/50% via de
-   fallback in hsla()) -- een thema kan ze op root-niveau herdefiniëren om
-   tags overal solide i.p.v. transparant te maken (zie themes/anchor-solid.css). */
+/* Tags met een tint (badge_style zet --tag-hue) krijgen een volle, solide
+   achtergrondkleur + altijd witte tekst -- i.p.v. de eerdere lichte/transparante vulling
+   met een gekleurde rand en de gewone (thema-afhankelijke) tekstkleur. Geen rand meer
+   nodig: `border: none` wint het border-stijl-aspect van de rand ook al zet badge_style
+   zelf nog een (nu onzichtbare) inline border-color. --tag-alpha/--tag-lightness blijven
+   door een thema te herdefiniëren (zie themes/anchor-solid.css), nu met 1/42% als
+   standaard i.p.v. 0.25/50%. Wit-op-wit kan hier niet ontstaan: dit geldt alleen voor tags
+   mét een hue (dus een duidelijke kleur); tags zonder hue (badge_style dan leeg, bv. een
+   oude/handmatige hex-kleur) vallen terug op de gewone achtergrond/tekstkleur van .tag
+   hierboven, nooit op geforceerd wit. */
 .tag[style*="--tag-hue"] {
-  background-color: hsla(var(--tag-hue), 60%, var(--tag-lightness, 50%), var(--tag-alpha, 0.25));
+  background-color: hsla(var(--tag-hue), 65%, var(--tag-lightness, 42%), var(--tag-alpha, 1));
+  border: none;
+  color: #fff;
 }
 
 .priority-star {
@@ -1470,6 +1485,15 @@ textarea {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
+}
+
+/* Lichte tint van de eerste tag (row_tint_style zet --tag-hue, zie
+   app/services/tags.py::first_tag_hue_style) -- bewust alléén voor snippet-kaarten (dat
+   bestond hier al), niet voor taak-/notitiekaarten: die krijgen --tag-hue nu ook
+   meegegeven (voor het "bubbles"-thema hieronder), maar zonder dat de standaard-thema's
+   daar iets nieuws mee doen -- geen ongevraagde kleurtint op taken/notities overal. */
+.snippet-card[style*="--tag-hue"] {
+  background-color: hsla(var(--tag-hue), 60%, 50%, 0.08);
 }
 
 /* Generieke reset -- de daadwerkelijke look/maat komt van de specifiekere classes

@@ -9,6 +9,7 @@ from sqlalchemy.sql import func
 
 from app.database import Base
 from app.models.tag import task_tags
+from app.services.tags import first_tag_hue_style
 
 
 class TaskStatus(str, enum.Enum):
@@ -81,3 +82,10 @@ class Task(Base):
     @property
     def total_focus_minutes(self) -> int:
         return sum(s.planned_minutes for s in self.completed_work_sessions)
+
+    @property
+    def row_tint_style(self) -> str:
+        """Zet --tag-hue op basis van de eerste tag (zie first_tag_hue_style) -- de
+        standaard-thema's doen er niets mee, het "bubbles"-thema (themes/bubbles.css)
+        gebruikt 'm voor een volle kleur op de taakkaart."""
+        return first_tag_hue_style(self.tags)

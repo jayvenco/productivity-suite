@@ -12,6 +12,7 @@ router = APIRouter(prefix="/settings", tags=["settings"])
 
 AVAILABLE_THEMES = [
     "dracula", "one-dark-pro", "nord", "light", "nexmail", "macos-light", "anchor", "anchor-solid", "white",
+    "bubbles",
 ]
 
 # (id, label). id is ook de data-font-waarde die app.css afvangt met

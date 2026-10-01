@@ -92,6 +92,12 @@ Gebouwd:
   "Productivity Suite"-merklabel en de favicon, i.p.v. de gewone tekstkleur — een derde
   plek die nu dat merk-oranje gebruikt. Bewust hardgecodeerd i.p.v. `var(--accent)`, dat per
   thema verschilt, want dit specifieke oranje moet er in élk thema hetzelfde uitzien
+- **Nieuw thema "Bubbles"**: een 10e thema (naast dracula/one-dark-pro/nord/light/nexmail/
+  macos-light/anchor/anchor-solid/white) waarin taak-, notitie- en snippet-kaarten met een
+  tag een **volle, solide achtergrondkleur** krijgen (van de eerste tag, net als de
+  tag-bubbels zelf) met een **zachte schaduw i.p.v. een rand** — kaarten zonder tag blijven
+  een gewone, neutrale kaart. Kiesbaar via dezelfde thema-zwaaitjes in de sidebar als de
+  andere thema's (laatste, regenboogkleurige swatch)
 - **Weergave-instellingen** (Account → Weergave): los van het thema kiesbaar **lettertype**
   (16 opties — systeemstandaard, de leesletters Inter/Roboto/Open Sans/Lato/Poppins/Nunito/
   Source Sans 3/Merriweather/Fira Sans/DM Sans, het sierlijke schreefletter Playfair Display,
@@ -801,6 +807,13 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 57. Maak een kanban-kaart aan → de titel staat in hetzelfde oranje als "Productivity Suite"
     bovenaan de sidebar. Wissel van thema → de kaarttitel blijft exact datzelfde oranje
     (verandert niet mee met het thema's eigen accentkleur).
+58. Maak een taak, notitie en snippet aan, elk met een tag, plus van elk ook één zonder tag
+    → de tag-bubbels zelf zijn overal een volle kleur met witte tekst (geen lichte vulling
+    + gekleurde rand meer). Zet het thema op "Bubbles" (laatste, regenboogkleurige swatch)
+    → de taak-/notitie-/snippet-kaarten mét een tag krijgen nu ook een volle kleur (van die
+    tag) met een zachte schaduw en geen rand; de kaarten zonder tag blijven een gewone
+    neutrale kaart. Zet het thema terug naar bv. Dracula → alle kaarten zijn weer gewoon
+    neutraal, ook die met een tag (de volle-kleur-kaart is uniek voor "Bubbles").
 
 ## Architectuur
 
@@ -856,6 +869,26 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   op de `Tag` zelf — dus stabiel voor die tag daarna, maar niet voorspelbaar uit de naam. Tags
   die vóór deze functie zijn aangemaakt (met de oude vaste grijstint) worden bij het opstarten
   eenmalig omgezet (`backfill_tag_colors`).
+- **BUGFIX/stijlkeuze — tag-bubbels in een volle kleur i.p.v. lichte vulling + rand**: een
+  tag-badge (`.tag[style*="--tag-hue"]` in `app.css`) had eerst een lichte, 25%-transparante
+  vulling met een duidelijk gekleurde rand en de gewone (thema-afhankelijke) tekstkleur —
+  nu een volle, solide achtergrondkleur (`hsl(hue, 65%, 42%)`) zonder rand, met altijd witte
+  tekst. Dit geldt bewust alléén voor tags mét een geldige hue (dus een echte kleur); een
+  tag zonder hue (`badge_style` dan leeg, bv. een oude/handmatige hex-kleur) valt terug op
+  de gewone `.tag`-achtergrond/tekstkleur, nooit op geforceerd wit — zo kan "wit-op-wit"
+  hier niet ontstaan.
+- **"Bubbles"-thema: volle tag-kleur ook op taak-/notitie-/snippet-kaarten**: een nieuw
+  thema (Account → Weergave → thema-zwaaitjes, laatste swatch) dat taak-, notitie- en
+  snippet-kaarten met een tag een volle achtergrondkleur geeft (van de eerste tag, net als
+  de tag-bubbel zelf) met een zachte schaduw i.p.v. een rand — kaarten zonder tag blijven
+  een gewone, neutrale kaart. Nieuwe `Task.row_tint_style`/`Note.row_tint_style`
+  (`Snippet.row_tint_style` bestond al, hergebruikt nu dezelfde gedeelde helper
+  `app/services/tags.py::first_tag_hue_style`) zetten `--tag-hue` als CSS custom property
+  op de kaart; de standaard-thema's doen daar niets zichtbaars mee (geen ongevraagde
+  kleurtint op taken/notities in andere thema's), alleen `themes/bubbles.css` leest 'm om
+  er een volle kleur van te maken. Snippet-kaarten hadden al langer een lichte 8%-tint op
+  basis van dezelfde `--tag-hue`-variabele (nu scoped tot alléén `.snippet-card`, niet
+  task-/note-card) — die blijft in alle andere thema's ongewijzigd.
 - **Swimlane-kleuren zijn handmatig instelbaar, met een naam-gebaseerde fallback**: elke
   swimlane heeft een optioneel `color`-veld (kleine kleurkiezer naast de swimlane-titel,
   direct opgeslagen via `POST /kanban/swimlanes/{id}/color`, geen page reload nodig). Zolang
