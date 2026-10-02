@@ -124,6 +124,10 @@ Gebouwd:
   als badge in de lijst) — zo'n notitie wordt automatisch verwijderd zodra ze een week oud is.
   Een **afbeelding plakken** (bv. met cmd/ctrl+V vanaf een screenshot) voegt hem direct in op de
   cursorpositie, met afgeronde hoeken, en blijft behouden na opslaan.
+- **Kanban: lanes standaard ingeklapt**: een vinkje "Lanes standaard ingeklapt" naast de
+  bordtitel laat bij elke paginalading alle swimlanes dicht starten (alleen de lane-namen
+  zichtbaar). Individueel openklappen kan, maar wordt dan niet onthouden. Voorkeur staat in
+  `localStorage` (client-side, geen serverstate).
 - **Herhalende afspraken**: een kalenderafspraak kan **elke week** of **elke maand** herhalen
   (optioneel "Herhalen tot"-datum). Eén rij in de database; de voorkomens worden per
   weergegeven bereik uitgerekend (`app/services/recurrence.py`), dus ze verschijnen in maand-,
@@ -844,6 +848,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 61. Kalender → "+ Afspraak" → kies Herhaling "Elke week" → opslaan: de afspraak staat met ↻ op
     elke week, en onder de kalender in het blok "Herhalende afspraken". Open 'm → "Herhaling
     stoppen" → latere weken zijn weg, eerdere blijven; het blok toont 'm niet meer.
+62. Kanban → vink "Lanes standaard ingeklapt" aan → alle swimlanes klappen dicht en blijven dicht
+    na verversen; klik een lane-naam om 'm tijdelijk open te klappen; vinkje uit → de eerder
+    onthouden open/dicht-stand per lane geldt weer.
 
 ## Architectuur
 

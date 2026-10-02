@@ -2392,6 +2392,15 @@ body:has(#task-ticker[hidden]) .pomodoro-float {
 
 /* ---- Overzicht onder de kalender: waar loopt het nu op ---- */
 
+.kanban-collapse-default {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9em;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
 .calendar-overview {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

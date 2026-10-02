@@ -14,7 +14,12 @@
 {% endmacro %}
 
 {% block content %}
-<h2>{{ board.name }}</h2>
+<div class="toolbar">
+  <h2 style="margin:0">{{ board.name }}</h2>
+  <label class="kanban-collapse-default" title="Bij elke keer openen starten alle swimlanes ingeklapt, zodat alleen de namen zichtbaar zijn">
+    <input type="checkbox" class="round-checkbox" id="kanban-collapse-default"> Lanes standaard ingeklapt
+  </label>
+</div>
 
 <div class="kanban-modal-backdrop" id="kanban-modal-backdrop" hidden></div>
 

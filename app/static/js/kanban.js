@@ -182,7 +182,37 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  const collapsed = loadCollapsed();
+  // Optie "standaard ingeklapt": bij elke paginalading starten alle lanes dicht (individueel
+  // openklappen kan, maar wordt dan niet onthouden). Voorkeur zelf staat in localStorage.
+  const defaultKey = "kanban-collapse-default";
+  const defaultToggle = document.getElementById("kanban-collapse-default");
+  let collapseByDefault = false;
+  try {
+    collapseByDefault = localStorage.getItem(defaultKey) === "1";
+  } catch {
+    /* geen opslag beschikbaar: optie staat dan gewoon uit */
+  }
+  if (defaultToggle) defaultToggle.checked = collapseByDefault;
+
+  const collapsed = collapseByDefault
+    ? new Set([...board.querySelectorAll("[data-swimlane-block]")].map((b) => b.dataset.swimlaneBlock))
+    : loadCollapsed();
+
+  if (defaultToggle) {
+    defaultToggle.addEventListener("change", () => {
+      try {
+        localStorage.setItem(defaultKey, defaultToggle.checked ? "1" : "0");
+      } catch {
+        /* zie hierboven */
+      }
+      if (defaultToggle.checked) {
+        board.querySelectorAll("[data-swimlane-block]").forEach((block) => {
+          collapsed.add(block.dataset.swimlaneBlock);
+          applyCollapsed(block, true);
+        });
+      }
+    });
+  }
 
   function applyCollapsed(block, isCollapsed) {
     block.classList.toggle("swimlane-collapsed", isCollapsed);
@@ -208,7 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       collapsed.delete(id);
     }
-    saveCollapsed(collapsed);
+    if (!(defaultToggle && defaultToggle.checked)) saveCollapsed(collapsed);
     applyCollapsed(block, isCollapsed);
   });
 });
