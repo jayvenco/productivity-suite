@@ -21,6 +21,10 @@ class CalendarEvent(Base):
     title: Mapped[str] = mapped_column(String(200))
     event_date: Mapped[date] = mapped_column(Date, index=True)
     description: Mapped[str] = mapped_column(Text, default="")
+    # "none" | "weekly" | "monthly"; event_date is het eerste voorkomen en
+    # recurrence_until de laatst toegestane datum (None = herhaalt oneindig).
+    recurrence: Mapped[str] = mapped_column(String(10), default="none")
+    recurrence_until: Mapped[date | None] = mapped_column(Date, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     tags: Mapped[list["Tag"]] = relationship(  # noqa: F821

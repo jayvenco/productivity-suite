@@ -16,6 +16,10 @@ _COLUMNS_TO_ENSURE = {
     "kanban_cards": [("color", "VARCHAR(20)")],
     "kanban_columns": [("swimlane_id", "INTEGER")],
     "kanban_swimlanes": [("color", "VARCHAR(20)")],
+    "calendar_events": [
+        ("recurrence", "VARCHAR(10) DEFAULT 'none'"),
+        ("recurrence_until", "DATE"),
+    ],
     "notes": [("is_temp", "BOOLEAN DEFAULT 0")],
     "snippets": [("description", "TEXT DEFAULT ''")],
     "mindmap_boards": [("description", "TEXT DEFAULT ''")],

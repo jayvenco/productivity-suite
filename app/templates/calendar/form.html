@@ -13,6 +13,19 @@
            value="{{ event.event_date.isoformat() if event else default_date }}">
   </div>
   <div class="field">
+    <label for="recurrence">Herhaling</label>
+    <select id="recurrence" name="recurrence">
+      {% for value, label in recurrence_labels.items() %}
+      <option value="{{ value }}" {{ 'selected' if event and event.recurrence == value }}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label for="recurrence_until">Herhalen tot (optioneel, leeg = onbeperkt)</label>
+    <input type="date" id="recurrence_until" name="recurrence_until"
+           value="{{ event.recurrence_until.isoformat() if event and event.recurrence_until else '' }}">
+  </div>
+  <div class="field">
     <label for="description">Beschrijving</label>
     <textarea id="description" name="description" rows="4">{{ event.description if event else '' }}</textarea>
   </div>
@@ -24,8 +37,13 @@
   <button type="submit" class="btn">Opslaan</button>
   <a href="/calendar" class="btn btn-secondary">Annuleren</a>
 </form>
+{% if event and event.recurrence != 'none' %}
+<form method="post" action="/calendar/events/{{ event.id }}/stop-recurrence" onsubmit="return confirm('Herhaling stoppen? Latere voorkomens verdwijnen, eerdere blijven staan.')" style="margin-top:8px">
+  <button type="submit" class="btn btn-secondary">Herhaling stoppen</button>
+</form>
+{% endif %}
 {% if event %}
-<form method="post" action="/calendar/events/{{ event.id }}/delete" onsubmit="return confirm('Afspraak verwijderen?')" style="margin-top:8px">
+<form method="post" action="/calendar/events/{{ event.id }}/delete" onsubmit="return confirm('Afspraak verwijderen?{{ ' Dit verwijdert de hele reeks.' if event.recurrence != 'none' }}')" style="margin-top:8px">
   <button type="submit" class="btn btn-danger">Verwijder</button>
 </form>
 {% endif %}

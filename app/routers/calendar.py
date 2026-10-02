@@ -4,6 +4,7 @@ from datetime import date, timedelta
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session, selectinload
 
 from app.auth.dependencies import require_user
@@ -14,6 +15,7 @@ from app.models.note import Note
 from app.models.task import Task, TaskStatus
 from app.models.user import User
 from app.services.calendar_grid import DUTCH_MONTHS, DUTCH_WEEKDAYS, add_months, month_weeks, week_dates
+from app.services.recurrence import RECURRENCE_LABELS, next_occurrence, occurrences
 from app.services.tags import resolve_tags
 from app.templating import templates
 
@@ -30,6 +32,24 @@ def _get_event_or_404(db: Session, event_id: int, user_id: int) -> CalendarEvent
     if event is None:
         raise HTTPException(status_code=404, detail="Afspraak niet gevonden")
     return event
+
+
+def _events_in_range(user_id: int, start: date, end: date):
+    """Losse afspraken in het bereik, plus herhalende die al begonnen zijn en nog niet
+    afgelopen (de exacte voorkomens worden daarna in Python uitgerekend)."""
+    return and_(
+        CalendarEvent.user_id == user_id,
+        or_(
+            and_(CalendarEvent.recurrence.in_(["weekly", "monthly"]), CalendarEvent.event_date <= end,
+                 or_(CalendarEvent.recurrence_until.is_(None), CalendarEvent.recurrence_until >= start)),
+            and_(CalendarEvent.event_date >= start, CalendarEvent.event_date <= end),
+        ),
+    )
+
+
+def _apply_recurrence(event: CalendarEvent, recurrence: str, until: str) -> None:
+    event.recurrence = recurrence if recurrence in ("weekly", "monthly") else "none"
+    event.recurrence_until = date.fromisoformat(until) if until and event.recurrence != "none" else None
 
 
 def _items_by_date(
@@ -50,7 +70,7 @@ def _items_by_date(
     events = (
         db.query(CalendarEvent)
         .options(selectinload(CalendarEvent.tags))
-        .filter(CalendarEvent.user_id == user_id, CalendarEvent.event_date >= start, CalendarEvent.event_date <= end)
+        .filter(_events_in_range(user_id, start, end))
         .all()
     )
 
@@ -60,7 +80,8 @@ def _items_by_date(
 
     events_by_date: dict[date, list[CalendarEvent]] = {}
     for event in events:
-        events_by_date.setdefault(event.event_date, []).append(event)
+        for occurrence in occurrences(event.event_date, event.recurrence, event.recurrence_until, start, end):
+            events_by_date.setdefault(occurrence, []).append(event)
 
     return tasks_by_date, events_by_date
 
@@ -87,7 +108,19 @@ def _overview(user_id: int, db: Session) -> dict:
         .limit(3)
         .all()
     )
+    today = date.today()
+    recurring = []
+    for event in (
+        db.query(CalendarEvent)
+        .filter(CalendarEvent.user_id == user_id, CalendarEvent.recurrence.in_(["weekly", "monthly"]))
+        .all()
+    ):
+        upcoming = next_occurrence(event.event_date, event.recurrence, event.recurrence_until, today)
+        if upcoming is not None:  # al afgelopen reeksen horen niet meer in het overzicht
+            recurring.append((upcoming, event))
+    recurring.sort(key=lambda item: item[0])
     return {
+        "recurring_events": recurring,
         "high_priority_tasks": high_priority_tasks,
         "recent_notes": recent_notes,
         "recent_cards": recent_cards,
@@ -111,10 +144,9 @@ def _marked_dates(days: list[date], user_id: int, db: Session) -> set[date]:
         .all()
     }
     event_dates = {
-        row[0]
-        for row in db.query(CalendarEvent.event_date)
-        .filter(CalendarEvent.user_id == user_id, CalendarEvent.event_date >= start, CalendarEvent.event_date <= end)
-        .all()
+        occurrence
+        for event in db.query(CalendarEvent).filter(_events_in_range(user_id, start, end)).all()
+        for occurrence in occurrences(event.event_date, event.recurrence, event.recurrence_until, start, end)
     }
     return task_dates | event_dates
 
@@ -217,7 +249,7 @@ def calendar_view(
 @router.get("/events/new")
 def new_event_form(request: Request, on: str | None = None, user: User = Depends(require_user)):
     return templates.TemplateResponse(
-        request, "calendar/form.html", {"user": user, "event": None, "default_date": on or date.today().isoformat()}
+        request, "calendar/form.html", {"user": user, "event": None, "default_date": on or date.today().isoformat(), "recurrence_labels": RECURRENCE_LABELS}
     )
 
 
@@ -227,11 +259,14 @@ def create_event(
     event_date: str = Form(...),
     description: str = Form(""),
     tags: str = Form(""),
+    recurrence: str = Form("none"),
+    recurrence_until: str = Form(""),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     parsed_date = date.fromisoformat(event_date)
     event = CalendarEvent(user_id=user.id, title=title.strip(), event_date=parsed_date, description=description)
+    _apply_recurrence(event, recurrence, recurrence_until)
     event.tags = resolve_tags(db, tags)
     db.add(event)
     db.commit()
@@ -244,7 +279,7 @@ def edit_event_form(
 ):
     event = _get_event_or_404(db, event_id, user.id)
     return templates.TemplateResponse(
-        request, "calendar/form.html", {"user": user, "event": event, "default_date": None}
+        request, "calendar/form.html", {"user": user, "event": event, "default_date": None, "recurrence_labels": RECURRENCE_LABELS}
     )
 
 
@@ -255,11 +290,14 @@ def update_event(
     event_date: str = Form(...),
     description: str = Form(""),
     tags: str = Form(""),
+    recurrence: str = Form("none"),
+    recurrence_until: str = Form(""),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
     event = _get_event_or_404(db, event_id, user.id)
     parsed_date = date.fromisoformat(event_date)
+    _apply_recurrence(event, recurrence, recurrence_until)
     event.title = title.strip()
     event.event_date = parsed_date
     event.description = description
@@ -275,3 +313,19 @@ def delete_event(event_id: int, user: User = Depends(require_user), db: Session 
     db.delete(event)
     db.commit()
     return RedirectResponse(f"/calendar?year={year}&month={month}", status_code=303)
+
+
+@router.post("/events/{event_id}/stop-recurrence")
+def stop_recurrence(event_id: int, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    """Stopt de herhaling vanaf nu: voorkomens tot en met vandaag blijven staan, daarna
+    verdwijnen ze (recurrence_until = laatste voorkomen tot en met vandaag)."""
+    event = _get_event_or_404(db, event_id, user.id)
+    if event.recurrence != "none":
+        today = date.today()
+        past = occurrences(event.event_date, event.recurrence, event.recurrence_until, event.event_date, today)
+        event.recurrence_until = past[-1] if past else event.event_date
+        if event.recurrence_until == event.event_date:
+            event.recurrence = "none"
+            event.recurrence_until = None
+        db.commit()
+    return RedirectResponse("/calendar", status_code=303)

@@ -2394,7 +2394,7 @@ body:has(#task-ticker[hidden]) .pomodoro-float {
 
 .calendar-overview {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
   margin-top: 16px;
 }

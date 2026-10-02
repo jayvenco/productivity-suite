@@ -124,6 +124,13 @@ Gebouwd:
   als badge in de lijst) — zo'n notitie wordt automatisch verwijderd zodra ze een week oud is.
   Een **afbeelding plakken** (bv. met cmd/ctrl+V vanaf een screenshot) voegt hem direct in op de
   cursorpositie, met afgeronde hoeken, en blijft behouden na opslaan.
+- **Herhalende afspraken**: een kalenderafspraak kan **elke week** of **elke maand** herhalen
+  (optioneel "Herhalen tot"-datum). Eén rij in de database; de voorkomens worden per
+  weergegeven bereik uitgerekend (`app/services/recurrence.py`), dus ze verschijnen in maand-,
+  week- en mini-kalender met een ↻ ervoor. Maandelijks op de 31e valt in kortere maanden op de
+  laatste dag. "**Herhaling stoppen**" in het bewerkformulier laat voorkomens t/m vandaag staan
+  en laat de rest verdwijnen; verwijderen haalt de hele reeks weg. Onder de kalender staat een
+  nieuw blok **Herhalende afspraken** met per reeks frequentie, volgende datum en einddatum.
 - **Taken-archief**: een afgeronde taak verdwijnt 24 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
@@ -834,6 +841,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 60. Vink een taak af en zet in de database `completed_at` meer dan 24 uur terug → de taak staat
     niet meer in de lijst maar wel onder Taken → Archief; "Herstellen" zet 'm terug. Kijk in
     `data/backups/` → een `app-<datum>.db` en `snippets/<id>.json` per snippet.
+61. Kalender → "+ Afspraak" → kies Herhaling "Elke week" → opslaan: de afspraak staat met ↻ op
+    elke week, en onder de kalender in het blok "Herhalende afspraken". Open 'm → "Herhaling
+    stoppen" → latere weken zijn weg, eerdere blijven; het blok toont 'm niet meer.
 
 ## Architectuur
 

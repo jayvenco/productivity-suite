@@ -39,7 +39,7 @@
         {% for event in events_by_date.get(day, []) %}
         <a href="/calendar/events/{{ event.id }}/edit" class="calendar-item calendar-item-event"
            {% if event.tags and event.tags[0].hue is not none %}style="--dot-color: hsl({{ event.tags[0].hue }}, 60%, 55%)"{% endif %}
-           title="{{ event.title }}">{{ event.title }}</a>
+           title="{{ event.title }}">{{ '↻ ' if event.recurrence != 'none' }}{{ event.title }}</a>
         {% endfor %}
       </div>
     </div>
@@ -48,6 +48,22 @@
 </div>
 
 <div class="calendar-overview">
+  <div class="calendar-overview-block">
+    <h3>Herhalende afspraken</h3>
+    {% if recurring_events %}
+    <ul class="calendar-overview-list">
+      {% for upcoming, event in recurring_events %}
+      <li>
+        <a href="/calendar/events/{{ event.id }}/edit">↻ {{ event.title }}</a>
+        <span class="calendar-overview-meta">{{ 'wekelijks' if event.recurrence == 'weekly' else 'maandelijks' }} · volgende {{ upcoming.isoformat() }}{% if event.recurrence_until %} · t/m {{ event.recurrence_until.isoformat() }}{% endif %}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="calendar-overview-empty">Geen herhalende afspraken.</p>
+    {% endif %}
+  </div>
+
   <div class="calendar-overview-block">
     <h3>Hoge prioriteit</h3>
     {% if high_priority_tasks %}
