@@ -124,6 +124,14 @@ Gebouwd:
   als badge in de lijst) — zo'n notitie wordt automatisch verwijderd zodra ze een week oud is.
   Een **afbeelding plakken** (bv. met cmd/ctrl+V vanaf een screenshot) voegt hem direct in op de
   cursorpositie, met afgeronde hoeken, en blijft behouden na opslaan.
+- **Stickies (plakbriefjes)**: eigen pagina `/stickies` (sidebar → Stickies) met gekleurde
+  briefjes in een raster. Per sticky: platte tekst, **kleur** (geel/roze/blauw/groen/oranje/
+  paars, vaste pastelkleuren onafhankelijk van het thema), **tags** (zelfde gedeelde tag-systeem,
+  klikbaar om te filteren) en een **Temp**-vinkje — een temp-sticky wordt na een week
+  automatisch verwijderd (zelfde opportunistische opruiming bij elk bezoek als tijdelijke
+  notities). Wijzigingen worden direct via `fetch` automatisch opgeslagen (`stickies.js`,
+  server antwoordt 204 op het `X-Requested-With: fetch`-verzoek), zonder opslaan-knop of
+  paginaherlaad; nieuw toevoegen via het briefje bovenaan.
 - **Kanban: lanes standaard ingeklapt**: een vinkje "Lanes standaard ingeklapt" naast de
   bordtitel laat bij elke paginalading alle swimlanes dicht starten (alleen de lane-namen
   zichtbaar). Individueel openklappen kan, maar wordt dan niet onthouden. Voorkeur staat in
@@ -851,6 +859,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 62. Kanban → vink "Lanes standaard ingeklapt" aan → alle swimlanes klappen dicht en blijven dicht
     na verversen; klik een lane-naam om 'm tijdelijk open te klappen; vinkje uit → de eerder
     onthouden open/dicht-stand per lane geldt weer.
+63. Sidebar → Stickies → typ een tekst, kies roze, tags "werk", vink Temp aan → Toevoegen: het
+    briefje staat roze met TEMP-label en tag. Klik een andere kleur op een briefje → het
+    wisselt meteen en blijft zo na verversen. Klik een tag → alleen stickies met die tag.
 
 ## Architectuur
 

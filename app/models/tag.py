@@ -54,6 +54,14 @@ mindmap_tags = Table(
 )
 
 
+sticky_tags = Table(
+    "sticky_tags",
+    Base.metadata,
+    Column("sticky_id", ForeignKey("stickies.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
+)
+
+
 class Tag(Base):
     __tablename__ = "tags"
 
@@ -69,6 +77,9 @@ class Tag(Base):
     )
     notes: Mapped[list["Note"]] = relationship(  # noqa: F821
         "Note", secondary=note_tags, back_populates="tags"
+    )
+    stickies: Mapped[list["Sticky"]] = relationship(  # noqa: F821
+        "Sticky", secondary=sticky_tags, back_populates="tags"
     )
     snippets: Mapped[list["Snippet"]] = relationship(  # noqa: F821
         "Snippet", secondary=snippet_tags, back_populates="tags"

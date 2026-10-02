@@ -67,6 +67,7 @@ _TAG_ASSOCIATION_TABLES = [
     ("card_tags", "card_id", "kanban_cards"),
     ("note_tags", "note_id", "notes"),
     ("snippet_tags", "snippet_id", "snippets"),
+    ("sticky_tags", "sticky_id", "stickies"),
     ("event_tags", "event_id", "calendar_events"),
     ("mindmap_tags", "mindmap_board_id", "mindmap_boards"),
 ]

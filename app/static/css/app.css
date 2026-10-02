@@ -3589,3 +3589,77 @@ body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
 .task-ticker-close:hover {
   background: rgba(255, 255, 255, 0.18);
 }
+
+/* ---- Stickies (plakbriefjes): vaste pastelkleuren, onafhankelijk van het thema ---- */
+.stickies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.sticky {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 6px 6px 14px 6px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  color: #2b2b2b;
+}
+
+.sticky-new { max-width: 420px; margin-bottom: 8px; }
+
+.sticky textarea,
+.sticky input[type="text"] {
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  color: #2b2b2b;
+  padding: 6px 8px;
+  font: inherit;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.sticky textarea::placeholder,
+.sticky input::placeholder { color: rgba(0, 0, 0, 0.45); }
+
+.sticky-meta { display: flex; align-items: center; gap: 8px; font-size: 0.85em; }
+.sticky-meta input[type="text"] { flex: 1; min-width: 0; }
+.sticky-meta label { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.sticky-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.sticky-temp-badge { position: absolute; top: -8px; right: 8px; }
+
+.sticky-delete {
+  background: none;
+  border: none;
+  font-size: 1.3em;
+  line-height: 1;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.55);
+}
+.sticky-delete:hover { color: #b00020; }
+
+.sticky-colors { display: flex; gap: 6px; }
+.sticky-color-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  box-shadow: none;
+  padding: 0;
+  display: block;
+}
+.sticky-color-dot input { display: none; }
+.sticky-color-dot:has(input:checked) { border-color: #2b2b2b; transform: scale(1.15); }
+
+.sticky-yellow { background: #fff3a3; }
+.sticky-pink { background: #ffc4dd; }
+.sticky-blue { background: #b9dcff; }
+.sticky-green { background: #c4f0c0; }
+.sticky-orange { background: #ffd0a1; }
+.sticky-purple { background: #dcc8ff; }

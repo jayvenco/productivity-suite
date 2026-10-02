@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Stickies - Productivity Suite{% endblock %}
+
+{% macro color_picker(current, name_suffix) %}
+<div class="sticky-colors">
+  {% for value, label in colors.items() %}
+  <label class="sticky-color-dot sticky-{{ value }}" title="{{ label }}">
+    <input type="radio" name="color" value="{{ value }}" {{ 'checked' if current == value }}>
+  </label>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+{% block content %}
+<div class="toolbar">
+  <h2 style="margin:0">Stickies{% if active_tags %} — tags: {{ active_tags | join(', ') }}{% endif %}</h2>
+  {% if active_tags %}<a href="/stickies" class="btn btn-secondary">Filter wissen</a>{% endif %}
+</div>
+
+<form method="post" action="/stickies" class="sticky sticky-new sticky-yellow" id="sticky-new-form">
+  <textarea name="content" rows="3" placeholder="Nieuwe sticky..." required></textarea>
+  {{ color_picker('yellow', 'new') }}
+  <div class="sticky-meta">
+    <input type="text" name="tags" placeholder="tags, komma-gescheiden">
+    <label title="Wordt na een week automatisch verwijderd"><input type="checkbox" name="is_temp" value="true" class="round-checkbox"> Temp</label>
+    <button type="submit" class="btn">Toevoegen</button>
+  </div>
+</form>
+
+<div class="stickies-grid">
+  {% for sticky in stickies %}
+  <form method="post" action="/stickies/{{ sticky.id }}" class="sticky sticky-{{ sticky.color }}" data-sticky-form>
+    <textarea name="content" rows="5">{{ sticky.content }}</textarea>
+    {{ color_picker(sticky.color, sticky.id) }}
+    <div class="sticky-meta">
+      <input type="text" name="tags" placeholder="tags" value="{{ sticky.tags | map(attribute='name') | join(', ') }}">
+      <label title="Wordt na een week automatisch verwijderd"><input type="checkbox" name="is_temp" value="true" class="round-checkbox" {{ 'checked' if sticky.is_temp }}> Temp</label>
+      <button type="submit" formaction="/stickies/{{ sticky.id }}/delete" class="sticky-delete" title="Verwijderen"
+              onclick="return confirm('Sticky verwijderen?')">×</button>
+    </div>
+    {% if sticky.tags %}
+    <div class="sticky-tags">{% for t in sticky.tags %}<a class="tag" style="{{ t.badge_style }}" href="/stickies?tags={{ t.name }}">{{ t.name }}</a>{% endfor %}</div>
+    {% endif %}
+    {% if sticky.is_temp %}<span class="badge-warning sticky-temp-badge" title="Wordt na een week automatisch verwijderd">TEMP</span>{% endif %}
+  </form>
+  {% else %}
+  <p>Nog geen stickies.</p>
+  {% endfor %}
+</div>
+{% if all_tags %}
+<div class="task-tag-filter" style="margin-top:16px">
+  <span class="task-tag-filter-label">Tags:</span>
+  {% for t in all_tags %}<a class="tag" style="{{ t.badge_style }}" href="/stickies?tags={{ t.name }}">{{ t.name }}</a>{% endfor %}
+</div>
+{% endif %}
+<script src="{{ static_url('js/stickies.js') }}"></script>
+{% endblock %}
