@@ -29,19 +29,18 @@
 
 <div class="stickies-grid">
   {% for sticky in stickies %}
-  <form method="post" action="/stickies/{{ sticky.id }}" class="sticky sticky-{{ sticky.color }}" data-sticky-form>
-    <textarea name="content" rows="5">{{ sticky.content }}</textarea>
-    {{ color_picker(sticky.color, sticky.id) }}
-    <div class="sticky-meta">
-      <input type="text" name="tags" placeholder="tags" value="{{ sticky.tags | map(attribute='name') | join(', ') }}">
-      <label title="Wordt na een week automatisch verwijderd"><input type="checkbox" name="is_temp" value="true" class="round-checkbox" {{ 'checked' if sticky.is_temp }}> Temp</label>
-      <button type="submit" formaction="/stickies/{{ sticky.id }}/delete" class="sticky-delete" title="Verwijderen"
-              onclick="return confirm('Sticky verwijderen?')">×</button>
-    </div>
-    {% if sticky.tags %}
-    <div class="sticky-tags">{% for t in sticky.tags %}<a class="tag" style="{{ t.badge_style }}" href="/stickies?tags={{ t.name }}">{{ t.name }}</a>{% endfor %}</div>
-    {% endif %}
-    {% if sticky.is_temp %}<span class="badge-warning sticky-temp-badge" title="Wordt na een week automatisch verwijderd">TEMP</span>{% endif %}
+  <form method="post" action="/stickies/{{ sticky.id }}" class="sticky sticky-note sticky-{{ sticky.color }}" data-sticky-form>
+    <textarea name="content" rows="6">{{ sticky.content }}</textarea>
+    <button type="submit" formaction="/stickies/{{ sticky.id }}/delete" class="sticky-delete" title="Verwijderen"
+            onclick="return confirm('Sticky verwijderen?')">×</button>
+    <details class="sticky-options">
+      <summary title="Kleur, tags en temp">⚙</summary>
+      <div class="sticky-options-body">
+        {{ color_picker(sticky.color, sticky.id) }}
+        <input type="text" name="tags" placeholder="tags" value="{{ sticky.tags | map(attribute='name') | join(', ') }}">
+        <label title="Wordt na een week automatisch verwijderd"><input type="checkbox" name="is_temp" value="true" class="round-checkbox" {{ 'checked' if sticky.is_temp }}> Temp</label>
+      </div>
+    </details>
   </form>
   {% else %}
   <p>Nog geen stickies.</p>

@@ -132,6 +132,8 @@ Gebouwd:
   notities). Wijzigingen worden direct via `fetch` automatisch opgeslagen (`stickies.js`,
   server antwoordt 204 op het `X-Requested-With: fetch`-verzoek), zonder opslaan-knop of
   paginaherlaad; nieuw toevoegen via het briefje bovenaan.
+  In het overzicht zie je alleen de klassieke briefjes (licht gedraaid, handschriftlettertype,
+  alleen tekst); kleur, tags en temp zitten achter het ⚙-knopje op elk briefje.
 - **Kanban: lanes standaard ingeklapt**: een vinkje "Lanes standaard ingeklapt" naast de
   bordtitel laat bij elke paginalading alle swimlanes dicht starten (alleen de lane-namen
   zichtbaar). Individueel openklappen kan, maar wordt dan niet onthouden. Voorkeur staat in

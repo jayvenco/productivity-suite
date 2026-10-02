@@ -3663,3 +3663,49 @@ body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
 .sticky-green { background: #c4f0c0; }
 .sticky-orange { background: #ffd0a1; }
 .sticky-purple { background: #dcc8ff; }
+
+/* Klassieke sticky in het overzicht: alleen tekst; kleur/tags/temp zitten achter het ⚙-knopje */
+.sticky-note {
+  padding: 14px 14px 10px;
+  border-radius: 2px 2px 2px 18px / 2px 2px 2px 6px;
+  min-height: 170px;
+  transform: rotate(-1deg);
+  box-shadow: 0 8px 10px -6px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s;
+}
+.stickies-grid .sticky-note:nth-child(even) { transform: rotate(1deg); }
+.stickies-grid .sticky-note:nth-child(3n) { transform: rotate(-0.5deg); }
+.sticky-note:hover, .sticky-note:focus-within { transform: rotate(0) scale(1.02); z-index: 2; }
+
+.sticky-note textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  resize: none;
+  font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive;
+  font-size: 1.05em;
+  line-height: 1.4;
+}
+.sticky-note textarea:focus { outline: none; }
+
+.sticky-note .sticky-delete {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  opacity: 0;
+}
+.sticky-note:hover .sticky-delete { opacity: 1; }
+
+.sticky-options > summary {
+  list-style: none;
+  cursor: pointer;
+  width: 22px;
+  color: rgba(0, 0, 0, 0.45);
+  opacity: 0.35;
+}
+.sticky-options > summary::-webkit-details-marker { display: none; }
+.sticky-note:hover .sticky-options > summary, .sticky-options[open] > summary { opacity: 1; }
+.sticky-options-body { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; font-size: 0.85em; }
+.sticky-options-body label { display: flex; align-items: center; gap: 4px; }

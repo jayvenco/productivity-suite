@@ -24,8 +24,9 @@ def test_create_sticky_with_color_tag_and_temp(logged_in_client):
     assert r.status_code == 303
     page = logged_in_client.get("/stickies").text
     assert "Melk kopen" in page
-    assert "sticky sticky-pink" in page
-    assert "TEMP" in page
+    assert "sticky-pink" in page
+    assert 'value="true" class="round-checkbox" checked' in page  # temp staat achter het ⚙-knopje
+    assert "TEMP" not in page  # geen label meer op het briefje zelf
     assert 'href="/stickies?tags=boodschappen"' in page
 
     sid = _id_for(logged_in_client, "Melk kopen")
