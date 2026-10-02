@@ -17,7 +17,7 @@
   {% if active_tags %}<a href="/stickies" class="btn btn-secondary">Filter wissen</a>{% endif %}
 </div>
 
-<form method="post" action="/stickies" class="sticky sticky-new sticky-yellow" id="sticky-new-form">
+<form method="post" action="/stickies" class="sticky-new" id="sticky-new-form">
   <textarea name="content" rows="3" placeholder="Nieuwe sticky..." required></textarea>
   {{ color_picker('yellow', 'new') }}
   <div class="sticky-meta">

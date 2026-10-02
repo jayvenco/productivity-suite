@@ -3609,7 +3609,6 @@ body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
   color: #2b2b2b;
 }
 
-.sticky-new { max-width: 420px; margin-bottom: 8px; }
 
 .sticky textarea,
 .sticky input[type="text"] {
@@ -3709,3 +3708,35 @@ body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
 .sticky-note:hover .sticky-options > summary, .sticky-options[open] > summary { opacity: 1; }
 .sticky-options-body { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; font-size: 0.85em; }
 .sticky-options-body label { display: flex; align-items: center; gap: 4px; }
+
+/* Nieuw-sticky-formulier volgt het thema (geen briefjeskleur) */
+.sticky-new {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 420px;
+  margin-bottom: 8px;
+  padding: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+}
+.sticky-new textarea,
+.sticky-new input[type="text"] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 6px 8px;
+  font: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+}
+.sticky-new textarea::placeholder,
+.sticky-new input::placeholder { color: var(--text-muted); }
+.sticky-new .sticky-meta { display: flex; align-items: center; gap: 8px; font-size: 0.85em; }
+.sticky-new .sticky-meta input[type="text"] { flex: 1; min-width: 0; }
+.sticky-new .sticky-meta label { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.sticky-new .sticky-color-dot:has(input:checked) { border-color: var(--text); }
