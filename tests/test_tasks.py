@@ -306,41 +306,66 @@ def test_toggle_done_sets_and_clears_completed_at(logged_in_client):
         assert task.completed_at is None
 
 
-def test_done_task_older_than_4_days_is_auto_deleted(logged_in_client):
-    logged_in_client.post(
-        "/tasks", data={"title": "Oude afgeronde taak", "description": "", "deadline": "", "tags": ""}
-    )
-    listing = logged_in_client.get("/tasks").text
-    task_id = _task_id_for_title(listing, "Oude afgeronde taak")
-    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
-
+def _make_done_task(client, title, completed_ago, archived_ago=None):
+    client.post("/tasks", data={"title": title, "description": "", "deadline": "", "tags": ""})
+    task_id = _task_id_for_title(client.get("/tasks").text, title)
+    client.post(f"/tasks/{task_id}/toggle-done")
+    now = datetime.now(UTC).replace(tzinfo=None)
     with SessionLocal() as db:
         task = db.get(Task, int(task_id))
-        task.completed_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(days=5)
+        task.completed_at = now - completed_ago
+        if archived_ago is not None:
+            task.archived_at = now - archived_ago
         db.commit()
-
-    listing_after = logged_in_client.get("/tasks").text
-    assert "Oude afgeronde taak" not in listing_after
+    return task_id
 
 
-def test_done_task_within_4_days_is_kept(logged_in_client):
-    logged_in_client.post(
-        "/tasks", data={"title": "Net afgeronde taak", "description": "", "deadline": "", "tags": ""}
-    )
-    listing = logged_in_client.get("/tasks").text
-    task_id = _task_id_for_title(listing, "Net afgeronde taak")
-    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+def test_done_task_older_than_24_hours_is_archived_not_deleted(logged_in_client):
+    task_id = _make_done_task(logged_in_client, "Oude afgeronde taak", timedelta(hours=25))
 
+    assert "Oude afgeronde taak" not in logged_in_client.get("/tasks").text
+    assert "Oude afgeronde taak" in logged_in_client.get("/tasks/archive").text
     with SessionLocal() as db:
-        task = db.get(Task, int(task_id))
-        task.completed_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(days=1)
-        db.commit()
+        assert db.get(Task, int(task_id)).archived_at is not None
 
-    listing_after = logged_in_client.get("/tasks").text
-    assert "Net afgeronde taak" in listing_after
+    logged_in_client.post(f"/tasks/{task_id}/delete")
+
+
+def test_done_task_within_24_hours_is_kept(logged_in_client):
+    task_id = _make_done_task(logged_in_client, "Net afgeronde taak", timedelta(hours=2))
+
+    assert "Net afgeronde taak" in logged_in_client.get("/tasks").text
+    assert "Net afgeronde taak" not in logged_in_client.get("/tasks/archive").text
 
     # Opruimen: niet laten liggen als "recent done", anders vervuilt dat brede
     # "task-card-done"-asserts in andere tests in deze gedeelde testrun.
+    logged_in_client.post(f"/tasks/{task_id}/delete")
+
+
+def test_archived_task_older_than_30_days_is_purged(logged_in_client):
+    task_id = _make_done_task(
+        logged_in_client, "Verlopen archieftaak", timedelta(days=40), archived_ago=timedelta(days=31)
+    )
+
+    assert "Verlopen archieftaak" not in logged_in_client.get("/tasks/archive").text
+    with SessionLocal() as db:
+        assert db.get(Task, int(task_id)) is None
+
+
+def test_restore_archived_task(logged_in_client):
+    task_id = _make_done_task(logged_in_client, "Terug te halen taak", timedelta(hours=30))
+    assert "Terug te halen taak" in logged_in_client.get("/tasks/archive").text
+
+    response = logged_in_client.post(f"/tasks/{task_id}/restore", follow_redirects=False)
+    assert response.status_code == 303
+
+    assert "Terug te halen taak" not in logged_in_client.get("/tasks/archive").text
+    assert "Terug te halen taak" in logged_in_client.get("/tasks").text
+    with SessionLocal() as db:
+        task = db.get(Task, int(task_id))
+        assert task.archived_at is None
+        assert task.completed_at is None
+
     logged_in_client.post(f"/tasks/{task_id}/delete")
 
 

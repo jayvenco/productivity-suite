@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Taken archief - Productivity Suite{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h2 style="margin:0">Taken-archief</h2>
+  <a href="/tasks" class="btn btn-secondary">← Terug naar taken</a>
+</div>
+<p style="color:var(--text-muted)">Afgeronde taken komen hier 24 uur na afronden terecht en worden na {{ archive_days }} dagen definitief verwijderd.</p>
+
+{% if tasks %}
+<div class="task-card-list">
+  {% for task in tasks %}
+  <div class="task-card task-card-done">
+    <div class="task-card-body">
+      <div class="task-card-main-row">
+        <span class="task-card-title-link">{{ task.title }}</span>
+        <div class="task-card-meta task-card-meta-end">
+          {% for t in task.tags %}<span class="tag" style="{{ t.badge_style }}">{{ t.name }}</span>{% endfor %}
+          <span class="task-card-preview">gearchiveerd {{ task.archived_at.strftime('%Y-%m-%d') }} · nog {{ (archive_lifetime - (now_utc - task.archived_at)).days }} dagen</span>
+        </div>
+      </div>
+    </div>
+    <div class="task-card-actions" style="display:flex;gap:6px">
+      <form method="post" action="/tasks/{{ task.id }}/restore"><button type="submit" class="btn btn-secondary">Herstellen</button></form>
+      <form method="post" action="/tasks/{{ task.id }}/delete" onsubmit="return confirm('Taak definitief verwijderen?')">
+        <button type="submit" class="task-card-delete" title="Verwijderen">×</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<p>Het archief is leeg.</p>
+{% endif %}
+{% endblock %}

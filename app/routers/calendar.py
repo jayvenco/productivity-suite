@@ -40,6 +40,7 @@ def _items_by_date(
         db.query(Task)
         .filter(
             Task.user_id == user_id,
+            Task.archived_at.is_(None),
             Task.deadline.isnot(None),
             Task.deadline >= start,
             Task.deadline <= end,
@@ -100,7 +101,13 @@ def _marked_dates(days: list[date], user_id: int, db: Session) -> set[date]:
     task_dates = {
         row[0]
         for row in db.query(Task.deadline)
-        .filter(Task.user_id == user_id, Task.deadline.isnot(None), Task.deadline >= start, Task.deadline <= end)
+        .filter(
+            Task.user_id == user_id,
+            Task.archived_at.is_(None),
+            Task.deadline.isnot(None),
+            Task.deadline >= start,
+            Task.deadline <= end,
+        )
         .all()
     }
     event_dates = {

@@ -50,7 +50,10 @@
 {% block content %}
 <div class="toolbar">
   <h2 style="margin:0">Taken{% if active_tags %} — tags: {{ active_tags | join(', ') }}{% endif %}</h2>
-  <a href="/tasks/new" class="btn">+ Nieuwe taak</a>
+  <div style="display:flex;gap:8px">
+    <a href="/tasks/archive" class="btn btn-secondary">Archief</a>
+    <a href="/tasks/new" class="btn">+ Nieuwe taak</a>
+  </div>
 </div>
 
 <details class="filter-panel" {{ 'open' if active_tags }}>

@@ -25,6 +25,7 @@ from app.routers import (
     tasks,
     voice,
 )
+from app.services.backup import start_backup_scheduler
 from app.services.migrate import run_lightweight_migrations
 from app.services.seed import seed_default_user_and_board
 from app.services.tags import backfill_tag_colors
@@ -35,6 +36,8 @@ run_lightweight_migrations(engine)
 with SessionLocal() as db:
     seed_default_user_and_board(db)
     backfill_tag_colors(db)
+
+start_backup_scheduler()
 
 app = FastAPI(title=settings.app_name)
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "app" / "static")), name="static")

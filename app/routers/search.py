@@ -43,7 +43,7 @@ def search(
     events: list[CalendarEvent] = []
 
     if has_query:
-        task_query = db.query(Task).options(selectinload(Task.tags)).filter(Task.user_id == user.id)
+        task_query = db.query(Task).options(selectinload(Task.tags)).filter(Task.user_id == user.id, Task.archived_at.is_(None))
         if tag:
             task_query = task_query.filter(Task.tags.any(Tag.name == tag))
         if like:

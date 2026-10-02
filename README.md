@@ -124,6 +124,17 @@ Gebouwd:
   als badge in de lijst) — zo'n notitie wordt automatisch verwijderd zodra ze een week oud is.
   Een **afbeelding plakken** (bv. met cmd/ctrl+V vanaf een screenshot) voegt hem direct in op de
   cursorpositie, met afgeronde hoeken, en blijft behouden na opslaan.
+- **Taken-archief**: een afgeronde taak verdwijnt 24 uur na afvinken uit de takenlijst (en
+  kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
+  `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
+  verwijderen; na 30 dagen in het archief wordt hij automatisch verwijderd. Opportunistisch
+  bij elk bezoek, geen scheduler (kolom `tasks.archived_at`).
+- **Automatische back-ups**: een achtergrond-thread (`app/services/backup.py`) maakt bij het
+  starten en daarna elk uur een check: max. één database-backup per dag
+  (`data/backups/app-YYYYMMDD.db`, via `VACUUM INTO`, de laatste 14 blijven bewaard) en elke
+  snippet die nog niet (of gewijzigd) in de backup staat wordt als `data/backups/snippets/<id>.json`
+  weggeschreven. Er wordt nooit iets uit de snippet-backup verwijderd, dus ook een in de app
+  verwijderde snippet blijft terug te vinden. Uitzetten kan met `BACKUP_ENABLED=false`.
 - **Notities sorteren + raster-/lijstweergave**: een "Sorteren op"-keuzelijst (laatst
   gewijzigd / titel / aangemaakt, server-side, blijft staan bij tag-filteren en bulk-acties)
   en een **▦ Raster / ☰ Lijst-schakelaar** ernaast. Lijstweergave toont elke notitie als
@@ -820,6 +831,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     tekstvak → de afbeelding verschijnt meteen op de cursorpositie met afgeronde hoeken. Sla de
     notitie op → ga terug naar de lijst → de afbeelding staat (met dezelfde afgeronde hoeken)
     ook in de kaartpreview. Open de notitie opnieuw om te bewerken → de afbeelding staat er nog.
+60. Vink een taak af en zet in de database `completed_at` meer dan 24 uur terug → de taak staat
+    niet meer in de lijst maar wel onder Taken → Archief; "Herstellen" zet 'm terug. Kijk in
+    `data/backups/` → een `app-<datum>.db` en `snippets/<id>.json` per snippet.
 
 ## Architectuur
 

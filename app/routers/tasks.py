@@ -24,7 +24,10 @@ _SORT_OPTIONS = {
     "status": (Task.status.asc(), Task.title.asc()),
 }
 _GEEN_TAG_LABEL = "Zonder tag"
-DONE_TASK_LIFETIME = timedelta(days=4)
+# Afgeronde taken verdwijnen na 24 uur uit de lijst (-> archief), en het archief wordt na
+# 30 dagen leeggemaakt.
+DONE_TASK_LIFETIME = timedelta(hours=24)
+ARCHIVE_LIFETIME = timedelta(days=30)
 
 
 def _apply_status(task: Task, new_status: TaskStatus) -> None:
@@ -35,19 +38,27 @@ def _apply_status(task: Task, new_status: TaskStatus) -> None:
         task.completed_at = datetime.now(UTC).replace(tzinfo=None)
     elif new_status != TaskStatus.DONE:
         task.completed_at = None
+        task.archived_at = None
     task.status = new_status
 
 
-def _delete_expired_done_tasks(db: Session, user_id: int) -> None:
-    """Afgeronde taken ruimen zichzelf op zodra ze 4 dagen 'done' staan -- zelfde
-    "geen scheduler, opportunistisch bij elk bezoek"-patroon als tijdelijke notities
-    (zie _delete_expired_temp_notes in app/routers/notes.py)."""
-    cutoff = datetime.now(UTC).replace(tzinfo=None) - DONE_TASK_LIFETIME
+def _archive_and_purge_tasks(db: Session, user_id: int) -> None:
+    """Afgeronde taken gaan 24 uur na afronden naar het archief (archived_at), en
+    gearchiveerde taken worden na 30 dagen definitief verwijderd -- zelfde "geen
+    scheduler, opportunistisch bij elk bezoek"-patroon als tijdelijke notities (zie
+    _delete_expired_temp_notes in app/routers/notes.py)."""
+    now = datetime.now(UTC).replace(tzinfo=None)
     db.query(Task).filter(
         Task.user_id == user_id,
         Task.status == TaskStatus.DONE,
+        Task.archived_at.is_(None),
         Task.completed_at.isnot(None),
-        Task.completed_at < cutoff,
+        Task.completed_at < now - DONE_TASK_LIFETIME,
+    ).update({Task.archived_at: now}, synchronize_session=False)
+    db.query(Task).filter(
+        Task.user_id == user_id,
+        Task.archived_at.isnot(None),
+        Task.archived_at < now - ARCHIVE_LIFETIME,
     ).delete(synchronize_session=False)
     db.commit()
 
@@ -91,9 +102,13 @@ def list_tasks(
     db: Session = Depends(get_db),
 ):
     sort = sort if sort in _SORT_OPTIONS else "deadline"
-    _delete_expired_done_tasks(db, user.id)
+    _archive_and_purge_tasks(db, user.id)
 
-    query = db.query(Task).options(selectinload(Task.tags)).filter(Task.user_id == user.id)
+    query = (
+        db.query(Task)
+        .options(selectinload(Task.tags))
+        .filter(Task.user_id == user.id, Task.archived_at.is_(None))
+    )
     if tags:
         query = query.filter(Task.tags.any(Tag.name.in_(tags)))
     if status_filter:
@@ -103,7 +118,7 @@ def list_tasks(
     all_tags = (
         db.query(Tag)
         .join(Tag.tasks)
-        .filter(Task.user_id == user.id)
+        .filter(Task.user_id == user.id, Task.archived_at.is_(None))
         .distinct()
         .order_by(Tag.name)
         .all()
@@ -137,6 +152,33 @@ def list_tasks(
             "group_by": group_by,
         },
     )
+
+
+@router.get("/archive")
+def archived_tasks(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    _archive_and_purge_tasks(db, user.id)
+    tasks = (
+        db.query(Task)
+        .options(selectinload(Task.tags))
+        .filter(Task.user_id == user.id, Task.archived_at.isnot(None))
+        .order_by(Task.archived_at.desc())
+        .all()
+    )
+    return templates.TemplateResponse(
+        request,
+        "tasks/archive.html",
+        {"user": user, "tasks": tasks, "archive_days": ARCHIVE_LIFETIME.days, "archive_lifetime": ARCHIVE_LIFETIME,
+         "now_utc": datetime.now(UTC).replace(tzinfo=None)},
+    )
+
+
+@router.post("/{task_id}/restore")
+def restore_task(task_id: int, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    """Haalt een gearchiveerde taak terug naar de takenlijst (status weer 'todo')."""
+    task = _get_task_or_404(db, task_id, user.id)
+    _apply_status(task, TaskStatus.TODO)
+    db.commit()
+    return RedirectResponse("/tasks/archive", status_code=303)
 
 
 @router.get("/upcoming")

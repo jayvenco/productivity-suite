@@ -11,6 +11,7 @@ _COLUMNS_TO_ENSURE = {
         ("priority", "BOOLEAN DEFAULT 0"),
         ("daily_task", "BOOLEAN DEFAULT 0"),
         ("completed_at", "DATETIME"),
+        ("archived_at", "DATETIME"),
     ],
     "kanban_cards": [("color", "VARCHAR(20)")],
     "kanban_columns": [("swimlane_id", "INTEGER")],
@@ -82,7 +83,7 @@ def _cleanup_orphaned_tag_associations(conn) -> None:
 def _backfill_completed_at(conn) -> None:
     """Taken die al vóór de completed_at-kolom op 'done' stonden, hebben anders nooit een
     completed_at gekregen en worden dus nooit automatisch opgeruimd (zie
-    _delete_expired_done_tasks in app/routers/tasks.py) -- benadert de voltooiingsdatum met
+    _archive_expired_done_tasks in app/routers/tasks.py) -- benadert de voltooiingsdatum met
     updated_at (de laatste keer dat er iets aan de taak veranderde, wat voor een al-lang
     afgeronde taak meestal het moment van afvinken is). Idempotent: raakt alleen rijen waar
     completed_at nog leeg is, dus goedkoop om bij elke start opnieuw te draaien."""

@@ -46,6 +46,10 @@ class Settings(BaseSettings):
 
     default_theme: str = "dracula"
 
+    # Automatische backups naar DATA_DIR/backups (zie app/services/backup.py).
+    backup_enabled: bool = True
+    backup_keep: int = 14  # aantal dagelijkse database-backups dat bewaard blijft
+
     pomodoro_work_minutes: int = 25
     pomodoro_break_minutes: int = 5
 

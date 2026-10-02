@@ -39,7 +39,7 @@ def graph_data(user: User = Depends(require_user), db: Session = Depends(get_db)
             nodes.append({"id": node_id, "type": "tag", "label": f"#{tag.name}", "url": None})
         return node_id
 
-    tasks = db.query(Task).options(selectinload(Task.tags)).filter(Task.user_id == user.id).all()
+    tasks = db.query(Task).options(selectinload(Task.tags)).filter(Task.user_id == user.id, Task.archived_at.is_(None)).all()
     for task in tasks:
         if not task.tags:
             continue
