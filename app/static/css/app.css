@@ -3740,3 +3740,5 @@ body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
 .sticky-new .sticky-meta input[type="text"] { flex: 1; min-width: 0; }
 .sticky-new .sticky-meta label { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
 .sticky-new .sticky-color-dot:has(input:checked) { border-color: var(--text); }
+
+.sticky-new[hidden] { display: none; }

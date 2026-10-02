@@ -16,3 +16,12 @@ document.querySelectorAll("[data-sticky-form]").forEach((form) => {
     save();
   });
 });
+
+const newForm = document.getElementById("sticky-new-form");
+const newToggle = document.getElementById("sticky-new-toggle");
+if (newForm && newToggle) {
+  newToggle.addEventListener("click", () => {
+    newForm.hidden = !newForm.hidden;
+    if (!newForm.hidden) newForm.querySelector("textarea").focus();
+  });
+}

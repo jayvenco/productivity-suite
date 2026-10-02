@@ -14,10 +14,13 @@
 {% block content %}
 <div class="toolbar">
   <h2 style="margin:0">Stickies{% if active_tags %} — tags: {{ active_tags | join(', ') }}{% endif %}</h2>
-  {% if active_tags %}<a href="/stickies" class="btn btn-secondary">Filter wissen</a>{% endif %}
+  <div style="display:flex;gap:8px">
+    {% if active_tags %}<a href="/stickies" class="btn btn-secondary">Filter wissen</a>{% endif %}
+    <button type="button" class="btn" id="sticky-new-toggle">+ Nieuwe sticky</button>
+  </div>
 </div>
 
-<form method="post" action="/stickies" class="sticky-new" id="sticky-new-form">
+<form method="post" action="/stickies" class="sticky-new" id="sticky-new-form" hidden>
   <textarea name="content" rows="3" placeholder="Nieuwe sticky..." required></textarea>
   {{ color_picker('yellow', 'new') }}
   <div class="sticky-meta">
