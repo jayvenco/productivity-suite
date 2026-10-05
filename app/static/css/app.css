@@ -3762,12 +3762,12 @@ body:has(#task-ticker:not([hidden])) .main {
 }
 
 /* Dagtaken: magenta titel, gradient van zwart (links) naar oranje (rechts) en een rustig
-   knipperende oranje rand. Specificiteit bewust hoog zodat thema's (bv. "bubbles") dit niet
+   knipperende rand (rgb 232, 97, 79). Specificiteit bewust hoog zodat thema's (bv. "bubbles") dit niet
    overschrijven. */
 :root:root[data-theme] .task-card.task-card-daily {
   background: linear-gradient(90deg, #000000 0%, #ff8a1f 100%);
-  border: 2px solid #ff8a1f;
-  animation: daily-task-blink 3.6s ease-in-out infinite;
+  border: 2px solid rgb(232, 97, 79);
+  animation: daily-task-blink 2s ease-in-out infinite;
 }
 
 :root:root[data-theme] .task-card.task-card-daily .task-card-title-link,
@@ -3784,8 +3784,8 @@ body:has(#task-ticker:not([hidden])) .main {
 }
 
 @keyframes daily-task-blink {
-  0%, 100% { border-color: #ff8a1f; box-shadow: 0 0 6px rgba(255, 138, 31, 0.5); }
-  50% { border-color: rgba(255, 138, 31, 0.35); box-shadow: none; }
+  0%, 100% { border-color: rgb(232, 97, 79); box-shadow: 0 0 6px rgba(232, 97, 79, 0.5); }
+  50% { border-color: rgba(232, 97, 79, 0.35); box-shadow: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

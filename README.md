@@ -146,7 +146,7 @@ Gebouwd:
   en laat de rest verdwijnen; verwijderen haalt de hele reeks weg. Onder de kalender staat een
   nieuw blok **Herhalende afspraken** met per reeks frequentie, volgende datum en einddatum.
 - **Dagtaken vallen op**: een taak met "Dagtaak" aangevinkt heeft een magenta titel, een
-  gradient van zwart (links) naar oranje (rechts) en een rustig knipperende oranje rand (uit
+  gradient van zwart (links) naar oranje (rechts) en een knipperende rand in rgb(232, 97, 79) (uit
   bij `prefers-reduced-motion`); geldt in elk thema.
 - **Taakkleur via tags**: een taak met een tag krijgt een zachte gradient van de (gedempte)
   tagkleur links naar de kaartkleur van het actieve thema rechts (`color-mix` met
