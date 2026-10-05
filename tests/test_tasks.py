@@ -477,3 +477,26 @@ def test_task_card_exposes_tag_hue_for_themes_like_bubbles(logged_in_client):
         listing = logged_in_client.get("/tasks").text
         task_id = _task_id_for_title(listing, title)
         logged_in_client.post(f"/tasks/{task_id}/delete")
+
+
+def test_tasks_split_into_daily_and_rest_columns_grouped_by_first_tag(logged_in_client):
+    logged_in_client.post(
+        "/tasks",
+        data={"title": "Kolom-dagtaak", "description": "", "deadline": "", "tags": "zzz, kolomtag", "daily_task": "true"},
+    )
+    logged_in_client.post(
+        "/tasks", data={"title": "Kolom-overig", "description": "", "deadline": "", "tags": "kolomtag"}
+    )
+    page = logged_in_client.get("/tasks").text
+
+    daily_col = page[page.index("Dagtaken <span"): page.index("Overig <span")]
+    rest_col = page[page.index("Overig <span"):]
+    assert "Kolom-dagtaak" in daily_col and "Kolom-dagtaak" not in rest_col
+    assert "Kolom-overig" in rest_col and "Kolom-overig" not in daily_col
+    # onder de eerste tag (alfabetisch) en niet dubbel onder "zzz"
+    assert 'data-group-toggle="daily:kolomtag"' in daily_col
+    assert 'data-group-toggle="daily:zzz"' not in daily_col
+
+    for title in ["Kolom-dagtaak", "Kolom-overig"]:
+        task_id = _task_id_for_title(page, title)
+        logged_in_client.post(f"/tasks/{task_id}/delete")

@@ -151,6 +151,12 @@ Gebouwd:
   laatste dag. "**Herhaling stoppen**" in het bewerkformulier laat voorkomens t/m vandaag staan
   en laat de rest verdwijnen; verwijderen haalt de hele reeks weg. Onder de kalender staat een
   nieuw blok **Herhalende afspraken** met per reeks frequentie, volgende datum en einddatum.
+- **Takenpagina in twee kolommen**: links **Dagtaken**, rechts **Overig**; binnen elke kolom
+  staan taken standaard automatisch onder elkaar per tag (onder de eerste tag, alfabetisch,
+  dus een taak met meerdere tags staat maar één keer; taken zonder tag onderaan). "Groeperen
+  op: Geen" geeft platte lijsten per kolom. Op smalle schermen staan de kolommen onder elkaar.
+- **Kanban: kolombreedte aanpasbaar**: sleep de rechterrand van een kolom; de breedte wordt
+  per kolom in `localStorage` onthouden, dubbelklik op de greep zet 'm terug naar standaard.
 - **Dagtaken vallen op**: een taak met "Dagtaak" aangevinkt heeft een magenta titel, een
   gradient van zwart (links) naar oranje (rechts) en een knipperende rand in rgb(232, 97, 79) (uit
   bij `prefers-reduced-motion`); geldt in elk thema.
@@ -877,6 +883,8 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 63. Sidebar → Stickies → typ een tekst, kies roze, tags "werk", vink Temp aan → Toevoegen: het
     briefje staat roze met TEMP-label en tag. Klik een andere kleur op een briefje → het
     wisselt meteen en blijft zo na verversen. Klik een tag → alleen stickies met die tag.
+64. Taken → links staan de dagtaken, rechts de rest, elk onder elkaar per tag. Kanban → sleep de
+    rechterrand van een kolom → breder/smaller en blijft zo na verversen.
 
 ## Architectuur
 

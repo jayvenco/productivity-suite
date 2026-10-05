@@ -65,7 +65,7 @@ def _archive_and_purge_tasks(db: Session, user_id: int) -> None:
 
 def _redirect_to_list(
     sort: str = "deadline",
-    group_by: str = "none",
+    group_by: str = "tag",
     tags: list[str] | None = None,
     status_filter: str | None = None,
 ) -> RedirectResponse:
@@ -97,7 +97,7 @@ def list_tasks(
     tags: list[str] = Query(default=[]),
     status_filter: str | None = None,
     sort: str = "deadline",
-    group_by: str = "none",
+    group_by: str = "tag",
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
@@ -124,18 +124,27 @@ def list_tasks(
         .all()
     )
 
-    groups: list[tuple[str, list[Task]]] | None = None
-    if group_by == "tag":
-        by_tag: dict[str, list[Task]] = {}
-        untagged: list[Task] = []
-        for task in tasks:
-            if not task.tags:
-                untagged.append(task)
-            for t in task.tags:
-                by_tag.setdefault(t.name, []).append(task)
-        groups = [(name, by_tag[name]) for name in sorted(by_tag)]
-        if untagged:
-            groups.append((_GEEN_TAG_LABEL, untagged))
+    # Twee kolommen: dagtaken links, de rest rechts. Binnen elke kolom staan taken (bij
+    # group_by=tag, de standaard) automatisch onder elkaar per tag -- onder de eerste tag
+    # (alfabetisch) van de taak, zodat een taak met meerdere tags niet dubbel voorkomt.
+    columns = []
+    for key, title, column_tasks in (
+        ("daily", "Dagtaken", [t for t in tasks if t.daily_task]),
+        ("rest", "Overig", [t for t in tasks if not t.daily_task]),
+    ):
+        groups: list[tuple[str, list[Task]]] | None = None
+        if group_by == "tag":
+            by_tag: dict[str, list[Task]] = {}
+            untagged: list[Task] = []
+            for task in column_tasks:
+                if task.tags:
+                    by_tag.setdefault(min(t.name for t in task.tags), []).append(task)
+                else:
+                    untagged.append(task)
+            groups = [(name, by_tag[name]) for name in sorted(by_tag)]
+            if untagged:
+                groups.append((_GEEN_TAG_LABEL, untagged))
+        columns.append({"key": key, "title": title, "tasks": column_tasks, "groups": groups})
 
     return templates.TemplateResponse(
         request,
@@ -143,7 +152,7 @@ def list_tasks(
         {
             "user": user,
             "tasks": tasks,
-            "groups": groups,
+            "columns": columns,
             "statuses": list(TaskStatus),
             "all_tags": all_tags,
             "active_tags": tags,
@@ -307,7 +316,7 @@ def update_task(
 def toggle_done(
     task_id: int,
     sort: str = Form("deadline"),
-    group_by: str = Form("none"),
+    group_by: str = Form("tag"),
     filter_tags: list[str] = Form(default=[]),
     status_filter: str = Form(""),
     user: User = Depends(require_user),
@@ -324,7 +333,7 @@ def toggle_done(
 def delete_task(
     task_id: int,
     sort: str = Form("deadline"),
-    group_by: str = Form("none"),
+    group_by: str = Form("tag"),
     filter_tags: list[str] = Form(default=[]),
     status_filter: str = Form(""),
     user: User = Depends(require_user),

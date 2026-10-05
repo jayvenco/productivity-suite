@@ -73,7 +73,7 @@
     </label>
     <label>Groeperen op
       <select name="group_by" onchange="this.form.submit()">
-        <option value="none" {{ 'selected' if group_by == 'none' }}>Geen</option>
+        <option value="none" {{ 'selected' if group_by == 'none' }}>Geen (plat)</option>
         <option value="tag" {{ 'selected' if group_by == 'tag' }}>Tag / project</option>
       </select>
     </label>
@@ -92,22 +92,32 @@
   </form>
 </details>
 
-{% if groups is not none %}
-  {% for group_name, group_tasks in groups %}
-  <button type="button" class="task-group-heading task-group-toggle" data-group-toggle="{{ group_name }}">
-    <span class="task-group-toggle-arrow">▾</span> {{ group_name }} <span class="task-group-count">({{ group_tasks | length }})</span>
-  </button>
-  <div class="task-card-list" data-group-block="{{ group_name }}">
-    {% for task in group_tasks %}{{ task_card(task, sort, group_by, active_tags, active_status) }}{% endfor %}
-  </div>
-  {% endfor %}
-{% else %}
-<div class="task-card-list">
-  {% for task in tasks %}{{ task_card(task, sort, group_by, active_tags, active_status) }}
-  {% else %}
-  <p>Nog geen taken. Maak er één aan.</p>
+<div class="task-columns">
+  {% for column in columns %}
+  <section class="task-column">
+    <h3 class="task-column-title">{{ column.title }} <span class="task-group-count">({{ column.tasks | length }})</span></h3>
+    {% if column.groups is not none %}
+      {% for group_name, group_tasks in column.groups %}
+      {% set group_id = group_name if column.key == 'rest' else column.key ~ ':' ~ group_name %}
+      <button type="button" class="task-group-heading task-group-toggle" data-group-toggle="{{ group_id }}">
+        <span class="task-group-toggle-arrow">▾</span> {{ group_name }} <span class="task-group-count">({{ group_tasks | length }})</span>
+      </button>
+      <div class="task-card-list" data-group-block="{{ group_id }}">
+        {% for task in group_tasks %}{{ task_card(task, sort, group_by, active_tags, active_status) }}{% endfor %}
+      </div>
+      {% else %}
+      <p class="task-column-empty">Geen taken.</p>
+      {% endfor %}
+    {% else %}
+    <div class="task-card-list">
+      {% for task in column.tasks %}{{ task_card(task, sort, group_by, active_tags, active_status) }}
+      {% else %}
+      <p class="task-column-empty">Geen taken.</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </section>
   {% endfor %}
 </div>
-{% endif %}
 <script src="{{ static_url('js/tasks-list.js') }}"></script>
 {% endblock %}

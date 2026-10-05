@@ -3870,3 +3870,28 @@ body:has(#task-ticker:not([hidden])) .main {
 @media (prefers-reduced-motion: reduce) {
   :root:root[data-theme] .task-card.task-card-daily { animation: none; }
 }
+
+/* Takenpagina: dagtaken links, de rest rechts (onder elkaar per tag); onder elkaar op smalle schermen. */
+.task-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+
+.task-column-title {
+  margin: 0 0 4px;
+  font-size: 15px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.task-column-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin: 8px 0;
+}
+
+@media (max-width: 900px) {
+  .task-columns { grid-template-columns: 1fr; }
+}
