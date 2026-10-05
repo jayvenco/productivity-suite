@@ -25,10 +25,15 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
-:root[data-theme="bubbles"] .task-card[style*="--tag-hue"],
 :root[data-theme="bubbles"] .note-card[style*="--tag-hue"],
 :root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] {
   background: hsl(var(--tag-hue), 65%, 42%);
+}
+
+/* Taken: zelfde zachtere gradient als in de andere thema's (tagkleur -> kaartkleur), maar
+   met een sterkere tagkleur zodat het nog steeds een "bubbles"-kaart is. */
+:root[data-theme="bubbles"] .task-card[style*="--tag-hue"] {
+  --task-tag-strength: 62%;
 }
 
 /* Primaire tekst (titel) op een vol-gekleurde kaart: altijd wit, net als de tag-bubbels

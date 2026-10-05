@@ -146,8 +146,12 @@ Gebouwd:
   en laat de rest verdwijnen; verwijderen haalt de hele reeks weg. Onder de kalender staat een
   nieuw blok **Herhalende afspraken** met per reeks frequentie, volgende datum en einddatum.
 - **Dagtaken vallen op**: een taak met "Dagtaak" aangevinkt heeft een magenta titel, een
-  gradient van zwart (links) naar geel (rechts) en een knipperende gele rand (uit bij
-  `prefers-reduced-motion`); geldt in elk thema.
+  gradient van zwart (links) naar oranje (rechts) en een rustig knipperende oranje rand (uit
+  bij `prefers-reduced-motion`); geldt in elk thema.
+- **Taakkleur via tags**: een taak met een tag krijgt een zachte gradient van de (gedempte)
+  tagkleur links naar de kaartkleur van het actieve thema rechts (`color-mix` met
+  `--bg-elevated`, dus ook leesbaar in lichte thema's); "Bubbles" gebruikt dezelfde gradient
+  maar met een sterkere tagkleur (`--task-tag-strength`).
 - **Taken-archief**: een afgeronde taak verdwijnt 24 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
