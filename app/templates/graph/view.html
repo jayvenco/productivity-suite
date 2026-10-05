@@ -5,7 +5,7 @@
 <p style="color:var(--text-muted);font-size:12px;margin-top:0;margin-bottom:12px">
   Taken, notities, kanban-kaarten en mindmaps die dezelfde tag delen, gegroepeerd rond die tag
   — net als de graph-view in Obsidian. Sleep een knooppunt om het te verplaatsen, klik op een
-  item om het te openen.
+  item om het te openen. Het venster is aan te passen met de sleephoek rechtsonder.
 </p>
 
 <div class="graph-legend">
@@ -17,6 +17,7 @@
 </div>
 
 <div class="graph-wrap">
+  <button type="button" id="graph-fullscreen" class="graph-fullscreen-btn" title="Graph schermvullend tonen">⛶ Volledig scherm</button>
   <canvas id="graph-canvas"></canvas>
   <p id="graph-empty" class="graph-empty" hidden>
     Nog geen getagde items om te tonen. Voeg tags toe aan een taak, notitie, kanban-kaart of

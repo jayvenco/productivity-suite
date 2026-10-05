@@ -3349,6 +3349,34 @@ body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
   border-radius: 14px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   overflow: hidden;
+  /* Standaard bijna de hele schermhoogte; met de sleephoek rechtsonder aan te passen. */
+  height: calc(100vh - 210px);
+  min-height: 320px;
+  max-width: 100%;
+  resize: both;
+}
+
+.graph-wrap:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  border-radius: 0;
+  border: none;
+  resize: none;
+}
+
+.graph-fullscreen-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  background: var(--bg-hover);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
 }
 
 .graph-wrap canvas {

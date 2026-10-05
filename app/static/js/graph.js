@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function resize() {
     width = wrap.clientWidth;
+    height = wrap.clientHeight || height;
     canvas.width = width * devicePixelRatio;
     canvas.height = height * devicePixelRatio;
     canvas.style.width = `${width}px`;
@@ -45,7 +46,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   resize();
-  window.addEventListener("resize", resize);
+  // Het venster is aanpasbaar (sleephoek rechtsonder, volledig scherm): het canvas volgt
+  // altijd de werkelijke afmetingen van de wrapper.
+  if (typeof ResizeObserver !== "undefined") {
+    new ResizeObserver(resize).observe(wrap);
+  } else {
+    window.addEventListener("resize", resize);
+  }
+
+  const fullscreenBtn = document.getElementById("graph-fullscreen");
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener("click", () => {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else if (wrap.requestFullscreen) {
+        wrap.requestFullscreen();
+      }
+    });
+    document.addEventListener("fullscreenchange", () => {
+      fullscreenBtn.textContent = document.fullscreenElement ? "✕ Sluiten" : "⛶ Volledig scherm";
+    });
+  }
 
   const edgeCount = {};
   for (const edge of data.edges) {

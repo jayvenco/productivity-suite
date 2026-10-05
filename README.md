@@ -134,6 +134,9 @@ Gebouwd:
   paginaherlaad; nieuw toevoegen via het briefje bovenaan.
   In het overzicht zie je alleen de klassieke briefjes (licht gedraaid, handschriftlettertype,
   alleen tekst); kleur, tags en temp zitten achter het ⚙-knopje op elk briefje.
+- **Graph schermvullend + aanpasbaar**: de graph vult standaard bijna de hele schermhoogte, is
+  met de sleephoek rechtsonder (CSS `resize: both`) vrij te vergroten/verkleinen en heeft een
+  knop "Volledig scherm" (Fullscreen API). Het canvas volgt de wrapper via `ResizeObserver`.
 - **Kanban: schermvullende kaart-editor**: "+ Kaart toevoegen" en "Bewerken" openen de editor
   over het hele scherm (titel, markdown-werkbalk, een beschrijving die de rest van de hoogte
   vult, tags); Annuleren, Escape of een klik op de backdrop sluit 'm weer.
