@@ -3742,3 +3742,9 @@ body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
 .sticky-new .sticky-color-dot:has(input:checked) { border-color: var(--text); }
 
 .sticky-new[hidden] { display: none; }
+
+/* Ruimte onderaan de pagina zodat de laatste knoppen (bv. "Opslaan" bij een lange notitie)
+   niet onder de vaste ticker-band (34px hoog) verdwijnen. */
+body:has(#task-ticker:not([hidden])) .main {
+  padding-bottom: 80px;
+}
