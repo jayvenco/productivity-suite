@@ -145,6 +145,9 @@ Gebouwd:
   laatste dag. "**Herhaling stoppen**" in het bewerkformulier laat voorkomens t/m vandaag staan
   en laat de rest verdwijnen; verwijderen haalt de hele reeks weg. Onder de kalender staat een
   nieuw blok **Herhalende afspraken** met per reeks frequentie, volgende datum en einddatum.
+- **Dagtaken vallen op**: een taak met "Dagtaak" aangevinkt heeft een magenta titel, een
+  gradient van zwart (links) naar geel (rechts) en een knipperende gele rand (uit bij
+  `prefers-reduced-motion`); geldt in elk thema.
 - **Taken-archief**: een afgeronde taak verdwijnt 24 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief

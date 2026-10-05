@@ -3748,3 +3748,35 @@ body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
 body:has(#task-ticker:not([hidden])) .main {
   padding-bottom: 80px;
 }
+
+/* Dagtaken: magenta titel, gradient van zwart (links) naar geel (rechts) en een
+   knipperende gele rand. Selector-specificiteit bewust hoog zodat thema's (bv. "bubbles",
+   dat .task-card zelf een volle kleur geeft) dit niet overschrijven. */
+:root[data-theme] .task-card.task-card-daily {
+  background: linear-gradient(90deg, #000000 0%, #ffe600 100%);
+  border: 2px solid #ffe600;
+  border-left-width: 2px;
+  animation: daily-task-blink 1.2s ease-in-out infinite;
+}
+
+:root[data-theme] .task-card.task-card-daily .task-card-title-link,
+:root[data-theme] .task-card.task-card-daily .daily-task-badge {
+  color: #ff00ff;
+  font-weight: 600;
+  text-shadow: 0 0 3px #000, 0 0 1px #000;
+}
+
+:root[data-theme] .task-card.task-card-daily .task-card-preview,
+:root[data-theme] .task-card.task-card-daily .task-card-status {
+  color: #ffffff;
+  text-shadow: 0 0 3px #000, 0 0 1px #000;
+}
+
+@keyframes daily-task-blink {
+  0%, 100% { border-color: #ffe600; box-shadow: 0 0 8px rgba(255, 230, 0, 0.8); }
+  50% { border-color: transparent; box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root[data-theme] .task-card.task-card-daily { animation: none; }
+}
