@@ -3767,7 +3767,7 @@ body:has(#task-ticker:not([hidden])) .main {
 :root:root[data-theme] .task-card.task-card-daily {
   background: linear-gradient(90deg, #000000 0%, #ff8a1f 100%);
   border: 2px solid rgb(232, 97, 79);
-  animation: daily-task-blink 2s ease-in-out infinite;
+  animation: daily-task-blink 1.3s ease-in-out infinite;
 }
 
 :root:root[data-theme] .task-card.task-card-daily .task-card-title-link,
