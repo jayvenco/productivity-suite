@@ -865,6 +865,24 @@ textarea {
   flex-shrink: 0;
   padding: 12px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+/* Sleepgreep op de rechterrand van een kolom om de breedte aan te passen. */
+.column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 10px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 3;
+  touch-action: none;
+}
+
+.column-resize-handle:hover,
+.column-resize-handle.dragging {
+  background: linear-gradient(90deg, transparent 3px, var(--accent) 3px, var(--accent) 7px, transparent 7px);
 }
 
 /* Gekleurde stippenlijn tussen kolommen, met een korte gradient die vanaf de lijn
@@ -3490,6 +3508,11 @@ body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
   .column {
     width: 78vw;
     max-width: 260px;
+  }
+
+  /* Handmatig aangepaste breedte (inline style) wint van de mobiele maximumbreedte. */
+  .column[style*="width"] {
+    max-width: none;
   }
 
   .stats-grid {

@@ -132,6 +132,61 @@ document.addEventListener("DOMContentLoaded", () => {
     if (openAdd) closeAddCard(openAdd);
   });
 
+  // Kolombreedte aanpasbaar: sleepgreep rechts op elke kolom; breedte per kolom onthouden in
+  // localStorage (client-side, net als het in-/uitklappen van lanes). Dubbelklik = standaard.
+  const MIN_COLUMN_WIDTH = 180;
+  const MAX_COLUMN_WIDTH = 800;
+  const widthKey = (id) => `kanban-column-width-${id}`;
+
+  board.querySelectorAll("[data-column-width-id]").forEach((column) => {
+    try {
+      const saved = parseInt(localStorage.getItem(widthKey(column.dataset.columnWidthId)), 10);
+      if (saved) column.style.width = `${saved}px`;
+    } catch {
+      /* geen opslag: standaardbreedte */
+    }
+  });
+
+  board.addEventListener("pointerdown", (event) => {
+    const handle = event.target.closest(".column-resize-handle");
+    if (!handle) return;
+    event.preventDefault();
+    const column = handle.closest(".column");
+    const startX = event.clientX;
+    const startWidth = column.getBoundingClientRect().width;
+    handle.classList.add("dragging");
+    handle.setPointerCapture(event.pointerId);
+
+    const onMove = (e) => {
+      const width = Math.max(MIN_COLUMN_WIDTH, Math.min(MAX_COLUMN_WIDTH, startWidth + e.clientX - startX));
+      column.style.width = `${width}px`;
+    };
+    const onUp = () => {
+      handle.classList.remove("dragging");
+      handle.removeEventListener("pointermove", onMove);
+      handle.removeEventListener("pointerup", onUp);
+      try {
+        localStorage.setItem(widthKey(column.dataset.columnWidthId), String(Math.round(column.getBoundingClientRect().width)));
+      } catch {
+        /* zie hierboven */
+      }
+    };
+    handle.addEventListener("pointermove", onMove);
+    handle.addEventListener("pointerup", onUp);
+  });
+
+  board.addEventListener("dblclick", (event) => {
+    const handle = event.target.closest(".column-resize-handle");
+    if (!handle) return;
+    const column = handle.closest(".column");
+    column.style.width = "";
+    try {
+      localStorage.removeItem(widthKey(column.dataset.columnWidthId));
+    } catch {
+      /* zie hierboven */
+    }
+  });
+
   // "+ Kaart toevoegen": het formulier opent (via CSS) als schermvullende editor, met
   // dezelfde backdrop; Annuleren/Escape sluit de <details> weer.
   function closeAddCard(details) {

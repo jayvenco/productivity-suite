@@ -50,7 +50,8 @@
       <div class="column-divider column-divider-{{ (loop.index0 - 1) % 4 }}" aria-hidden="true"></div>
       {% endif %}
       {% set column_cards = cards_by_cell.get((swimlane.id, column.id), []) %}
-      <div class="column">
+      <div class="column" data-column-width-id="{{ column.id }}">
+        <div class="column-resize-handle" title="Sleep om de breedte aan te passen (dubbelklik = standaard)"></div>
         <div class="column-header">
           <span class="column-header-dot" data-swimlane-dot="{{ swimlane.id }}" style="background: {{ swimlane.display_color }};"></span>
           <span class="column-header-title">{{ column.name }}</span>
