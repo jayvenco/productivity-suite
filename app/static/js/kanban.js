@@ -128,6 +128,35 @@ document.addEventListener("DOMContentLoaded", () => {
   backdrop.addEventListener("click", () => {
     const openForm = document.querySelector(".card-edit-form:not([hidden])");
     if (openForm) closeCardEditModal(openForm);
+    const openAdd = document.querySelector(".add-card-details[open]");
+    if (openAdd) closeAddCard(openAdd);
+  });
+
+  // "+ Kaart toevoegen": het formulier opent (via CSS) als schermvullende editor, met
+  // dezelfde backdrop; Annuleren/Escape sluit de <details> weer.
+  function closeAddCard(details) {
+    details.open = false;
+    backdrop.hidden = true;
+  }
+
+  board.querySelectorAll(".add-card-details").forEach((details) => {
+    details.addEventListener("toggle", () => {
+      backdrop.hidden = !details.open;
+      if (details.open) details.querySelector("input[name=title]").focus();
+    });
+  });
+
+  board.addEventListener("click", (event) => {
+    const cancelBtn = event.target.closest(".add-card-cancel");
+    if (cancelBtn) closeAddCard(cancelBtn.closest(".add-card-details"));
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    const openForm = document.querySelector(".card-edit-form:not([hidden])");
+    if (openForm) return closeCardEditModal(openForm);
+    const openAdd = document.querySelector(".add-card-details[open]");
+    if (openAdd) closeAddCard(openAdd);
   });
 
   // "+ Checklist-item": voegt een lege "- [ ] "-regel toe aan de beschrijving,

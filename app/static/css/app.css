@@ -1101,21 +1101,49 @@ textarea {
 
 .card-edit-form.kanban-modal {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 640px;
-  max-width: 92vw;
-  max-height: 85vh;
+  inset: 0;
+  width: auto;
+  max-width: none;
+  max-height: none;
   overflow-y: auto;
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
-  padding: 16px 18px;
+  padding: 24px max(24px, 8vw);
   z-index: 901;
   cursor: default;
 }
+
+/* Schermvullende editor: titel en tags houden hun hoogte, de beschrijving vult de rest. */
+.card-edit-form.kanban-modal .md-editor,
+.add-card-form[open] > .add-card-modal-form .md-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+.card-edit-form.kanban-modal .md-textarea,
+.add-card-form[open] > .add-card-modal-form .md-textarea {
+  flex: 1;
+  resize: none;
+}
+
+/* "+ Kaart toevoegen" geopend: zelfde schermvullende editor als bij bewerken. */
+.add-card-form[open] > .add-card-modal-form {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-elevated);
+  padding: 24px max(24px, 8vw);
+  z-index: 901;
+  overflow-y: auto;
+}
+
+.add-card-modal-form .kanban-modal-title,
+.add-card-modal-form .kanban-modal-actions { display: none; }
+.add-card-form[open] > .add-card-modal-form .kanban-modal-title { display: block; }
+.add-card-form[open] > .add-card-modal-form .kanban-modal-actions { display: flex; }
 
 .kanban-modal-title {
   margin: 0 0 4px;

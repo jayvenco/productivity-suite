@@ -134,6 +134,9 @@ Gebouwd:
   paginaherlaad; nieuw toevoegen via het briefje bovenaan.
   In het overzicht zie je alleen de klassieke briefjes (licht gedraaid, handschriftlettertype,
   alleen tekst); kleur, tags en temp zitten achter het ⚙-knopje op elk briefje.
+- **Kanban: schermvullende kaart-editor**: "+ Kaart toevoegen" en "Bewerken" openen de editor
+  over het hele scherm (titel, markdown-werkbalk, een beschrijving die de rest van de hoogte
+  vult, tags); Annuleren, Escape of een klik op de backdrop sluit 'm weer.
 - **Kanban: lanes standaard ingeklapt**: een vinkje "Lanes standaard ingeklapt" naast de
   bordtitel laat bij elke paginalading alle swimlanes dicht starten (alleen de lane-namen
   zichtbaar). Individueel openklappen kan, maar wordt dan niet onthouden. Voorkeur staat in

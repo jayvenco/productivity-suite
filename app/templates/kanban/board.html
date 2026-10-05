@@ -87,9 +87,10 @@
           </div>
           {% endfor %}
         </div>
-        <details class="add-card-form">
+        <details class="add-card-form add-card-details">
           <summary>+ Kaart toevoegen</summary>
-          <form method="post" action="/kanban/cards">
+          <form method="post" action="/kanban/cards" class="add-card-modal-form">
+            <h3 class="kanban-modal-title">Nieuwe kaart</h3>
             <input type="hidden" name="column_id" value="{{ column.id }}">
             <input type="hidden" name="swimlane_id" value="{{ swimlane.id }}">
             <input type="text" name="title" placeholder="Titel" required>
@@ -98,7 +99,10 @@
               <textarea name="description" class="md-textarea" placeholder="Beschrijving" rows="4"></textarea>
             </div>
             <input type="text" name="tags" placeholder="Tags (komma-gescheiden)">
-            <button type="submit" class="btn">Toevoegen</button>
+            <div class="kanban-modal-actions">
+              <button type="submit" class="btn">Toevoegen</button>
+              <button type="button" class="btn btn-secondary add-card-cancel">Annuleren</button>
+            </div>
           </form>
         </details>
         {% if available_tasks %}
