@@ -885,51 +885,15 @@ textarea {
   background: linear-gradient(90deg, transparent 3px, var(--accent) 3px, var(--accent) 7px, transparent 7px);
 }
 
-/* Gekleurde stippenlijn tussen kolommen, met een korte gradient die vanaf de lijn
-   vervaagt naar transparant (dus naar de achtergrond eronder) -- kleur cyclet per
-   kolomgrens (pink/oranje/blauw/groen, dan weer opnieuw), zodat elke swimlane er met
-   dezelfde volgorde maar onafhankelijk van de andere swimlanes uitziet. */
+/* Strakke, grijze stippellijn tussen kolommen: 1px, net zo dik als de randen van de lanes
+   en kolommen zelf, zonder kleur-cyclus of gradient. */
 .column-divider {
   align-self: stretch;
-  width: 24px;
+  width: 0;
   flex-shrink: 0;
-  position: relative;
+  margin: 4px 6px;
+  border-left: 1px dotted #888888;
   pointer-events: none;
-}
-
-.column-divider::before {
-  content: "";
-  position: absolute;
-  top: 4px;
-  bottom: 4px;
-  left: 50%;
-  border-left: 2px dotted var(--col-divider-color, var(--accent));
-  transform: translateX(-50%);
-}
-
-.column-divider::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to right, transparent, var(--col-divider-color, var(--accent)) 50%, transparent);
-  opacity: 0.25;
-  filter: blur(3px);
-}
-
-.column-divider-0 {
-  --col-divider-color: #f472b6;
-}
-
-.column-divider-1 {
-  --col-divider-color: #fb923c;
-}
-
-.column-divider-2 {
-  --col-divider-color: #60a5fa;
-}
-
-.column-divider-3 {
-  --col-divider-color: #4ade80;
 }
 
 .column-header {

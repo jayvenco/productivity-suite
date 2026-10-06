@@ -400,13 +400,12 @@ Gebouwd:
   klikbaar naar de bewerkpagina. Met een sluitknopje te verbergen (onthouden in
   `localStorage`); de quick-add-wheel en Pomodoro-widget schuiven automatisch een stukje
   omhoog zolang de ticker zichtbaar is, en weer terug zodra 'm verborgen is.
-- **Kanban: 5 standaardkolommen + gekleurde stippenlijn-dividers**: nieuwe swimlanes (en het
+- **Kanban: 5 standaardkolommen + strakke stippenlijn-dividers**: nieuwe swimlanes (en het
   bord van een gloednieuwe installatie) krijgen nu **Backlog / To Do / In Progress / Review /
   Done** i.p.v. de eerdere 4 (Backlog/Todo/In Progress/Done) — bestaande swimlanes op een
   al langer lopende installatie veranderen niet met terugwerkende kracht, dit geldt alleen
-  voor nieuw aangemaakte. Tussen de kolommen staat nu een **gekleurde stippenlijn** die per
-  kolomgrens van kleur wisselt (roze → oranje → blauw → groen, dan weer opnieuw), met een
-  korte gradient die vanaf de lijn vervaagt naar transparant.
+  voor nieuw aangemaakte. Tussen de kolommen staat een **grijze stippellijn van 1px** (even dik als de
+  randen van lanes/kolommen), zonder kleur-cyclus of gradient.
 
 Nog niet gebouwd: CI/CD, voice-commando's matchen op een al bestaand item i.p.v. altijd een
 nieuw item aanmaken (bv. "voeg dit toe aan mijn boodschappenlijst-notitie" i.p.v. een nieuwe
@@ -835,8 +834,7 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     blijft verborgen.
 53. Maak een nieuwe swimlane aan (of, op een verse installatie, kijk naar "Mijn bord") →
     de kolommen heten Backlog/To Do/In Progress/Review/Done (5 stuks). Tussen elke kolom
-    staat een verticale stippenlijn die van kleur wisselt (roze, oranje, blauw, groen) met
-    een zachte gloed eromheen die naar de achtergrond vervaagt.
+    staat een strakke, grijze, 1px dikke stippellijn (geen kleur, geen gloed).
 54. Maak een snippet aan met een beschrijving en één bestand → op de kaart in de lijst zie
     je meteen de titel + "zojuist" rechtsboven, de beschrijving, tags (of "Geen tags"), en
     een live preview van het bestand met een bestandsnaam-balkje. Klik het kopieer-icoontje
@@ -1553,10 +1551,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   bord veranderen. Wie dat alsnog wil, voegt 'm zelf toe via "+ Kolom" op de betreffende
   swimlane.
 - **Kolom-dividers als losse elementen i.p.v. CSS `::before` op `.column` zelf**: elke
-  divider is een eigen `<div class="column-divider column-divider-N">` tussen twee
-  `.column`-elementen in de kolommenrij (`app/templates/kanban/board.html`), N =
-  `(loop.index0 - 1) % 4` (cyclet door 4 kleuren, dus bij meer dan 5 kolommen in één
-  swimlane herhaalt de kleurvolgorde vanaf roze). Bewust géén absoluut gepositioneerd
+  divider is een eigen `<div class="column-divider">` tussen twee
+  `.column`-elementen in de kolommenrij (`app/templates/kanban/board.html`; de eerdere
+  per-kolom kleur-cyclus en gradient-gloed zijn vervallen). Bewust géén absoluut gepositioneerd
   pseudo-element op de kolom zelf (bv. `.column::before`) -- dat zou de dotted-line +
   gradient-gloed buiten de kolomgrenzen moeten laten overlappen op een naburige kolom, wat
   precies het soort positionerings-/z-index-gedoe is waar de swimlane-hernoem-popup-bugfix
