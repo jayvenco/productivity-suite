@@ -320,8 +320,8 @@ def _make_done_task(client, title, completed_ago, archived_ago=None):
     return task_id
 
 
-def test_done_task_older_than_24_hours_is_archived_not_deleted(logged_in_client):
-    task_id = _make_done_task(logged_in_client, "Oude afgeronde taak", timedelta(hours=25))
+def test_done_task_older_than_8_hours_is_archived_not_deleted(logged_in_client):
+    task_id = _make_done_task(logged_in_client, "Oude afgeronde taak", timedelta(hours=9))
 
     assert "Oude afgeronde taak" not in logged_in_client.get("/tasks").text
     assert "Oude afgeronde taak" in logged_in_client.get("/tasks/archive").text
@@ -331,7 +331,7 @@ def test_done_task_older_than_24_hours_is_archived_not_deleted(logged_in_client)
     logged_in_client.post(f"/tasks/{task_id}/delete")
 
 
-def test_done_task_within_24_hours_is_kept(logged_in_client):
+def test_done_task_within_8_hours_is_kept(logged_in_client):
     task_id = _make_done_task(logged_in_client, "Net afgeronde taak", timedelta(hours=2))
 
     assert "Net afgeronde taak" in logged_in_client.get("/tasks").text
@@ -353,7 +353,7 @@ def test_archived_task_older_than_30_days_is_purged(logged_in_client):
 
 
 def test_restore_archived_task(logged_in_client):
-    task_id = _make_done_task(logged_in_client, "Terug te halen taak", timedelta(hours=30))
+    task_id = _make_done_task(logged_in_client, "Terug te halen taak", timedelta(hours=10))
     assert "Terug te halen taak" in logged_in_client.get("/tasks/archive").text
 
     response = logged_in_client.post(f"/tasks/{task_id}/restore", follow_redirects=False)

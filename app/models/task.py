@@ -36,7 +36,7 @@ class Task(Base):
     # `updated_at`, dat bij élke wijziging meeverandert. Bepaalt wanneer een afgeronde taak
     # automatisch opgeruimd wordt (zie _archive_expired_done_tasks in app/routers/tasks.py).
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    # Gezet zodra een afgeronde taak 24 uur 'done' staat: dan verdwijnt 'ie uit alle
+    # Gezet zodra een afgeronde taak 8 uur 'done' staat: dan verdwijnt 'ie uit alle
     # lijsten maar blijft nog 30 dagen in het archief (/tasks/archive) staan.
     archived_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 

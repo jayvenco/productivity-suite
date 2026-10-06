@@ -24,9 +24,9 @@ _SORT_OPTIONS = {
     "status": (Task.status.asc(), Task.title.asc()),
 }
 _GEEN_TAG_LABEL = "Zonder tag"
-# Afgeronde taken verdwijnen na 24 uur uit de lijst (-> archief), en het archief wordt na
+# Afgeronde taken verdwijnen na 8 uur uit de lijst (-> archief), en het archief wordt na
 # 30 dagen leeggemaakt.
-DONE_TASK_LIFETIME = timedelta(hours=24)
+DONE_TASK_LIFETIME = timedelta(hours=8)
 ARCHIVE_LIFETIME = timedelta(days=30)
 
 
@@ -43,7 +43,7 @@ def _apply_status(task: Task, new_status: TaskStatus) -> None:
 
 
 def _archive_and_purge_tasks(db: Session, user_id: int) -> None:
-    """Afgeronde taken gaan 24 uur na afronden naar het archief (archived_at), en
+    """Afgeronde taken gaan 8 uur na afronden naar het archief (archived_at), en
     gearchiveerde taken worden na 30 dagen definitief verwijderd -- zelfde "geen
     scheduler, opportunistisch bij elk bezoek"-patroon als tijdelijke notities (zie
     _delete_expired_temp_notes in app/routers/notes.py)."""

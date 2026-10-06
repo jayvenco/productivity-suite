@@ -164,7 +164,7 @@ Gebouwd:
   tagkleur links naar de kaartkleur van het actieve thema rechts (`color-mix` met
   `--bg-elevated`, dus ook leesbaar in lichte thema's); "Bubbles" gebruikt dezelfde gradient
   maar met een sterkere tagkleur (`--task-tag-strength`).
-- **Taken-archief**: een afgeronde taak verdwijnt 24 uur na afvinken uit de takenlijst (en
+- **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
   verwijderen; na 30 dagen in het archief wordt hij automatisch verwijderd. Opportunistisch
@@ -871,7 +871,7 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     tekstvak → de afbeelding verschijnt meteen op de cursorpositie met afgeronde hoeken. Sla de
     notitie op → ga terug naar de lijst → de afbeelding staat (met dezelfde afgeronde hoeken)
     ook in de kaartpreview. Open de notitie opnieuw om te bewerken → de afbeelding staat er nog.
-60. Vink een taak af en zet in de database `completed_at` meer dan 24 uur terug → de taak staat
+60. Vink een taak af en zet in de database `completed_at` meer dan 8 uur terug → de taak staat
     niet meer in de lijst maar wel onder Taken → Archief; "Herstellen" zet 'm terug. Kijk in
     `data/backups/` → een `app-<datum>.db` en `snippets/<id>.json` per snippet.
 61. Kalender → "+ Afspraak" → kies Herhaling "Elke week" → opslaan: de afspraak staat met ↻ op
