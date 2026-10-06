@@ -164,6 +164,10 @@ Gebouwd:
   tagkleur links naar de kaartkleur van het actieve thema rechts (`color-mix` met
   `--bg-elevated`, dus ook leesbaar in lichte thema's); "Bubbles" gebruikt dezelfde gradient
   maar met een sterkere tagkleur (`--task-tag-strength`).
+- **Extra lettertypen** (Account → Weergave): Alegreya Sans, Bitter, Exo 2, Cuprum, Carrois Gothic
+  en Bebas Neue, afkomstig uit de lijst op stalbanswebdesign.com (alleen de fonts die op Google
+  Fonts staan; de overige fonts in dat artikel zijn losse freebie-downloads zonder
+  Google-Fonts-bron en niet meegenomen).
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
@@ -404,8 +408,8 @@ Gebouwd:
   bord van een gloednieuwe installatie) krijgen nu **Backlog / To Do / In Progress / Review /
   Done** i.p.v. de eerdere 4 (Backlog/Todo/In Progress/Done) — bestaande swimlanes op een
   al langer lopende installatie veranderen niet met terugwerkende kracht, dit geldt alleen
-  voor nieuw aangemaakte. Tussen de kolommen staat een **grijze stippellijn van 1px** (even dik als de
-  randen van lanes/kolommen), zonder kleur-cyclus of gradient.
+  voor nieuw aangemaakte. Tussen de kolommen staat een **oranje stippellijn van 1px** (merk-oranje #ef8354, even
+  dik als de randen van lanes/kolommen), zonder kleur-cyclus of gradient.
 
 Nog niet gebouwd: CI/CD, voice-commando's matchen op een al bestaand item i.p.v. altijd een
 nieuw item aanmaken (bv. "voeg dit toe aan mijn boodschappenlijst-notitie" i.p.v. een nieuwe
@@ -834,7 +838,7 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     blijft verborgen.
 53. Maak een nieuwe swimlane aan (of, op een verse installatie, kijk naar "Mijn bord") →
     de kolommen heten Backlog/To Do/In Progress/Review/Done (5 stuks). Tussen elke kolom
-    staat een strakke, grijze, 1px dikke stippellijn (geen kleur, geen gloed).
+    staat een strakke, oranje, 1px dikke stippellijn (geen gloed).
 54. Maak een snippet aan met een beschrijving en één bestand → op de kaart in de lijst zie
     je meteen de titel + "zojuist" rechtsboven, de beschrijving, tags (of "Geen tags"), en
     een live preview van het bestand met een bestandsnaam-balkje. Klik het kopieer-icoontje

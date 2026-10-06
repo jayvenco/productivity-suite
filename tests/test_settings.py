@@ -228,3 +228,17 @@ def test_account_page_lists_background_options(logged_in_client):
     assert "Natuur" in page
     assert "Bergen" in page
     assert "Heelal" in page
+
+
+def test_set_new_google_fonts(logged_in_client):
+    for font_id in ["alegreya-sans", "bitter", "exo-2", "cuprum", "carrois-gothic", "bebas-neue"]:
+        logged_in_client.post(
+            "/settings/appearance",
+            data={"font_family": font_id, "font_size": "14", "density": "comfortable", "redirect_to": "/tasks"},
+        )
+        assert f'data-font="{font_id}"' in logged_in_client.get("/tasks").text
+
+    logged_in_client.post(
+        "/settings/appearance",
+        data={"font_family": "system", "font_size": "14", "density": "comfortable", "redirect_to": "/tasks"},
+    )

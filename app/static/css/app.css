@@ -45,6 +45,12 @@ h1, h2, h3 {
 :root[data-font="merriweather"] { --font-sans: "Merriweather", serif;       --font-heading: "Merriweather", serif; }
 :root[data-font="fira-sans"]    { --font-sans: "Fira Sans", sans-serif;     --font-heading: "Fira Sans", sans-serif; }
 :root[data-font="dm-sans"]      { --font-sans: "DM Sans", sans-serif;       --font-heading: "DM Sans", sans-serif; }
+:root[data-font="alegreya-sans"] { --font-sans: "Alegreya Sans", sans-serif; --font-heading: "Alegreya Sans", sans-serif; }
+:root[data-font="bitter"] { --font-sans: "Bitter", serif; --font-heading: "Bitter", serif; }
+:root[data-font="exo-2"] { --font-sans: "Exo 2", sans-serif; --font-heading: "Exo 2", sans-serif; }
+:root[data-font="cuprum"] { --font-sans: "Cuprum", sans-serif; --font-heading: "Cuprum", sans-serif; }
+:root[data-font="carrois-gothic"] { --font-sans: "Carrois Gothic", sans-serif; --font-heading: "Carrois Gothic", sans-serif; }
+:root[data-font="bebas-neue"] { --font-sans: "Bebas Neue", sans-serif; --font-heading: "Bebas Neue", sans-serif; }
 :root[data-font="playfair-display"] { --font-sans: "Playfair Display", serif; --font-heading: "Playfair Display", serif; }
 
 /* Monospace-opties -- vooral leuk voor wie de hele UI in een code-font wil. Consolas
@@ -885,14 +891,14 @@ textarea {
   background: linear-gradient(90deg, transparent 3px, var(--accent) 3px, var(--accent) 7px, transparent 7px);
 }
 
-/* Strakke, grijze stippellijn tussen kolommen: 1px, net zo dik als de randen van de lanes
+/* Strakke, oranje (merk-oranje #ef8354) stippellijn tussen kolommen: 1px, net zo dik als de randen van de lanes
    en kolommen zelf, zonder kleur-cyclus of gradient. */
 .column-divider {
   align-self: stretch;
   width: 0;
   flex-shrink: 0;
   margin: 4px 6px;
-  border-left: 1px dotted #888888;
+  border-left: 1px dotted #ef8354;
   pointer-events: none;
 }
 
