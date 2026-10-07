@@ -3865,3 +3865,10 @@ body:has(#task-ticker:not([hidden])) .main {
 @media (max-width: 900px) {
   .task-columns { grid-template-columns: 1fr; }
 }
+
+/* Schermvullende kaart-editors: ruimte onderaan zodat Toevoegen/Opslaan/Annuleren niet onder
+   de vaste ticker-band (34px) verdwijnen. */
+.card-edit-form.kanban-modal,
+.add-card-form[open] > .add-card-modal-form {
+  padding-bottom: 64px;
+}
