@@ -168,6 +168,26 @@ Gebouwd:
   en Bebas Neue, afkomstig uit de lijst op stalbanswebdesign.com (alleen de fonts die op Google
   Fonts staan; de overige fonts in dat artikel zijn losse freebie-downloads zonder
   Google-Fonts-bron en niet meegenomen).
+- **Volledige JSON-API (`/api/v1`)**: naast de bestaande create-routes nu ook
+  **lijst/ophalen/bijwerken/verwijderen** voor taken, notities, snippets en kanban
+  (kaarten + swimlanes), allemaal met alleen `Authorization: Bearer <token>` (zonder
+  browser-sessie). Eén token-dependency hangt aan de hele router, dus een ontbrekend/ongeldig
+  token geeft overal een JSON-`401` (nooit een 303/HTML). Routes (`app/routers/api.py` +
+  `api_crud.py`):
+  - `GET /health`
+  - Taken: `GET /tasks` (filters `status=open|done|archived`, `tag`, `priority`, `due_before`,
+    `limit`, `offset`), `GET|PATCH|DELETE /tasks/{id}`, `POST /tasks/{id}/toggle-done`,
+    `POST /tasks/{id}/restore`
+  - Notities: `GET /notes` (`tag`, `is_temp`, `limit`, `offset`), `GET|PATCH|DELETE /notes/{id}`
+  - Snippets: `GET /snippets` (`tag`, ...), `GET|PATCH|DELETE /snippets/{id}` (incl. files)
+  - Kanban: `GET /kanban` (heel bord), `GET /kanban/cards` (`swimlane_id`, `column_id`, `tag`),
+    `GET|PATCH|DELETE /kanban/cards/{id}`, `POST /kanban/cards/{id}/move`,
+    `POST /kanban/cards/{id}/checklist-toggle`, `GET|POST /kanban/swimlanes`,
+    `PATCH|DELETE /kanban/swimlanes/{id}`
+  Lijsten geven `{"items": [...], "total", "limit", "offset"}` (limit default 100, max 500,
+  nieuwste eerst), delete geeft `{"deleted": true, "id": N}`, onbekend id `404`, validatiefout
+  `422`. `tags` gaan als komma-gescheiden string (of lijst) erin en als lijst eruit; een PATCH
+  past alleen meegestuurde velden aan (`null` wist deadline/kleur).
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
@@ -887,6 +907,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     wisselt meteen en blijft zo na verversen. Klik een tag → alleen stickies met die tag.
 64. Taken → links staan de dagtaken, rechts de rest, elk onder elkaar per tag. Kanban → sleep de
     rechterrand van een kolom → breder/smaller en blijft zo na verversen.
+65. Maak via Account een API-token → `curl -H "Authorization: Bearer <token>"
+    http://localhost:8887/api/v1/tasks` geeft `200` met `{"items": [...], ...}`; zonder token
+    `401` met JSON. PATCH een taak met `{"done": true}` en DELETE hem → daarna `404`.
 
 ## Architectuur
 

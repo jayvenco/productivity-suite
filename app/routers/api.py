@@ -18,7 +18,15 @@ from app.services.kanban_cells import get_or_create_default_cell
 from app.services.seed import DEFAULT_COLUMNS
 from app.services.tags import resolve_tags
 
-router = APIRouter(prefix="/api/v1", tags=["api"])
+# De token-check hangt aan de hele router: een ontbrekend/ongeldig token geeft overal onder
+# /api/v1 een JSON-401, nooit een redirect of HTML (dat is alleen het gedrag van de
+# sessie-routes buiten /api/v1).
+router = APIRouter(prefix="/api/v1", tags=["api"], dependencies=[Depends(require_api_user)])
+
+
+@router.get("/health")
+def health(user: User = Depends(require_api_user)) -> dict:
+    return {"status": "ok", "auth": "ok"}
 
 
 # ---- Taken ----
@@ -237,3 +245,6 @@ def create_snippet_api(body: SnippetIn, user: User = Depends(require_api_user), 
         "files": [{"filename": f.filename, "language": f.language} for f in snippet.files],
         "url": "/snippets",
     }
+
+
+from app.routers import api_crud  # noqa: E402,F401  (registreert de list/get/update/delete-routes)
