@@ -188,6 +188,10 @@ Gebouwd:
   nieuwste eerst), delete geeft `{"deleted": true, "id": N}`, onbekend id `404`, validatiefout
   `422`. `tags` gaan als komma-gescheiden string (of lijst) erin en als lijst eruit; een PATCH
   past alleen meegestuurde velden aan (`null` wist deadline/kleur).
+- **MCP-server voor agents** (`mcp_server/`): 28 tools (taken, notities, snippets, kanban) die
+  de `/api/v1`-API aanroepen, voor MCP-compatibele agents zoals Hermes. Draait los van de app
+  met een eigen venv (de `mcp`-library eist een nieuwere Starlette dan de app pint); zie
+  `mcp_server/README.md` voor installatie en de Hermes-configuratie.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
