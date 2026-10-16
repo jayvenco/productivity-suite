@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Notitie bewerken' if note else 'Nieuwe notitie' }} - Productivity Suite{% endblock %}
 {% block content %}
-<div class="form-page">
+<div class="form-page note-form-page">
 <h2>{{ 'Notitie bewerken' if note else 'Nieuwe notitie' }}</h2>
 <form method="post" action="{{ '/notes/' ~ note.id if note else '/notes' }}" id="note-form">
   <div class="field">
@@ -23,9 +23,11 @@
       <button type="button" data-cmd="insertOrderedList" title="Genummerde lijst">1. Lijst</button>
       <button type="button" data-cmd="createLink" title="Link invoegen">Link</button>
       <button type="button" data-cmd="code" title="Code">&lt;/&gt;</button>
+      <button type="button" data-cmd="insertImage" title="Afbeelding invoegen (of plak/sleep een afbeelding in het tekstvak)">🖼 Afbeelding</button>
       <button type="button" data-cmd="removeFormat" title="Opmaak wissen">Wissen</button>
     </div>
     <div id="note-editor" class="rich-editor" contenteditable="true">{{ note.content|safe if note else '' }}</div>
+    <input type="file" id="note-image-input" accept="image/*" hidden>
     <textarea name="content" id="content" hidden></textarea>
   </div>
 

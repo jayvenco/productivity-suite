@@ -3732,7 +3732,7 @@ body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
   box-shadow: none;
   padding: 0;
   resize: none;
-  font-family: "Segoe Print", "Bradley Hand", "Comic Sans MS", cursive;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
   font-size: 1.05em;
   line-height: 1.4;
 }
@@ -3871,4 +3871,37 @@ body:has(#task-ticker:not([hidden])) .main {
 .card-edit-form.kanban-modal,
 .add-card-form[open] > .add-card-modal-form {
   padding-bottom: 64px;
+}
+
+/* Notitie-formulier: schermvullend tot aan de onderkant (of de ticker-band); het tekstvak
+   neemt alle overgebleven hoogte. */
+.form-page.note-form-page {
+  max-width: none;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 64px);
+}
+
+body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
+  height: calc(100vh - 112px);
+}
+
+.note-form-page > form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.note-form-page .field:has(.rich-editor) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 260px;
+}
+
+.note-form-page .rich-editor {
+  flex: 1;
+  overflow-y: auto;
 }

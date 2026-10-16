@@ -192,6 +192,12 @@ Gebouwd:
   de `/api/v1`-API aanroepen, voor MCP-compatibele agents zoals Hermes. Draait los van de app
   met een eigen venv (de `mcp`-library eist een nieuwere Starlette dan de app pint); zie
   `mcp_server/README.md` voor installatie en de Hermes-configuratie.
+- **Notitie-editor schermvullend + afbeeldingen**: het nieuwe-/bewerk-notitieformulier gebruikt
+  de volle breedte en hoogte (tot aan de ticker-band onderin), het tekstvak vult de
+  overgebleven ruimte. Afbeeldingen toevoegen kan via de knop "🖼 Afbeelding", door te
+  **plakken** of door ze in het tekstvak te **slepen**; afbeeldingen breder dan 1600px worden
+  vooraf verkleind (canvas) zodat de notitie niet onnodig zwaar wordt.
+- **Stickies**: tekst in Segoe UI (valt terug op het systeemlettertype) voor betere leesbaarheid.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
