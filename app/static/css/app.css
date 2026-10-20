@@ -3979,9 +3979,9 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   background: linear-gradient(
     115deg,
     transparent 0 14%,
-    hsla(var(--tag-hue), 75%, 72%, 0.55) 14% 46%,
+    hsla(var(--tag-hue), 85%, 84%, 0.55) 14% 46%,
     transparent 46% 54%,
-    hsla(var(--tag-hue), 68%, 58%, 0.9) 54% 86%,
+    hsla(var(--tag-hue), 72%, 44%, 0.95) 54% 86%,
     transparent 86%
   );
 }
@@ -3995,9 +3995,9 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   background: linear-gradient(
     115deg,
     transparent 0 24%,
-    hsla(var(--tag-hue), 75%, 72%, 0.55) 24% 46.4%,
+    hsla(var(--tag-hue), 85%, 84%, 0.55) 24% 46.4%,
     transparent 46.4% 54.4%,
-    hsla(var(--tag-hue), 68%, 58%, 0.9) 54.4% 76.8%,
+    hsla(var(--tag-hue), 72%, 44%, 0.95) 54.4% 76.8%,
     transparent 76.8%
   );
   -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.1), #000);
@@ -4057,9 +4057,9 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   background: linear-gradient(
     115deg,
     transparent 0 14%,
-    hsla(var(--tag-hue), 75%, 72%, 0.55) 14% 46%,
+    hsla(var(--tag-hue), 85%, 84%, 0.55) 14% 46%,
     transparent 46% 54%,
-    hsla(var(--tag-hue), 68%, 58%, 0.9) 54% 86%,
+    hsla(var(--tag-hue), 72%, 44%, 0.95) 54% 86%,
     transparent 86%
   );
 }
@@ -4068,9 +4068,9 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
 .task-card[style*="--tag-hue"] .task-card-body { order: 2; }
 .task-card[style*="--tag-hue"] .task-card-actions { order: 3; }
 
-/* Notitie-/mindmapkaart: bij hover wisselen de lichte en de donkere baan van de banner van plek
-   (links <-> rechts, met een vloeiende overgang). Elke baan is een eigen gradient-laag waarvan
-   de startpositie een geregistreerde custom property is, zodat die kan transitionen. */
+/* Alle tag-ribbons: bij hover op de kaart wisselen de lichte en de donkere baan vloeiend van plek.
+   Elke baan is een eigen gradient-laag waarvan de startpositie een geregistreerde custom
+   property is (kan dus transitionen). Het verschil tussen licht en donker is bewust groot. */
 @property --stripe-light {
   syntax: "<percentage>";
   inherits: false;
@@ -4083,30 +4083,60 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   initial-value: 54.4%;
 }
 
-.note-card[style*="--tag-hue"]::after {
+/* Notitie, mindmap en snippet (::after, banen van 22.4%) */
+.note-card[style*="--tag-hue"]::after,
+.snippet-card[style*="--tag-hue"]::after {
   --stripe-light: 24%;
   --stripe-dark: 54.4%;
   background:
     linear-gradient(
       115deg,
       transparent 0 var(--stripe-dark),
-      hsla(var(--tag-hue), 68%, 58%, 0.9) var(--stripe-dark) calc(var(--stripe-dark) + 22.4%),
+      hsla(var(--tag-hue), 72%, 44%, 0.95) var(--stripe-dark) calc(var(--stripe-dark) + 22.4%),
       transparent calc(var(--stripe-dark) + 22.4%)
     ),
     linear-gradient(
       115deg,
       transparent 0 var(--stripe-light),
-      hsla(var(--tag-hue), 75%, 72%, 0.55) var(--stripe-light) calc(var(--stripe-light) + 22.4%),
+      hsla(var(--tag-hue), 85%, 84%, 0.55) var(--stripe-light) calc(var(--stripe-light) + 22.4%),
       transparent calc(var(--stripe-light) + 22.4%)
     );
   transition: --stripe-light 0.5s ease, --stripe-dark 0.5s ease;
 }
 
-.note-card[style*="--tag-hue"]:hover::after {
+.note-card[style*="--tag-hue"]:hover::after,
+.snippet-card[style*="--tag-hue"]:hover::after {
   --stripe-light: 54.4%;
   --stripe-dark: 24%;
 }
 
+/* Taak (::before-ribbon tussen checkbox en tekst, banen van 32%) */
+.task-card[style*="--tag-hue"]::before {
+  --stripe-light: 14%;
+  --stripe-dark: 54%;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0 var(--stripe-dark),
+      hsla(var(--tag-hue), 72%, 44%, 0.95) var(--stripe-dark) calc(var(--stripe-dark) + 32%),
+      transparent calc(var(--stripe-dark) + 32%)
+    ),
+    linear-gradient(
+      115deg,
+      transparent 0 var(--stripe-light),
+      hsla(var(--tag-hue), 85%, 84%, 0.55) var(--stripe-light) calc(var(--stripe-light) + 32%),
+      transparent calc(var(--stripe-light) + 32%)
+    );
+  transition: --stripe-light 0.5s ease, --stripe-dark 0.5s ease;
+}
+
+.task-card[style*="--tag-hue"]:hover::before {
+  --stripe-light: 54%;
+  --stripe-dark: 14%;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .note-card[style*="--tag-hue"]::after { transition: none; }
+  .note-card[style*="--tag-hue"]::after,
+  .snippet-card[style*="--tag-hue"]::after,
+  .task-card[style*="--tag-hue"]::before { transition: none; }
 }

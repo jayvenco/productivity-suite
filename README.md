@@ -247,9 +247,10 @@ Gebouwd:
   tekst begint dus ná de ribbon). **Notities** een kleine banner (32×23px) rechtsboven met een
   dekking die van onder (weinig) naar boven (volledig) loopt; **mindmap- en snippetkaarten** dezelfde
   banner in de onderste hoek rechts. Pure CSS, zonder extra markup.
-  Bij **hover** op een notitie- of mindmapkaart wisselen de lichte en de donkere baan vloeiend van
+  Bij **hover** op een getagde taak-, notitie-, mindmap- of snippetkaart wisselen de lichte en de donkere baan vloeiend van
   plek (twee gradient-lagen met geregistreerde `@property`-startposities `--stripe-light`/
-  `--stripe-dark` die transitionen; uit bij `prefers-reduced-motion`).
+  `--stripe-dark` die transitionen; uit bij `prefers-reduced-motion`). Het kleurverschil tussen
+  de lichte en de donkere baan is groot (L 84% vs 44%).
 - **Snippets: weergave en groeperen**: een **Raster/Lijst**-schakelaar (onthouden in `localStorage`;
   lijst = compacte rijen zonder codepreview) en **Groeperen op: Tag** (`?group_by=tag`, onder de
   eerste tag alfabetisch, "Zonder tag" onderaan, blijft bewaard bij bulk-verwijderen). In de
