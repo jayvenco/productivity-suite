@@ -3950,3 +3950,45 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   border: 1px solid var(--border);
 }
 .stickies-grid .sticky-note .sticky-color-dot:has(input:checked) { border-color: var(--text); }
+
+/* Tag-streepjes: twee schuine banen (een lichte en een donkere tint) afgeleid van de tagkleur
+   (--tag-hue via row_tint_style). Notitiekaart: klein, rechtsboven. Taakkaart: over de volle
+   hoogte, aan het rechtereinde van de kaart. Ze liggen onder de inhoud (isolation + z-index -1). */
+.task-card[style*="--tag-hue"],
+.note-card[style*="--tag-hue"] {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.task-card[style*="--tag-hue"]::after,
+.note-card[style*="--tag-hue"]::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  right: 0;
+  top: 0;
+  width: 72px;
+  background: linear-gradient(
+    115deg,
+    transparent 0 14%,
+    hsla(var(--tag-hue), 75%, 72%, 0.55) 14% 46%,
+    transparent 46% 54%,
+    hsla(var(--tag-hue), 68%, 58%, 0.9) 54% 86%,
+    transparent 86%
+  );
+}
+
+.task-card[style*="--tag-hue"]::after { bottom: 0; }
+
+.note-card[style*="--tag-hue"]::after { height: 46px; width: 64px; }
+
+.note-card[style*="--tag-hue"] .note-card-header { padding-right: 52px; }
+
+/* Knoppen rechts op een getagde taakkaart liggen boven de streepjes: wat meer contrast. */
+.task-card[style*="--tag-hue"] .task-card-delete,
+.task-card[style*="--tag-hue"] .task-card-focus {
+  color: var(--text);
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.55);
+}

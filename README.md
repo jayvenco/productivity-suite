@@ -235,12 +235,15 @@ Gebouwd:
   standaard uit.** Een verborgen module blijft via zijn adres bereikbaar (bv. `/stats`) en er
   verdwijnt geen data; het snel-toevoegen-wiel en de zoekfunctie zijn niet aangepast.
 - **Rustige kaarten**: notitie- (en mindmap-)kaarten zijn eenvoudig: geen rand, een zachte
-  schaduw, titel links en datum rechts. Taak- en notitiekaarten hebben geen tag-ribbon of
-  -gradient meer (de tagkleur-weergave wordt later opnieuw ontworpen; de kleur zit alleen nog in
-  de tag-bubbels); stickies gebruiken dezelfde kaartvorm met hun gekozen kleur als ribbon.
+  schaduw, titel links en datum rechts. Taak- en notitiekaarten hebben geen ribbon of gradient meer (zie
+  "Tag-streepjes" hieronder); stickies gebruiken dezelfde kaartvorm met hun gekozen kleur als ribbon.
   **Dagtaken** hebben geen ster, gradient of knipperende rand: het **afvinkrondje** wisselt
   langzaam (3,6 s) rand én binnenkant tussen grijs en geel (uit bij `prefers-reduced-motion`).
   Snippetkaarten behouden de gradient-rand.
+- **Tag-streepjes**: een getagde taak- of notitiekaart krijgt twee schuine banen (een lichte en een
+  donkere tint, afgeleid van de kleur van de eerste tag via `--tag-hue`): bij notities klein
+  rechtsboven, bij taken over de volle hoogte aan het rechtereinde. Pure CSS (`::after` onder de
+  inhoud), dus zonder extra markup.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
