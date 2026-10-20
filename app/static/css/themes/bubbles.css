@@ -23,20 +23,12 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
-/* Notities en snippets: bubbles-schaduw; de tagkleur komt van de ribbon (notities, zie
-   app.css) resp. de gradient-rand (snippets). */
+/* Notities en snippets: bubbles-schaduw (snippets houden hun gradient-rand voor tags). */
 :root[data-theme="bubbles"] .note-card,
 :root[data-theme="bubbles"] .snippet-card {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
-:root[data-theme="bubbles"] .note-card:not([style*="--tag-hue"]),
 :root[data-theme="bubbles"] .snippet-card:not([style*="--tag-hue"]) {
   border: none;
-}
-
-/* De ribbon (inset schaduw) blijft ook in dit thema bovenop de bubbles-schaduw staan. */
-:root[data-theme="bubbles"] .task-card[style*="--tag-hue"],
-:root[data-theme="bubbles"] .note-card[style*="--tag-hue"] {
-  box-shadow: inset 4px 0 0 hsl(var(--tag-hue), 65%, 55%), 0 4px 14px rgba(0, 0, 0, 0.3);
 }

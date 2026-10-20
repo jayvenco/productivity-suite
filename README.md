@@ -234,12 +234,13 @@ Gebouwd:
   (`users.hidden_modules`), minstens één module blijft zichtbaar. **Statistieken staat
   standaard uit.** Een verborgen module blijft via zijn adres bereikbaar (bv. `/stats`) en er
   verdwijnt geen data; het snel-toevoegen-wiel en de zoekfunctie zijn niet aangepast.
-- **Rustige kaarten met ribbon**: taak- en notitiekaarten met een tag krijgen een smalle gekleurde
-  **ribbon** links in de kleur van de eerste tag (geen vulling/gradient meer); stickies
-  gebruiken dezelfde minimalistische kaartvorm als de mindmap-/notitiekaart (themakleur, geen
-  rotatie), met de gekozen stickykleur als ribbon + lichte tint. **Dagtaken** knipperen niet
-  meer en hebben geen gradient: een subtiele magenta ster ★ vervaagt langzaam en verschijnt
-  weer (uit bij `prefers-reduced-motion`). Snippetkaarten behouden de gradient-rand.
+- **Rustige kaarten**: notitie- (en mindmap-)kaarten zijn eenvoudig: geen rand, een zachte
+  schaduw, titel links en datum rechts. Taak- en notitiekaarten hebben geen tag-ribbon of
+  -gradient meer (de tagkleur-weergave wordt later opnieuw ontworpen; de kleur zit alleen nog in
+  de tag-bubbels); stickies gebruiken dezelfde kaartvorm met hun gekozen kleur als ribbon.
+  **Dagtaken** hebben geen ster, gradient of knipperende rand: het **afvinkrondje** wisselt
+  langzaam (3,6 s) rand én binnenkant tussen grijs en geel (uit bij `prefers-reduced-motion`).
+  Snippetkaarten behouden de gradient-rand.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
@@ -968,8 +969,7 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     Dupliceren → bewerken: module toevoegen, ↑/↓, Voorbeeld, Opslaan; de eerder gemaakte
     notitie blijft ongewijzigd.
 67. Account → Navigatie: vink "Statistieken" aan → verschijnt in het menu; vink "Stickies" uit →
-    verdwijnt; blijft zo na verversen. Taken: een taak met tag heeft een gekleurde ribbon links, een
-    dagtaak een zacht vervagende ster (geen knipperende rand).
+    verdwijnt; blijft zo na verversen. Taken: een dagtaak heeft een afvinkrondje dat langzaam grijs ↔ geel pulseert.
 
 ## Architectuur
 

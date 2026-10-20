@@ -498,11 +498,6 @@ textarea {
   margin-right: 2px;
 }
 
-.daily-task-badge {
-  color: #f97316;
-  margin-right: 2px;
-}
-
 /* Meer dan 7 dagen niet bewerkt (zie Task.stale). */
 .task-card-stale {
   border-left: 3px solid #ffffff;
@@ -1283,22 +1278,22 @@ textarea {
   gap: 12px;
 }
 
+/* Eenvoudige kaart (notities en mindmaps): geen rand, een zachte schaduw. */
 .note-card {
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  border: none;
   border-radius: 16px;
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 .note-card:hover {
-  border-color: var(--accent);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.26);
   transform: translateY(-2px);
 }
 
@@ -3785,33 +3780,18 @@ body:has(#task-ticker:not([hidden])) .main {
   padding-bottom: 80px;
 }
 
-/* Taak- en notitiekaart met tag: een minimalistische ribbon (smalle gekleurde rand links) in
-   de kleur van de eerste tag (--tag-hue via row_tint_style). Geen vulling of gradient meer. */
-.task-card[style*="--tag-hue"],
-.note-card[style*="--tag-hue"] {
-  box-shadow: inset 4px 0 0 hsl(var(--tag-hue), 65%, 55%), 0 1px 2px rgba(0, 0, 0, 0.08);
+/* Dagtaken: het afvinkrondje (rand én binnenkant) wisselt langzaam tussen grijs en geel. */
+.task-card-daily .task-check:not(:checked) {
+  animation: daily-check-pulse 3.6s ease-in-out infinite;
 }
 
-.task-card[style*="--tag-hue"]:hover,
-.note-card[style*="--tag-hue"]:hover {
-  box-shadow: inset 4px 0 0 hsl(var(--tag-hue), 65%, 55%), 0 3px 8px rgba(0, 0, 0, 0.14);
-}
-
-/* Dagtaken: geen knipperende rand of gradient meer; een subtiele ster voor de titel die
-   langzaam vervaagt en weer verschijnt. */
-.task-card-daily .daily-task-badge {
-  color: #ff00ff;
-  display: inline-block;
-  animation: daily-star-fade 4.5s ease-in-out infinite;
-}
-
-@keyframes daily-star-fade {
-  0%, 100% { opacity: 0.12; transform: scale(0.85); }
-  50% { opacity: 1; transform: scale(1); }
+@keyframes daily-check-pulse {
+  0%, 100% { border-color: #8d9199; background: #8d9199; }
+  50% { border-color: #f5c518; background: #f5c518; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .task-card-daily .daily-task-badge { animation: none; }
+  .task-card-daily .task-check:not(:checked) { animation: none; border-color: #f5c518; background: #f5c518; }
 }
 
 /* Takenpagina: dagtaken links, de rest rechts (onder elkaar per tag); onder elkaar op smalle schermen. */

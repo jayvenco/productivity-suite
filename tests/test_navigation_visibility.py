@@ -48,9 +48,11 @@ def test_hidden_module_is_still_reachable_by_url(logged_in_client):
     assert logged_in_client.get("/stats").status_code == 200
 
 
-def test_daily_task_uses_star_badge(logged_in_client):
-    logged_in_client.post("/tasks", data={"title": "Ster-dagtaak", "daily_task": "true", "description": "", "deadline": "", "tags": ""})
+def test_daily_task_has_no_star_badge_but_keeps_daily_class(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Check-dagtaak", "daily_task": "true", "description": "", "deadline": "", "tags": ""})
     page = logged_in_client.get("/tasks").text
-    assert 'class="daily-task-badge" title="Dagtaak">★<' in page
-    task_id = re.search(r'/tasks/(\d+)/edit"[^>]*>\s*<span class="daily-task-badge"', page).group(1)
+    card_start = page.rindex('<div class="task-card ', 0, page.index("Check-dagtaak"))
+    card = page[card_start: page.index("Check-dagtaak")]
+    assert "task-card-daily" in card and "daily-task-badge" not in card
+    task_id = re.search(r'/tasks/(\d+)/edit"', page[card_start:]).group(1)
     logged_in_client.post(f"/tasks/{task_id}/delete")

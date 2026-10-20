@@ -55,7 +55,7 @@ def test_priority_task_shown_and_sorted_first(logged_in_client):
     assert listing.index("Belangrijke taak") < listing.index("Normale taak")
 
 
-def test_daily_task_shown_with_orange_badge_and_card_styling(logged_in_client):
+def test_daily_task_gets_daily_card_class(logged_in_client):
     logged_in_client.post("/tasks", data={"title": "Gewone taak", "description": "", "deadline": "", "tags": ""})
     logged_in_client.post(
         "/tasks",
@@ -63,8 +63,8 @@ def test_daily_task_shown_with_orange_badge_and_card_styling(logged_in_client):
     )
 
     listing = logged_in_client.get("/tasks").text
-    assert "daily-task-badge" in listing
     assert "task-card-daily" in listing
+    assert "daily-task-badge" not in listing  # geen ster meer; het afvinkrondje pulseert via CSS
 
     idx = listing.rindex("Dagelijkse taak")
     task_id = re.findall(r'href="/tasks/(\d+)/edit"', listing[:idx])[-1]

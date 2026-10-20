@@ -65,9 +65,9 @@
         <input type="checkbox" class="note-select" name="note_ids" value="{{ note.id }}">
         <a href="/notes/{{ note.id }}/edit" class="note-card-title">{{ note.title }}</a>
         {% if note.is_temp %}<span class="badge-warning" title="Wordt na een week automatisch verwijderd">TEMP</span>{% endif %}
+        <span class="note-card-date" style="margin-left:auto">{{ note.updated_at.date().isoformat() }}</span>
       </div>
       <div class="note-card-preview">{{ note.content|safe }}</div>
-      <div class="note-card-date">{{ note.updated_at.date().isoformat() }}</div>
     </div>
     {% else %}
     <p>Nog geen notities. Maak er één aan.</p>
