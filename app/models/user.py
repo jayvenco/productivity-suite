@@ -37,4 +37,12 @@ class User(Base):
     # kan het ook gewoon via de Settings-pagina. None = val terug op de env var/default.
     whisper_service_url: Mapped[str | None] = mapped_column(String(255), nullable=True)
     whisper_model: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    # Komma-gescheiden module-sleutels die uit het navigatiemenu verborgen zijn
+    # (zie app/services/navigation.py).
+    hidden_modules: Mapped[str] = mapped_column(String(200), default="stats")
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    def module_visible(self, key: str) -> bool:
+        from app.services.navigation import parse_hidden
+
+        return key not in parse_hidden(self.hidden_modules)

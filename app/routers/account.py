@@ -20,6 +20,7 @@ from app.database import Base, engine, get_db
 from app.models.user import User
 from app.routers.settings import AVAILABLE_BACKGROUNDS, AVAILABLE_DENSITIES, AVAILABLE_FONT_SIZES, AVAILABLE_FONTS
 from app.services.api_tokens import generate_api_token, hash_api_token
+from app.services.navigation import NAV_MODULES
 from app.services.migrate import run_lightweight_migrations
 from app.templating import templates
 
@@ -48,6 +49,7 @@ def _appearance_context() -> dict:
         "available_font_sizes": AVAILABLE_FONT_SIZES,
         "available_densities": AVAILABLE_DENSITIES,
         "available_backgrounds": AVAILABLE_BACKGROUNDS,
+        "nav_modules": NAV_MODULES,
     }
 
 

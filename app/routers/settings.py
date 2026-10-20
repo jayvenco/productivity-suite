@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import require_user
 from app.database import get_db
 from app.models.user import User
+from app.services.navigation import NAV_MODULE_KEYS, NAV_MODULES
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
@@ -75,6 +76,18 @@ def set_theme(
         user.theme = theme
         db.commit()
     return RedirectResponse(redirect_to, status_code=303)
+
+
+@router.post("/navigation")
+async def set_navigation(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    """Zichtbaarheid per module in het navigatiemenu. De module-sleutels die NIET zijn
+    aangevinkt worden verborgen; minstens één module moet zichtbaar blijven."""
+    form = await request.form()
+    visible = {k for k in form.getlist("visible") if k in NAV_MODULE_KEYS}
+    if visible:
+        user.hidden_modules = ",".join(key for key, _ in NAV_MODULES if key not in visible)
+        db.commit()
+    return RedirectResponse(form.get("redirect_to") or "/account", status_code=303)
 
 
 @router.post("/appearance")

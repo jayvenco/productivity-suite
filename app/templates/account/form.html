@@ -73,6 +73,24 @@
   <button type="submit" class="btn">Toepassen</button>
 </form>
 
+<h2 style="margin-top:28px">Navigatie</h2>
+<p style="color:var(--text-muted);font-size:12px;max-width:480px">
+  Kies welke onderdelen in het navigatiemenu staan. Een verborgen onderdeel blijft gewoon
+  bereikbaar via zijn adres (bv. <code>/stats</code>); er verdwijnt geen data.
+</p>
+<form method="post" action="/settings/navigation" style="max-width:480px">
+  <input type="hidden" name="redirect_to" value="/account">
+  <div class="nav-visibility-list">
+    {% for key, label in nav_modules %}
+    <label class="nav-visibility-item">
+      <input type="checkbox" name="visible" value="{{ key }}" class="round-checkbox" {{ 'checked' if user.module_visible(key) }}>
+      {{ label }}
+    </label>
+    {% endfor %}
+  </div>
+  <button type="submit" class="btn" style="margin-top:10px">Opslaan</button>
+</form>
+
 <h2 style="margin-top:28px">API-token</h2>
 <p style="color:var(--text-muted);font-size:12px;max-width:480px">
   Met een API-token kan een extern script/agent taken, kanban-kaarten, notities en

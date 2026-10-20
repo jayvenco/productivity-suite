@@ -56,17 +56,17 @@
         </ul>
       </div>
 
-      <a href="/tasks" class="nav-item {{ 'active' if request.url.path.startswith('/tasks') }}"><span class="nav-icon">✓</span>Taken</a>
-      <a href="/kanban" class="nav-item {{ 'active' if request.url.path.startswith('/kanban') }}"><span class="nav-icon">▦</span>Kanban</a>
-      <a href="/mindmap" class="nav-item {{ 'active' if request.url.path.startswith('/mindmap') }}"><span class="nav-icon">◇</span>Mindmap</a>
-      <a href="/notes" class="nav-item {{ 'active' if request.url.path.startswith('/notes') }}"><span class="nav-icon">▤</span>Notities</a>
-      <button type="button" id="pomodoro-menu-btn" class="nav-item"><span class="nav-icon">◷</span>Pomodoro</button>
-      <a href="/stickies" class="nav-item {{ 'active' if request.url.path.startswith('/stickies') }}"><span class="nav-icon">■</span>Stickies</a>
-      <a href="/snippets" class="nav-item {{ 'active' if request.url.path.startswith('/snippets') }}"><span class="nav-icon">&lt;/&gt;</span>Snippets</a>
-      <a href="/calendar" class="nav-item {{ 'active' if request.url.path.startswith('/calendar') }}"><span class="nav-icon">▢</span>Kalender</a>
-      <a href="/search" class="nav-item {{ 'active' if request.url.path.startswith('/search') }}"><span class="nav-icon">⚲</span>Zoeken</a>
-      <a href="/graph" class="nav-item {{ 'active' if request.url.path.startswith('/graph') }}"><span class="nav-icon">◎</span>Graph</a>
-      <a href="/stats" class="nav-item {{ 'active' if request.url.path.startswith('/stats') }}"><span class="nav-icon">▲</span>Statistieken</a>
+{% if user is none or user.module_visible('tasks') %}<a href="/tasks" class="nav-item {{ 'active' if request.url.path.startswith('/tasks') }}"><span class="nav-icon">✓</span>Taken</a>{% endif %}
+{% if user is none or user.module_visible('kanban') %}<a href="/kanban" class="nav-item {{ 'active' if request.url.path.startswith('/kanban') }}"><span class="nav-icon">▦</span>Kanban</a>{% endif %}
+{% if user is none or user.module_visible('mindmap') %}<a href="/mindmap" class="nav-item {{ 'active' if request.url.path.startswith('/mindmap') }}"><span class="nav-icon">◇</span>Mindmap</a>{% endif %}
+{% if user is none or user.module_visible('notes') %}<a href="/notes" class="nav-item {{ 'active' if request.url.path.startswith('/notes') }}"><span class="nav-icon">▤</span>Notities</a>{% endif %}
+{% if user is none or user.module_visible('pomodoro') %}<button type="button" id="pomodoro-menu-btn" class="nav-item"><span class="nav-icon">◷</span>Pomodoro</button>{% endif %}
+{% if user is none or user.module_visible('stickies') %}<a href="/stickies" class="nav-item {{ 'active' if request.url.path.startswith('/stickies') }}"><span class="nav-icon">■</span>Stickies</a>{% endif %}
+{% if user is none or user.module_visible('snippets') %}<a href="/snippets" class="nav-item {{ 'active' if request.url.path.startswith('/snippets') }}"><span class="nav-icon">&lt;/&gt;</span>Snippets</a>{% endif %}
+{% if user is none or user.module_visible('calendar') %}<a href="/calendar" class="nav-item {{ 'active' if request.url.path.startswith('/calendar') }}"><span class="nav-icon">▢</span>Kalender</a>{% endif %}
+{% if user is none or user.module_visible('search') %}<a href="/search" class="nav-item {{ 'active' if request.url.path.startswith('/search') }}"><span class="nav-icon">⚲</span>Zoeken</a>{% endif %}
+{% if user is none or user.module_visible('graph') %}<a href="/graph" class="nav-item {{ 'active' if request.url.path.startswith('/graph') }}"><span class="nav-icon">◎</span>Graph</a>{% endif %}
+{% if user is none or user.module_visible('stats') %}<a href="/stats" class="nav-item {{ 'active' if request.url.path.startswith('/stats') }}"><span class="nav-icon">▲</span>Statistieken</a>{% endif %}
       <div class="spacer"></div>
       <div class="theme-switcher">
         {% for theme in ["dracula", "one-dark-pro", "nord", "light", "nexmail", "macos-light", "anchor", "anchor-solid", "white", "bubbles"] %}

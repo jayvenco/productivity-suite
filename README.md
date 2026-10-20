@@ -228,6 +228,18 @@ Gebouwd:
     `template_version`, `template_name`, zichtbaar boven de editor); het sjabloon verhoogt
     `version` bij elke wijziging, verwijderen zet `template_id` op NULL en geen van beide
     raakt bestaande notities.
+- **Navigatie-zichtbaarheid** (Account → Navigatie): per module (Taken, Kanban, Mindmap,
+  Notities, Pomodoro, Stickies, Snippets, Kalender, Zoeken, Graph, Statistieken) een vinkje om
+  'm uit het navigatiemenu te halen of terug te zetten; opgeslagen per gebruiker
+  (`users.hidden_modules`), minstens één module blijft zichtbaar. **Statistieken staat
+  standaard uit.** Een verborgen module blijft via zijn adres bereikbaar (bv. `/stats`) en er
+  verdwijnt geen data; het snel-toevoegen-wiel en de zoekfunctie zijn niet aangepast.
+- **Rustige kaarten met ribbon**: taak- en notitiekaarten met een tag krijgen een smalle gekleurde
+  **ribbon** links in de kleur van de eerste tag (geen vulling/gradient meer); stickies
+  gebruiken dezelfde minimalistische kaartvorm als de mindmap-/notitiekaart (themakleur, geen
+  rotatie), met de gekozen stickykleur als ribbon + lichte tint. **Dagtaken** knipperen niet
+  meer en hebben geen gradient: een subtiele magenta ster ★ vervaagt langzaam en verschijnt
+  weer (uit bij `prefers-reduced-motion`). Snippetkaarten behouden de gradient-rand.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
@@ -955,6 +967,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     editor met alle secties, de taak staat onder Taken en is in de notitie gelinkt. Sjablonen →
     Dupliceren → bewerken: module toevoegen, ↑/↓, Voorbeeld, Opslaan; de eerder gemaakte
     notitie blijft ongewijzigd.
+67. Account → Navigatie: vink "Statistieken" aan → verschijnt in het menu; vink "Stickies" uit →
+    verdwijnt; blijft zo na verversen. Taken: een taak met tag heeft een gekleurde ribbon links, een
+    dagtaak een zacht vervagende ster (geen knipperende rand).
 
 ## Architectuur
 

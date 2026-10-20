@@ -38,6 +38,7 @@ _COLUMNS_TO_ENSURE = {
         ("openai_api_key", "VARCHAR(255)"),
         ("whisper_service_url", "VARCHAR(255)"),
         ("whisper_model", "VARCHAR(100)"),
+        ("hidden_modules", "VARCHAR(200) DEFAULT 'stats'"),
     ],
 }
 

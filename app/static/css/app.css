@@ -503,13 +503,7 @@ textarea {
   margin-right: 2px;
 }
 
-.task-card-daily {
-  border-left: 3px solid #f97316;
-  background: color-mix(in srgb, #f97316 10%, var(--bg-elevated));
-}
-
-/* Meer dan 7 dagen niet bewerkt (zie Task.stale) -- na .task-card-daily zodat een taak
-   die toevallig allebei is, als "lang niet aangeraakt" opvalt i.p.v. als dagtaak. */
+/* Meer dan 7 dagen niet bewerkt (zie Task.stale). */
 .task-card-stale {
   border-left: 3px solid #ffffff;
   background: color-mix(in srgb, #ffffff 10%, var(--bg-elevated));
@@ -3714,13 +3708,9 @@ body:has(#task-ticker[hidden]) .quickadd-wheel-wrap {
   padding: 14px 14px 10px;
   border-radius: 2px 2px 2px 18px / 2px 2px 2px 6px;
   min-height: 170px;
-  transform: rotate(-1deg);
   box-shadow: 0 8px 10px -6px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.2);
   transition: transform 0.15s;
 }
-.stickies-grid .sticky-note:nth-child(even) { transform: rotate(1deg); }
-.stickies-grid .sticky-note:nth-child(3n) { transform: rotate(-0.5deg); }
-.sticky-note:hover, .sticky-note:focus-within { transform: rotate(0) scale(1.02); z-index: 2; }
 
 .sticky-note textarea {
   flex: 1;
@@ -3795,47 +3785,33 @@ body:has(#task-ticker:not([hidden])) .main {
   padding-bottom: 80px;
 }
 
-/* Taakkaart met tag: zachte gradient van de (gedempte) tagkleur links naar de kaartkleur
-   van het actieve thema rechts. De tagkleur wordt via color-mix met de themakleur
-   gemengd, dus lichter/rustiger dan de felle tag-bubbel zelf en leesbaar in licht én donker
-   thema. */
-.task-card[style*="--tag-hue"] {
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, hsl(var(--tag-hue), 55%, 50%) var(--task-tag-strength, 38%), var(--bg-elevated)) 0%,
-    var(--bg-elevated) 100%
-  );
+/* Taak- en notitiekaart met tag: een minimalistische ribbon (smalle gekleurde rand links) in
+   de kleur van de eerste tag (--tag-hue via row_tint_style). Geen vulling of gradient meer. */
+.task-card[style*="--tag-hue"],
+.note-card[style*="--tag-hue"] {
+  box-shadow: inset 4px 0 0 hsl(var(--tag-hue), 65%, 55%), 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
-/* Dagtaken: magenta titel, gradient van zwart (links) naar oranje (rechts) en een rustig
-   knipperende rand (rgb 232, 97, 79). Specificiteit bewust hoog zodat thema's (bv. "bubbles") dit niet
-   overschrijven. */
-:root:root[data-theme] .task-card.task-card-daily {
-  background: linear-gradient(90deg, #000000 0%, #ff8a1f 100%);
-  border: 2px solid rgb(232, 97, 79);
-  animation: daily-task-blink 1.3s ease-in-out infinite;
+.task-card[style*="--tag-hue"]:hover,
+.note-card[style*="--tag-hue"]:hover {
+  box-shadow: inset 4px 0 0 hsl(var(--tag-hue), 65%, 55%), 0 3px 8px rgba(0, 0, 0, 0.14);
 }
 
-:root:root[data-theme] .task-card.task-card-daily .task-card-title-link,
-:root:root[data-theme] .task-card.task-card-daily .daily-task-badge {
+/* Dagtaken: geen knipperende rand of gradient meer; een subtiele ster voor de titel die
+   langzaam vervaagt en weer verschijnt. */
+.task-card-daily .daily-task-badge {
   color: #ff00ff;
-  font-weight: 600;
-  text-shadow: 0 0 3px #000, 0 0 1px #000;
+  display: inline-block;
+  animation: daily-star-fade 4.5s ease-in-out infinite;
 }
 
-:root:root[data-theme] .task-card.task-card-daily .task-card-preview,
-:root:root[data-theme] .task-card.task-card-daily .task-card-status {
-  color: #ffffff;
-  text-shadow: 0 0 3px #000, 0 0 1px #000;
-}
-
-@keyframes daily-task-blink {
-  0%, 100% { border-color: rgb(232, 97, 79); box-shadow: 0 0 6px rgba(232, 97, 79, 0.5); }
-  50% { border-color: rgba(232, 97, 79, 0.35); box-shadow: none; }
+@keyframes daily-star-fade {
+  0%, 100% { opacity: 0.12; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :root:root[data-theme] .task-card.task-card-daily { animation: none; }
+  .task-card-daily .daily-task-badge { animation: none; }
 }
 
 /* Takenpagina: dagtaken links, de rest rechts (onder elkaar per tag); onder elkaar op smalle schermen. */
@@ -3903,11 +3879,10 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   overflow-y: auto;
 }
 
-/* Notitie- en snippetkaart met tag: alleen de rand krijgt de tagkleur, in een gradient van links (tagkleur)
+/* Snippetkaart met tag: alleen de rand krijgt de tagkleur, in een gradient van links (tagkleur)
    naar rechts (de randkleur van het actieve thema); de kaart zelf blijft de gewone
    themakleur. Twee achtergrondlagen: een vlakke vulling binnen de padding-box en de gradient
    in de border-box -- zo blijft border-radius gewoon werken (border-image zou dat breken). */
-.note-card[style*="--tag-hue"],
 .snippet-card[style*="--tag-hue"] {
   border: 2px solid transparent;
   background:
@@ -3915,7 +3890,6 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
     linear-gradient(90deg, hsl(var(--tag-hue), 65%, 50%), var(--border)) border-box;
 }
 
-.note-card[style*="--tag-hue"]:hover,
 .snippet-card[style*="--tag-hue"]:hover {
   border-color: transparent;
 }
@@ -3949,3 +3923,50 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
 .tpl-module-head { display: flex; justify-content: space-between; align-items: center; }
 .tpl-module-actions button { background: var(--bg-hover); color: var(--text); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; padding: 2px 8px; }
 .tpl-add-module { display: flex; gap: 8px; margin-top: 8px; }
+
+.nav-visibility-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 14px; }
+.nav-visibility-item { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text); }
+
+/* Stickies in de minimalistische stijl van de mindmap-/notitiekaart (.note-card): themakaart,
+   zelfde afronding/rand, geen rotatie of zware schaduw. De gekozen stickykleur zit in de
+   ribbon links en een lichte tint. */
+.stickies-grid .sticky-note {
+  --sticky-c: #f2cf3a;
+  background: color-mix(in srgb, var(--sticky-c) 14%, var(--bg-elevated));
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  min-height: 150px;
+  transform: none;
+  box-shadow: inset 4px 0 0 var(--sticky-c), 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.stickies-grid .sticky-note:hover,
+.stickies-grid .sticky-note:focus-within {
+  transform: none;
+  border-color: var(--accent);
+  box-shadow: inset 4px 0 0 var(--sticky-c), 0 3px 8px rgba(0, 0, 0, 0.14);
+}
+
+.stickies-grid .sticky-note.sticky-yellow { --sticky-c: #f2cf3a; }
+.stickies-grid .sticky-note.sticky-pink { --sticky-c: #f472b6; }
+.stickies-grid .sticky-note.sticky-blue { --sticky-c: #60a5fa; }
+.stickies-grid .sticky-note.sticky-green { --sticky-c: #4ade80; }
+.stickies-grid .sticky-note.sticky-orange { --sticky-c: #fb923c; }
+.stickies-grid .sticky-note.sticky-purple { --sticky-c: #a78bfa; }
+
+.stickies-grid .sticky-note textarea,
+.stickies-grid .sticky-note input[type="text"] {
+  color: var(--text);
+  background: transparent;
+}
+
+.stickies-grid .sticky-note .sticky-options > summary,
+.stickies-grid .sticky-note .sticky-delete { color: var(--text-muted); }
+.stickies-grid .sticky-note .sticky-options-body input[type="text"] {
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+.stickies-grid .sticky-note .sticky-color-dot:has(input:checked) { border-color: var(--text); }
