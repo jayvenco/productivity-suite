@@ -198,10 +198,11 @@ Gebouwd:
   **plakken** of door ze in het tekstvak te **slepen**; afbeeldingen breder dan 1600px worden
   vooraf verkleind (canvas) zodat de notitie niet onnodig zwaar wordt.
 - **Stickies**: tekst in Segoe UI (valt terug op het systeemlettertype) voor betere leesbaarheid.
-- **Notitiekaart met tag**: geen volle kleur meer; alleen de **rand** is een gradient van de
+- **Notitie- en snippetkaart met tag**: geen volle kleur meer; alleen de **rand** is een gradient van de
   tagkleur (links) naar de randkleur van het actieve thema (rechts), de kaart zelf blijft de
   gewone themakleur. Twee achtergrondlagen (padding-box + border-box) i.p.v. `border-image`,
-  zodat de afgeronde hoeken blijven werken. Geldt in elk thema, ook "Bubbles".
+  zodat de afgeronde hoeken blijven werken. Geldt voor notities én snippets, in elk thema, ook
+  "Bubbles" (daar blijven alleen taken een gradient-vulling houden).
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief

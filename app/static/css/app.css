@@ -1517,9 +1517,6 @@ textarea {
    bestond hier al), niet voor taak-/notitiekaarten: die krijgen --tag-hue nu ook
    meegegeven (voor het "bubbles"-thema hieronder), maar zonder dat de standaard-thema's
    daar iets nieuws mee doen -- geen ongevraagde kleurtint op taken/notities overal. */
-.snippet-card[style*="--tag-hue"] {
-  background-color: hsla(var(--tag-hue), 60%, 50%, 0.08);
-}
 
 /* Generieke reset -- de daadwerkelijke look/maat komt van de specifiekere classes
    hieronder (.snippet-card-title-btn/.snippet-expand-btn/.snippet-card-more-files), want
@@ -3906,17 +3903,19 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   overflow-y: auto;
 }
 
-/* Notitiekaart met tag: alleen de rand krijgt de tagkleur, in een gradient van links (tagkleur)
+/* Notitie- en snippetkaart met tag: alleen de rand krijgt de tagkleur, in een gradient van links (tagkleur)
    naar rechts (de randkleur van het actieve thema); de kaart zelf blijft de gewone
    themakleur. Twee achtergrondlagen: een vlakke vulling binnen de padding-box en de gradient
    in de border-box -- zo blijft border-radius gewoon werken (border-image zou dat breken). */
-.note-card[style*="--tag-hue"] {
+.note-card[style*="--tag-hue"],
+.snippet-card[style*="--tag-hue"] {
   border: 2px solid transparent;
   background:
     linear-gradient(var(--bg-elevated), var(--bg-elevated)) padding-box,
     linear-gradient(90deg, hsl(var(--tag-hue), 65%, 50%), var(--border)) border-box;
 }
 
-.note-card[style*="--tag-hue"]:hover {
+.note-card[style*="--tag-hue"]:hover,
+.snippet-card[style*="--tag-hue"]:hover {
   border-color: transparent;
 }

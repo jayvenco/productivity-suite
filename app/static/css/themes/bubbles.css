@@ -18,23 +18,20 @@
   --link: #ef8354;
 }
 
-:root[data-theme="bubbles"] .task-card,
-:root[data-theme="bubbles"] .snippet-card {
+:root[data-theme="bubbles"] .task-card {
   border: none;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
-:root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] {
-  background: hsl(var(--tag-hue), 65%, 42%);
-}
-
-/* Notities: geen volle kleur, alleen de rand loopt in een gradient (zie .note-card in app.css);
-   de bubbles-schaduw houdt de kaart verder "zwevend". */
-:root[data-theme="bubbles"] .note-card {
+/* Notities en snippets: geen volle kleur, alleen de rand loopt in een gradient (zie
+   .note-card/.snippet-card in app.css); de bubbles-schaduw houdt de kaart verder "zwevend". */
+:root[data-theme="bubbles"] .note-card,
+:root[data-theme="bubbles"] .snippet-card {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
-:root[data-theme="bubbles"] .note-card:not([style*="--tag-hue"]) {
+:root[data-theme="bubbles"] .note-card:not([style*="--tag-hue"]),
+:root[data-theme="bubbles"] .snippet-card:not([style*="--tag-hue"]) {
   border: none;
 }
 
@@ -47,25 +44,13 @@
 /* Primaire tekst (titel) op een vol-gekleurde kaart: altijd wit, net als de tag-bubbels
    zelf -- de gewone tekstkleur is afgestemd op de neutrale kaartachtergrond, niet op een
    willekeurige volle kleur. */
-:root[data-theme="bubbles"] .task-card[style*="--tag-hue"] .task-card-title-link,
-:root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] .snippet-card-title-text {
+:root[data-theme="bubbles"] .task-card[style*="--tag-hue"] .task-card-title-link {
   color: #fff;
 }
 
 /* Secundaire tekst (preview/beschrijving/datum): semi-transparant wit i.p.v. de normale,
    gedempte tekstkleur -- die laatste zou op een volle kleur te weinig contrast geven. */
 :root[data-theme="bubbles"] .task-card[style*="--tag-hue"] .task-card-preview,
-:root[data-theme="bubbles"] .task-card[style*="--tag-hue"] .task-card-status,
-:root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] .snippet-card-description,
-:root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] .snippet-card-time {
+:root[data-theme="bubbles"] .task-card[style*="--tag-hue"] .task-card-status {
   color: rgba(255, 255, 255, 0.82);
-}
-
-/* Het bestandsnaam-balkje in de snippet-preview heeft zelf al een eigen achtergrond
-   (--bg-hover) en blijft dus prima leesbaar zonder aanpassing; alleen de "Geen
-   tags"/"Geen beschrijving beschikbaar"-placeholders op een volle kleur verdienen iets
-   meer contrast dan de standaard gedempte tekstkleur. */
-:root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] .snippet-tag-empty {
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
 }
