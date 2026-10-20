@@ -3780,18 +3780,38 @@ body:has(#task-ticker:not([hidden])) .main {
   padding-bottom: 80px;
 }
 
-/* Dagtaken: het afvinkrondje (rand én binnenkant) wisselt langzaam tussen grijs en geel. */
-.task-card-daily .task-check:not(:checked) {
-  animation: daily-check-pulse 3.6s ease-in-out infinite;
+/* Dagtaken: een geel-zwart afzetlint (schuine strepen) dat halverwege de taakbalk begint en naar
+   rechts toe oploopt van doorzichtig (links) tot 50% dekking (rechts), en horizontaal beweegt.
+   De baan is exact één tegelbreedte (28px) per cyclus verschoven, dus de lus is naadloos. */
+.task-card-daily {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
 }
 
-@keyframes daily-check-pulse {
-  0%, 100% { border-color: #8d9199; background: #8d9199; }
-  50% { border-color: #f5c518; background: #f5c518; }
+.task-card-daily::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  left: 50%;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #f5c518 25%, #1b1b1b 25% 50%, #f5c518 50% 75%, #1b1b1b 75%);
+  background-size: 28px 28px;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.5) 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.5) 100%);
+  animation: daily-tape-move 2.4s linear infinite;
+}
+
+@keyframes daily-tape-move {
+  from { background-position-x: 0; }
+  to { background-position-x: 28px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .task-card-daily .task-check:not(:checked) { animation: none; border-color: #f5c518; background: #f5c518; }
+  .task-card-daily::before { animation: none; }
 }
 
 /* Takenpagina: dagtaken links, de rest rechts (onder elkaar per tag); onder elkaar op smalle schermen. */

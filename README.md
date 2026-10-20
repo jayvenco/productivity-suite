@@ -237,8 +237,9 @@ Gebouwd:
 - **Rustige kaarten**: notitie- (en mindmap-)kaarten zijn eenvoudig: geen rand, een zachte
   schaduw, titel links en datum rechts. Taak- en notitiekaarten hebben geen ribbon of gradient meer (zie
   "Tag-streepjes" hieronder); stickies gebruiken dezelfde kaartvorm met hun gekozen kleur als ribbon.
-  **Dagtaken** hebben geen ster, gradient of knipperende rand: het **afvinkrondje** wisselt
-  langzaam (3,6 s) rand én binnenkant tussen grijs en geel (uit bij `prefers-reduced-motion`).
+  **Dagtaken** hebben een geel-zwart **afzetlint** (schuine strepen) dat halverwege de taakbalk
+  begint, naar rechts oploopt van doorzichtig tot 50% dekking en horizontaal beweegt (naadloze
+  lus van één tegelbreedte; stilstaand bij `prefers-reduced-motion`).
   Snippetkaarten behouden de gradient-rand.
 - **Tag-streepjes**: een getagde taak- of notitiekaart krijgt twee schuine banen (een lichte en een
   donkere tint, afgeleid van de kleur van de eerste tag via `--tag-hue`): bij notities klein
@@ -972,7 +973,7 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     Dupliceren → bewerken: module toevoegen, ↑/↓, Voorbeeld, Opslaan; de eerder gemaakte
     notitie blijft ongewijzigd.
 67. Account → Navigatie: vink "Statistieken" aan → verschijnt in het menu; vink "Stickies" uit →
-    verdwijnt; blijft zo na verversen. Taken: een dagtaak heeft een afvinkrondje dat langzaam grijs ↔ geel pulseert.
+    verdwijnt; blijft zo na verversen. Taken: een dagtaak heeft rechts een bewegend geel-zwart afzetlint.
 
 ## Architectuur
 
