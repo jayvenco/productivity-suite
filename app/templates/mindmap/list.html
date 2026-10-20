@@ -28,7 +28,7 @@
 
 <div class="notes-grid">
   {% for board in boards %}
-  <div class="note-card" data-href="/mindmap/{{ board.id }}">
+  <div class="note-card mindmap-card" style="{{ board.row_tint_style }}" data-href="/mindmap/{{ board.id }}">
     <div class="note-card-header">
       <a href="/mindmap/{{ board.id }}" class="note-card-title">{{ board.name }}</a>
       <span class="note-card-date" style="margin-left:auto">{{ node_counts.get(board.id, 0) }} componenten</span>

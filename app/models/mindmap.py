@@ -5,6 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 from app.models.tag import mindmap_tags
+from app.services.tags import first_tag_hue_style
 
 
 class MindmapBoard(Base):
@@ -27,6 +28,11 @@ class MindmapBoard(Base):
     tags: Mapped[list["Tag"]] = relationship(  # noqa: F821
         "Tag", secondary=mindmap_tags, back_populates="mindmaps"
     )
+
+    @property
+    def row_tint_style(self) -> str:
+        """Zet --tag-hue op basis van de eerste tag, voor de tag-banner op de mindmapkaart."""
+        return first_tag_hue_style(self.tags)
 
 
 class MindmapNode(Base):

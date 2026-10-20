@@ -245,6 +245,8 @@ Gebouwd:
   donkere tint, afgeleid van de kleur van de eerste tag via `--tag-hue`): bij notities een kleine banner (32×23px) rechtsboven met smallere banen en een
   dekking die van onder (weinig) naar boven (volledig) loopt, bij taken over de volle hoogte aan het rechtereinde. Pure CSS (`::after` onder de
   inhoud), dus zonder extra markup.
+  **Mindmapkaarten** krijgen dezelfde (kleine) banner, maar in de onderste hoek rechts
+  (`MindmapBoard.row_tint_style`, klasse `mindmap-card`).
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief

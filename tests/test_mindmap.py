@@ -256,3 +256,17 @@ def test_mindmap_tag_filter_checkboxes_listed_and_checked(logged_in_client):
     page = logged_in_client.get("/mindmap?tags=belangrijk").text
     assert "belangrijk" in page
     assert "checked" in page
+
+
+def test_mindmap_card_exposes_tag_hue_for_banner(logged_in_client):
+    logged_in_client.post("/mindmap", data={"name": "Banner-mindmap", "tags": "bannertag"})
+    logged_in_client.post("/mindmap", data={"name": "Zonder-banner-mindmap"})
+    listing = logged_in_client.get("/mindmap").text
+
+    def card_tag(title):
+        idx = listing.index(title)
+        start = listing.rindex('<div class="note-card mindmap-card"', 0, idx)
+        return listing[start: listing.index(">", start)]
+
+    assert "--tag-hue" in card_tag("Banner-mindmap")
+    assert "--tag-hue" not in card_tag("Zonder-banner-mindmap")

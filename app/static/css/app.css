@@ -4027,3 +4027,11 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   color: var(--text);
   text-shadow: 0 0 3px rgba(0, 0, 0, 0.55);
 }
+
+/* Mindmapkaart: dezelfde tag-banner als bij notities, maar in de onderste hoek rechts. */
+.mindmap-card[style*="--tag-hue"]::after {
+  top: auto;
+  bottom: 0;
+}
+
+.mindmap-card[style*="--tag-hue"] .note-card-header { padding-right: 0; }
