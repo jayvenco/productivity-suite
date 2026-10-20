@@ -203,6 +203,31 @@ Gebouwd:
   gewone themakleur. Twee achtergrondlagen (padding-box + border-box) i.p.v. `border-image`,
   zodat de afgeronde hoeken blijven werken. Geldt voor notities én snippets, in elk thema, ook
   "Bubbles" (daar blijven alleen taken een gradient-vulling houden).
+- **Notitiesjablonen** (Notities → Sjablonen, `/notes/templates`): maak een notitie vanuit een
+  sjabloon of stel zelf sjablonen samen uit herbruikbare modules.
+  - **Bibliotheek**: bladeren per categorie (Planning, Vergaderen & communicatie, Projecten &
+    uitvoering, Besluiten & probleemoplossing, Kennis & documentatie, Persoonlijke
+    productiviteit), zoeken/filteren, **voorbeeld**, gebruiken, **dupliceren**, bewerken,
+    verwijderen (met bevestiging) en "Standaardsjablonen herstellen". Ingebouwd (13, o.a.
+    Vergadernotulen, Weekplanning, Klein project, Stappenplan, Rollen en verantwoordelijkheden)
+    zijn alleen-lezen: dupliceer ze om ze aan te passen.
+  - **Modules** (16 typen): velden (gestructureerd), vrije tekst, Markdown, kop+beschrijving,
+    checklist, actiepunten, agendapunten, besluiten, mijlpalen, stappenlijst, rollen,
+    risicoregister, voor-/nadelen, links, vragen, notities. Per sjabloon: volgorde (↑/↓),
+    eigen sectietitel, optioneel-vlag, hint/standaardtekst, dezelfde module meerdere keren.
+    Veldtypes in een "Velden"-module (JSON in de editor): text, textarea, number, date,
+    checkbox, select, url, task (bestaande taak), met label/placeholder/default/required.
+  - **Notitie uit sjabloon**: een formulier gegenereerd uit de sjabloonconfig (herhaalbare
+    rijen), variabelen `{{title}}` `{{date}}` `{{datetime}}` `{{week}}`; het resultaat is een
+    gewone, bewerkbare notitie.
+  - **Integratie**: bij actiepunten/stappen kun je per rij een **bestaande taak koppelen**
+    (geen duplicaat) of nieuwe taken laten aanmaken (met de tags van het sjabloon); mijlpalen
+    met een datum kunnen **kalenderafspraken** aanmaken. De app heeft geen Project-model, dus
+    "koppelen aan een project" gaat via taken/kalender (beperking).
+  - **Zelfstandige notities**: de notitie bewaart alleen herkomst (`template_id`,
+    `template_version`, `template_name`, zichtbaar boven de editor); het sjabloon verhoogt
+    `version` bij elke wijziging, verwijderen zet `template_id` op NULL en geen van beide
+    raakt bestaande notities.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
@@ -925,6 +950,11 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 65. Maak via Account een API-token → `curl -H "Authorization: Bearer <token>"
     http://localhost:8887/api/v1/tasks` geeft `200` met `{"items": [...], ...}`; zonder token
     `401` met JSON. PATCH een taak met `{"done": true}` en DELETE hem → daarna `404`.
+66. Notities → Sjablonen → "Vergadernotulen" → Gebruiken: vul deelnemers in, voeg agenda-rijen toe,
+    zet bij Actiepunten "Maak ... nieuwe taak aan" aan → Notitie aanmaken: de notitie staat in de
+    editor met alle secties, de taak staat onder Taken en is in de notitie gelinkt. Sjablonen →
+    Dupliceren → bewerken: module toevoegen, ↑/↓, Voorbeeld, Opslaan; de eerder gemaakte
+    notitie blijft ongewijzigd.
 
 ## Architectuur
 
@@ -1629,3 +1659,17 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
   botsen met bestaande id's en ook werkt als je 'm naar een andere installatie overzet.
   Markdown-export is puur voor lezen/delen (geen vaste, herimporteerbare structuur) -- er is
   dan ook bewust geen markdown-import gebouwd.
+
+- **Notitiesjablonen — gegevensgedreven**: `app/services/note_templates.py` bevat het register
+  `MODULE_TYPES` (type → veld-/kolomdefinitie) en één generieke renderer; de ingebouwde
+  sjablonen staan als pure data in `note_template_data.py` en worden bij elke start
+  aangemaakt als ze ontbreken (herstellen = definitie terugzetten, versie +1). Tabellen:
+  `note_modules` (bibliotheek), `note_templates`, `note_template_modules` (positie, titel,
+  optioneel, hint, config-override); `notes` kreeg drie herkomstkolommen via de lichte
+  migratie. Nieuwe tabellen komen via `create_all`, er is niets te migreren of terug te draaien
+  voor bestaande data. De router staat in `main.py` **vóór** de notes-router, anders vangt
+  `POST /notes/{note_id}` "POST /notes/templates" af met een 422. De HTML die een sjabloon
+  genereert gaat door dezelfde `sanitize_note_html` als elke notitie (alle waarden zijn
+  bovendien geëscaped). Bewust (nog) niet gebouwd: een apart beheerscherm voor eigen modules
+  (de bibliotheek is nu de ingebouwde set; aanpassen kan per sjabloon via titel/hint/config),
+  en JSON-API-routes voor sjablonen.

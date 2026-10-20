@@ -3919,3 +3919,33 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
 .snippet-card[style*="--tag-hue"]:hover {
   border-color: transparent;
 }
+
+/* ---- Notitiesjablonen ---- */
+.tpl-search { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.tpl-search input[type="search"] { flex: 1; min-width: 200px; }
+.tpl-category { margin: 20px 0 8px; font-size: 15px; color: var(--text-muted); }
+.tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.tpl-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+.tpl-card-head { display: flex; gap: 10px; align-items: center; }
+.tpl-icon { font-size: 1.6em; }
+.tpl-badge { margin-left: 6px; font-size: 10px; }
+.tpl-desc { margin: 0; font-size: 13px; }
+.tpl-meta { margin: 0; font-size: 12px; color: var(--text-muted); }
+.tpl-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: auto; padding-top: 6px; }
+.tpl-actions form { margin: 0; }
+.tpl-hint { color: var(--text-muted); font-size: 12px; }
+.tpl-preview { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; margin-top: 14px; }
+.tpl-module { border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px 14px; margin: 14px 0; }
+.tpl-module legend { padding: 0 8px; font-weight: 600; }
+.tpl-rows { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.tpl-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; background: var(--bg); border-radius: 8px; padding: 8px; }
+.tpl-cell { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--text-muted); flex: 1; min-width: 130px; }
+.tpl-cell-checkbox { flex: 0 0 auto; min-width: 0; }
+.tpl-cell input, .tpl-cell select { width: 100%; box-sizing: border-box; }
+.tpl-row-remove { background: none; border: none; color: var(--text-muted); font-size: 1.3em; cursor: pointer; }
+.tpl-opt { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 13px; }
+.tpl-module-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.tpl-module-item { border: 1px solid var(--border); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 6px; background: var(--bg-elevated); }
+.tpl-module-head { display: flex; justify-content: space-between; align-items: center; }
+.tpl-module-actions button { background: var(--bg-hover); color: var(--text); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; padding: 2px 8px; }
+.tpl-add-module { display: flex; gap: 8px; margin-top: 8px; }

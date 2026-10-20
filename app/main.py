@@ -16,6 +16,7 @@ from app.routers import (
     graph,
     kanban,
     mindmap,
+    note_templates,
     notes,
     pomodoro,
     search,
@@ -27,6 +28,7 @@ from app.routers import (
     voice,
 )
 from app.services.backup import start_backup_scheduler
+from app.services.note_templates import seed_builtin_templates
 from app.services.migrate import run_lightweight_migrations
 from app.services.seed import seed_default_user_and_board
 from app.services.tags import backfill_tag_colors
@@ -37,6 +39,7 @@ run_lightweight_migrations(engine)
 with SessionLocal() as db:
     seed_default_user_and_board(db)
     backfill_tag_colors(db)
+    seed_builtin_templates(db)
 
 start_backup_scheduler()
 
@@ -48,6 +51,7 @@ app.include_router(account.router)
 app.include_router(tasks.router)
 app.include_router(kanban.router)
 app.include_router(mindmap.router)
+app.include_router(note_templates.router)  # vóór notes: literal paden eerst
 app.include_router(notes.router)
 app.include_router(calendar.router)
 app.include_router(graph.router)

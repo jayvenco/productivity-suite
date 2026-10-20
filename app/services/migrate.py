@@ -20,7 +20,12 @@ _COLUMNS_TO_ENSURE = {
         ("recurrence", "VARCHAR(10) DEFAULT 'none'"),
         ("recurrence_until", "DATE"),
     ],
-    "notes": [("is_temp", "BOOLEAN DEFAULT 0")],
+    "notes": [
+        ("is_temp", "BOOLEAN DEFAULT 0"),
+        ("template_id", "INTEGER"),
+        ("template_version", "INTEGER"),
+        ("template_name", "VARCHAR(120)"),
+    ],
     "snippets": [("description", "TEXT DEFAULT ''")],
     "mindmap_boards": [("description", "TEXT DEFAULT ''")],
     "users": [

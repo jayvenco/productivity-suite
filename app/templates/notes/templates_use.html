@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Notitie uit sjabloon - Productivity Suite{% endblock %}
+
+{% macro control(name, f, value, tasks) %}
+  {% set req = 'required' if f.required else '' %}
+  {% if f.type == 'textarea' %}
+    <textarea name="{{ name }}" rows="3" placeholder="{{ f.placeholder or '' }}" {{ req }}>{{ value }}</textarea>
+  {% elif f.type == 'checkbox' %}
+    <input type="checkbox" name="{{ name }}" value="1" class="round-checkbox" {{ 'checked' if value }}>
+  {% elif f.type == 'select' %}
+    <select name="{{ name }}" {{ req }}><option value=""></option>{% for o in f.options or [] %}<option value="{{ o }}" {{ 'selected' if o == value }}>{{ o }}</option>{% endfor %}</select>
+  {% elif f.type == 'task' %}
+    <select name="{{ name }}"><option value="">— geen —</option>{% for t in tasks %}<option value="{{ t.id }}">{{ t.title }}</option>{% endfor %}</select>
+  {% else %}
+    <input type="{{ f.type if f.type in ('number','date','url') else 'text' }}" name="{{ name }}" value="{{ value }}" placeholder="{{ f.placeholder or '' }}" {{ req }}>
+  {% endif %}
+{% endmacro %}
+
+{% macro row(m, r, tasks) %}
+  <div class="tpl-row" data-row>
+    {% for c in m.columns %}
+    <label class="tpl-cell tpl-cell-{{ c.type }}"><span>{{ c.label }}</span>{{ control('m' ~ m.index ~ '__r' ~ r ~ '__' ~ c.name, c, '', tasks) }}</label>
+    {% endfor %}
+    <button type="button" class="tpl-row-remove" data-remove-row title="Rij verwijderen">×</button>
+  </div>
+{% endmacro %}
+
+{% block content %}
+<div class="form-page">
+<h2>{{ template.icon }} {{ template.name }}</h2>
+<p style="color:var(--text-muted)">{{ template.description }}</p>
+{% if error %}<p class="badge-danger" style="padding:6px 10px;border-radius:6px">{{ error }}</p>{% endif %}
+
+<form method="post" action="/notes/templates/{{ template.id }}/use" id="tpl-use-form">
+  <div class="field">
+    <label for="title">Titel van de notitie</label>
+    <input type="text" id="title" name="title" required value="{{ title }}">
+  </div>
+
+  {% for m in modules %}
+  <fieldset class="tpl-module" {% if m.optional %}data-optional{% endif %}>
+    <legend>
+      {% if m.optional %}<label><input type="checkbox" name="m{{ m.index }}__include" value="1" class="round-checkbox" checked> {{ m.title or 'Sectie' }}</label>
+      {% else %}{{ m.title or 'Sectie' }}{% endif %}
+    </legend>
+    {% if m.default %}<p class="tpl-hint">{{ m.default }}</p>{% endif %}
+
+    {% if m.kind in ('fields', 'single') %}
+      {% for f in m.fields %}
+      <div class="field">
+        <label>{{ f.label or f.name }}{% if f.required %} *{% endif %}</label>
+        {{ control('m' ~ m.index ~ '__' ~ f.name, f, f.default, tasks) }}
+        {% if f.description %}<small class="tpl-hint">{{ f.description }}</small>{% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="tpl-rows" data-rows data-next="1">
+        {{ row(m, 0, tasks) }}
+      </div>
+      <template data-row-template>{{ row(m, '__R__', tasks) }}</template>
+      <button type="button" class="btn btn-secondary" data-add-row>+ Rij</button>
+      {% if m.can_tasks %}<label class="tpl-opt"><input type="checkbox" name="m{{ m.index }}__create_tasks" value="1" class="round-checkbox"> Maak van elke rij zonder bestaande taak een nieuwe taak aan</label>{% endif %}
+      {% if m.can_events %}<label class="tpl-opt"><input type="checkbox" name="m{{ m.index }}__create_events" value="1" class="round-checkbox"> Zet rijen met een datum ook in de kalender</label>{% endif %}
+    {% endif %}
+  </fieldset>
+  {% endfor %}
+
+  <div class="field">
+    <label for="tags">Extra tags (komma-gescheiden){% if template.tags %} — het sjabloon voegt toe: {{ template.tags }}{% endif %}</label>
+    <input type="text" id="tags" name="tags">
+  </div>
+  <div class="field">
+    <label style="display:flex;align-items:center;gap:6px;color:var(--text)">
+      <input type="checkbox" name="is_temp" value="1" class="round-checkbox"> Tijdelijke notitie (wordt na een week automatisch verwijderd)
+    </label>
+  </div>
+  <button type="submit" class="btn">Notitie aanmaken</button>
+  <a href="/notes/templates" class="btn btn-secondary">Annuleren</a>
+</form>
+</div>
+<script src="{{ static_url('js/note-templates.js') }}"></script>
+{% endblock %}

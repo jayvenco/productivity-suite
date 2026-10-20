@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Notitiesjablonen - Productivity Suite{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h2 style="margin:0">Sjablonen</h2>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="/notes" class="btn btn-secondary">← Notities</a>
+    <a href="/notes/templates/new" class="btn">+ Nieuw sjabloon</a>
+  </div>
+</div>
+<p style="color:var(--text-muted);margin-top:4px">Maak een notitie vanuit een sjabloon, of stel zelf een sjabloon samen uit herbruikbare modules. Een notitie blijft zelfstandig: later aanpassen van het sjabloon verandert bestaande notities niet.</p>
+
+<form method="get" action="/notes/templates" class="tpl-search">
+  <input type="search" name="q" value="{{ q }}" placeholder="Zoek op naam, beschrijving of tag...">
+  <select name="category" onchange="this.form.submit()" aria-label="Categorie">
+    <option value="">Alle categorieën</option>
+    {% for c in categories %}<option value="{{ c }}" {{ 'selected' if c == category }}>{{ c }}</option>{% endfor %}
+  </select>
+  <button type="submit" class="btn btn-secondary">Zoeken</button>
+</form>
+
+{% for name, items in groups %}
+<h3 class="tpl-category">{{ name }}</h3>
+<div class="tpl-grid">
+  {% for t in items %}
+  <article class="tpl-card">
+    <div class="tpl-card-head">
+      <span class="tpl-icon">{{ t.icon }}</span>
+      <div>
+        <strong>{{ t.name }}</strong>
+        {% if t.is_builtin %}<span class="badge-warning tpl-badge">Ingebouwd</span>{% endif %}
+      </div>
+    </div>
+    <p class="tpl-desc">{{ t.description }}</p>
+    <p class="tpl-meta">{{ t.modules | length }} modules{% if t.tags %} · {{ t.tags }}{% endif %}</p>
+    <div class="tpl-actions">
+      <a class="btn" href="/notes/templates/{{ t.id }}/use">Gebruiken</a>
+      <a class="btn btn-secondary" href="/notes/templates/{{ t.id }}/preview">Voorbeeld</a>
+      <form method="post" action="/notes/templates/{{ t.id }}/duplicate"><button class="btn btn-secondary" type="submit">Dupliceren</button></form>
+      {% if not t.is_builtin %}
+      <a class="btn btn-secondary" href="/notes/templates/{{ t.id }}/edit">Bewerken</a>
+      <form method="post" action="/notes/templates/{{ t.id }}/delete" onsubmit="return confirm('Sjabloon &quot;{{ t.name }}&quot; verwijderen? Notities die ermee gemaakt zijn blijven bestaan.')">
+        <button class="btn btn-danger" type="submit">Verwijderen</button>
+      </form>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<p>Geen sjablonen gevonden.</p>
+{% endfor %}
+
+<form method="post" action="/notes/templates/restore-builtins" style="margin-top:24px"
+      onsubmit="return confirm('Alle ingebouwde sjablonen terugzetten naar hun oorspronkelijke inhoud? Eigen sjablonen en bestaande notities blijven ongemoeid.')">
+  <button class="btn btn-secondary" type="submit">Standaardsjablonen herstellen</button>
+</form>
+{% endblock %}

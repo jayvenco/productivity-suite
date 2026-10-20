@@ -3,6 +3,7 @@
 {% block content %}
 <div class="form-page note-form-page">
 <h2>{{ 'Notitie bewerken' if note else 'Nieuwe notitie' }}</h2>
+{% if note and note.template_name %}<p class="tpl-hint" style="margin:-6px 0 8px">Gemaakt met sjabloon "{{ note.template_name }}" (versie {{ note.template_version }}) — deze notitie is zelfstandig en verandert niet mee met het sjabloon.</p>{% endif %}
 <form method="post" action="{{ '/notes/' ~ note.id if note else '/notes' }}" id="note-form">
   <div class="field">
     <label for="title">Titel</label>

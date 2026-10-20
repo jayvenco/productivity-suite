@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Sjabloon bewerken' if template else 'Nieuw sjabloon' }} - Productivity Suite{% endblock %}
+{% block content %}
+<div class="form-page">
+<h2>{{ 'Sjabloon bewerken' if template else 'Nieuw sjabloon' }}</h2>
+<form method="post" action="{{ '/notes/templates/' ~ template.id if template else '/notes/templates' }}" id="tpl-edit-form">
+  <div class="field"><label for="name">Naam</label>
+    <input type="text" id="name" name="name" required value="{{ template.name if template else '' }}"></div>
+  <div class="field"><label for="description">Beschrijving</label>
+    <textarea id="description" name="description" rows="2">{{ template.description if template else '' }}</textarea></div>
+  <div class="field"><label for="category">Categorie</label>
+    <input type="text" id="category" name="category" list="tpl-categories" value="{{ template.category if template else categories[0] }}">
+    <datalist id="tpl-categories">{% for c in categories %}<option value="{{ c }}">{% endfor %}</datalist></div>
+  <div class="field"><label for="icon">Pictogram (emoji)</label>
+    <input type="text" id="icon" name="icon" maxlength="4" value="{{ template.icon if template else '📝' }}"></div>
+  <div class="field"><label for="tags">Tags (komma-gescheiden, worden aan elke notitie toegevoegd)</label>
+    <input type="text" id="tags" name="tags" value="{{ template.tags if template else '' }}"></div>
+  <div class="field"><label for="title_pattern">Standaardtitel van een nieuwe notitie (variabelen: {{ '{{title}} {{date}} {{datetime}} {{week}}' }})</label>
+    <input type="text" id="title_pattern" name="title_pattern" value="{{ template.title_pattern if template else '{{title}}' }}"></div>
+
+  <h3>Modules</h3>
+  <p class="tpl-hint">Voeg modules toe, sleep ze niet — gebruik ↑ ↓ om de volgorde te wijzigen. Een optionele module kan bij het gebruiken uitgevinkt worden. Dezelfde module mag meerdere keren voorkomen.</p>
+  <ol id="tpl-modules" class="tpl-module-list"></ol>
+  <div class="tpl-add-module">
+    <select id="tpl-library" aria-label="Module kiezen"></select>
+    <button type="button" class="btn btn-secondary" id="tpl-add">+ Module toevoegen</button>
+  </div>
+
+  <input type="hidden" name="modules_json" id="modules_json">
+  <script type="application/json" id="tpl-data">{{ {'library': library, 'modules': modules} | tojson }}</script>
+
+  <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+    <button type="submit" class="btn">Opslaan</button>
+    <button type="button" class="btn btn-secondary" id="tpl-preview-btn">Voorbeeld</button>
+    <a href="/notes/templates" class="btn btn-secondary">Annuleren</a>
+  </div>
+  <div id="tpl-preview-panel" class="tpl-preview" hidden></div>
+</form>
+</div>
+<script src="{{ static_url('js/note-templates.js') }}"></script>
+{% endblock %}

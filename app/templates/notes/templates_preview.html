@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Voorbeeld {{ template.name }} - Productivity Suite{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h2 style="margin:0">{{ template.icon }} {{ template.name }} — voorbeeld</h2>
+  <div style="display:flex;gap:8px">
+    <a href="/notes/templates" class="btn btn-secondary">← Sjablonen</a>
+    <a href="/notes/templates/{{ template.id }}/use" class="btn">Gebruiken</a>
+  </div>
+</div>
+<p style="color:var(--text-muted)">{{ template.description }}</p>
+<div class="tpl-preview rich-editor-preview">{{ html|safe }}</div>
+{% endblock %}
