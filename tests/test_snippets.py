@@ -398,3 +398,25 @@ def test_import_requires_login(client):
     response = client.post("/snippets/import", follow_redirects=False)
     assert response.status_code == 303
     assert response.headers["location"] == "/login"
+
+
+def test_snippets_view_toggle_and_group_by_tag(logged_in_client):
+    for title, tags in [("Groep-snip A", "zzgroep, aagroep"), ("Groep-snip B", "aagroep"), ("Groep-snip C", "")]:
+        logged_in_client.post(
+            "/snippets",
+            data={"title": title, "description": "", "tags": tags, "filename": "a.py", "language": "python", "content": "x"},
+        )
+
+    plain = logged_in_client.get("/snippets").text
+    assert 'id="snippets-view-toggle"' in plain and 'data-view="list"' in plain
+    assert "snippet-group-heading" not in plain
+
+    grouped = logged_in_client.get("/snippets?group_by=tag").text
+    assert grouped.count("snippet-group-heading") >= 2
+    a_head = grouped.index("aagroep <span")
+    assert grouped.index("Groep-snip A") > a_head  # onder de eerste tag (alfabetisch), niet onder zzgroep
+    assert "zzgroep <span" not in grouped  # geen dubbele vermelding onder een eigen groep
+    assert grouped.index("Zonder tag <span") > a_head and grouped.index("Groep-snip C") > grouped.index("Zonder tag <span")
+
+    ids = re.findall(r'name="snippet_ids" value="(\d+)"', grouped)
+    logged_in_client.post("/snippets/bulk-delete", data={"snippet_ids": ids})

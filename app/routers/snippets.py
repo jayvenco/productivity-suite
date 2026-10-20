@@ -61,6 +61,7 @@ def list_snippets(
     request: Request,
     q: str | None = None,
     tag: str | None = None,
+    group_by: str = "none",
     import_error: str | None = None,
     import_success: str | None = None,
     user: User = Depends(require_user),
@@ -84,12 +85,30 @@ def list_snippets(
         )
 
     snippets = query.order_by(Snippet.updated_at.desc()).all()
+
+    # Groeperen op tag: onder de eerste tag (alfabetisch), zodat een snippet met meerdere tags
+    # maar één keer voorkomt; snippets zonder tag komen onderaan.
+    groups: list[tuple[str, list[Snippet]]] | None = None
+    if group_by == "tag":
+        by_tag: dict[str, list[Snippet]] = {}
+        untagged: list[Snippet] = []
+        for snippet in snippets:
+            if snippet.tags:
+                by_tag.setdefault(min(t.name for t in snippet.tags), []).append(snippet)
+            else:
+                untagged.append(snippet)
+        groups = [(name, by_tag[name]) for name in sorted(by_tag)]
+        if untagged:
+            groups.append(("Zonder tag", untagged))
+
     return templates.TemplateResponse(
         request,
         "snippets/list.html",
         {
             "user": user,
             "snippets": snippets,
+            "groups": groups,
+            "group_by": group_by if group_by == "tag" else "none",
             "active_tag": tag,
             "q": q or "",
             "import_error": import_error,
@@ -135,6 +154,8 @@ async def bulk_delete_snippets(request: Request, user: User = Depends(require_us
         params["q"] = form.get("q")
     if form.get("tag"):
         params["tag"] = form.get("tag")
+    if form.get("group_by") == "tag":
+        params["group_by"] = "tag"
     query = f"?{urlencode(params)}" if params else ""
     return RedirectResponse(f"/snippets{query}", status_code=303)
 

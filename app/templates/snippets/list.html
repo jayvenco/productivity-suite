@@ -1,46 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Snippets - Productivity Suite{% endblock %}
-{% block content %}
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-<div class="toolbar">
-  <h2 style="margin:0">Snippets{% if active_tag %} — tag: {{ active_tag }}{% endif %}</h2>
-  <a href="/snippets/new" class="btn">+ Nieuwe snippet</a>
-</div>
 
-<form method="get" action="/snippets" class="task-controls">
-  {% if active_tag %}<input type="hidden" name="tag" value="{{ active_tag }}">{% endif %}
-  <input type="text" name="q" placeholder="Zoeken op titel of tag..." value="{{ q }}" style="max-width:280px">
-  <button type="submit" class="btn btn-secondary">Zoeken</button>
-  {% if active_tag or q %}<a href="/snippets" class="btn btn-secondary">Filters wissen</a>{% endif %}
-</form>
-
-<details class="filter-panel">
-  <summary class="filter-panel-toggle">⇅ Export / Import</summary>
-  <div class="filter-panel-body">
-    {% if import_error %}<p class="badge-danger" style="display:inline-block">{{ import_error }}</p>{% endif %}
-    {% if import_success %}<p class="badge-warning" style="display:inline-block">{{ import_success }} snippet(s) geïmporteerd.</p>{% endif %}
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <a href="/snippets/export?format=json" class="btn btn-secondary">⬇ Exporteren als JSON</a>
-      <a href="/snippets/export?format=markdown" class="btn btn-secondary">⬇ Exporteren als Markdown</a>
-    </div>
-    <form method="post" action="/snippets/import" enctype="multipart/form-data" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <input type="file" name="import_file" accept="application/json" required>
-      <button type="submit" class="btn btn-secondary">⬆ Importeren (JSON)</button>
-    </form>
-  </div>
-</details>
-
-<form method="post" id="snippets-bulk-form">
-  <input type="hidden" name="q" value="{{ q }}">
-  <input type="hidden" name="tag" value="{{ active_tag or '' }}">
-
-  <div class="notes-bulk-bar" id="snippets-bulk-bar" hidden>
-    <span id="snippets-bulk-count">0 geselecteerd</span>
-    <button type="submit" formaction="/snippets/bulk-delete" class="btn btn-danger" onclick="return confirm('Geselecteerde snippets verwijderen?')">Verwijderen</button>
-  </div>
-
-  <div class="snippets-list">
-    {% for snippet in snippets %}
+{% macro snippet_card(snippet) %}
     <div class="snippet-card" style="{{ snippet.row_tint_style }}">
       <div class="snippet-card-topbar">
         <input type="checkbox" class="snippet-select" name="snippet_ids" value="{{ snippet.id }}">
@@ -85,10 +46,76 @@
         <button type="submit" formaction="/snippets/{{ snippet.id }}/delete" formnovalidate class="btn btn-danger btn-sm snippet-delete-btn" onclick="return confirm('Snippet verwijderen?')">Verwijder</button>
       </div>
     </div>
+{% endmacro %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<div class="toolbar">
+  <h2 style="margin:0">Snippets{% if active_tag %} — tag: {{ active_tag }}{% endif %}</h2>
+  <a href="/snippets/new" class="btn">+ Nieuwe snippet</a>
+</div>
+
+<form method="get" action="/snippets" class="task-controls">
+  {% if active_tag %}<input type="hidden" name="tag" value="{{ active_tag }}">{% endif %}
+  <label>Groeperen op
+    <select name="group_by" onchange="this.form.submit()">
+      <option value="none" {{ 'selected' if group_by != 'tag' }}>Geen</option>
+      <option value="tag" {{ 'selected' if group_by == 'tag' }}>Tag</option>
+    </select>
+  </label>
+  <div class="notes-view-toggle" id="snippets-view-toggle" role="group" aria-label="Weergave">
+    <button type="button" class="notes-view-btn" data-view="grid" title="Raster">▦ Raster</button>
+    <button type="button" class="notes-view-btn" data-view="list" title="Lijst">☰ Lijst</button>
+  </div>
+  <input type="text" name="q" placeholder="Zoeken op titel of tag..." value="{{ q }}" style="max-width:280px">
+  <button type="submit" class="btn btn-secondary">Zoeken</button>
+  {% if active_tag or q %}<a href="/snippets?group_by={{ group_by }}" class="btn btn-secondary">Filters wissen</a>{% endif %}
+</form>
+
+<details class="filter-panel">
+  <summary class="filter-panel-toggle">⇅ Export / Import</summary>
+  <div class="filter-panel-body">
+    {% if import_error %}<p class="badge-danger" style="display:inline-block">{{ import_error }}</p>{% endif %}
+    {% if import_success %}<p class="badge-warning" style="display:inline-block">{{ import_success }} snippet(s) geïmporteerd.</p>{% endif %}
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a href="/snippets/export?format=json" class="btn btn-secondary">⬇ Exporteren als JSON</a>
+      <a href="/snippets/export?format=markdown" class="btn btn-secondary">⬇ Exporteren als Markdown</a>
+    </div>
+    <form method="post" action="/snippets/import" enctype="multipart/form-data" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input type="file" name="import_file" accept="application/json" required>
+      <button type="submit" class="btn btn-secondary">⬆ Importeren (JSON)</button>
+    </form>
+  </div>
+</details>
+
+<form method="post" id="snippets-bulk-form">
+  <input type="hidden" name="q" value="{{ q }}">
+  <input type="hidden" name="tag" value="{{ active_tag or '' }}">
+  <input type="hidden" name="group_by" value="{{ group_by }}">
+
+  <div class="notes-bulk-bar" id="snippets-bulk-bar" hidden>
+    <span id="snippets-bulk-count">0 geselecteerd</span>
+    <button type="submit" formaction="/snippets/bulk-delete" class="btn btn-danger" onclick="return confirm('Geselecteerde snippets verwijderen?')">Verwijderen</button>
+  </div>
+
+  {% if groups is not none %}
+    {% for name, items in groups %}
+    <h3 class="task-group-heading snippet-group-heading">{{ name }} <span class="task-group-count">({{ items | length }})</span></h3>
+    <div class="snippets-list">
+      {% for snippet in items %}{{ snippet_card(snippet) }}{% endfor %}
+    </div>
+    {% else %}
+    <p>Nog geen snippets. Maak er één aan.</p>
+    {% endfor %}
+  {% else %}
+  <div class="snippets-list">
+    {% for snippet in snippets %}
+    {{ snippet_card(snippet) }}
     {% else %}
     <p>Nog geen snippets. Maak er één aan.</p>
     {% endfor %}
   </div>
+  {% endif %}
 </form>
 
 <div class="snippet-fullscreen-backdrop" id="snippet-fullscreen-backdrop" hidden></div>
@@ -109,4 +136,5 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlightjs-line-numbers.js/2.8.0/highlightjs-line-numbers.min.js"></script>
 <script>hljs.highlightAll();</script>
 <script src="{{ static_url('js/snippets-list.js') }}"></script>
+<script src="{{ static_url('js/snippets-view.js') }}"></script>
 {% endblock %}

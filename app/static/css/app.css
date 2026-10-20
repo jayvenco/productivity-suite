@@ -4033,3 +4033,32 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   justify-content: center;
   flex-shrink: 0;
 }
+
+/* Snippets: lijstweergave = compacte rijen zonder codepreview; in de rasterweergave maakt
+   snippets-view.js alle kaarten even hoog als de hoogste. */
+.snippets-list.view-list {
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.snippets-list.view-list .snippet-card {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  padding: 8px 14px;
+}
+
+.snippets-list.view-list .snippet-card-topbar { flex: 1 1 240px; min-width: 0; }
+.snippets-list.view-list .snippet-card-description { flex: 2 1 220px; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.snippets-list.view-list .snippet-card-tags { margin: 0; flex: 0 1 auto; }
+.snippets-list.view-list .snippet-files,
+.snippets-list.view-list .snippet-card-more-files { display: none; }
+.snippets-list.view-list .snippet-card-actions-row { margin: 0; flex: 0 0 auto; }
+
+.snippet-group-heading { margin: 18px 0 8px; }
+
+/* Rasterweergave: de knoppenrij zakt naar de onderkant van de (even hoge) kaart; in de
+   lijstweergave blijft rechts ruimte voor de tag-banner. */
+.snippets-list:not(.view-list) .snippet-card-actions-row { margin-top: auto; }
+.snippets-list.view-list .snippet-card[style*="--tag-hue"] { padding-right: 46px; }

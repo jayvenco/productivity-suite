@@ -248,6 +248,12 @@ Gebouwd:
   **Mindmap- en snippetkaarten** krijgen dezelfde (kleine) banner, maar in de onderste hoek
   rechts (`MindmapBoard.row_tint_style`, klasse `mindmap-card`; snippets gebruiken
   `Snippet.row_tint_style`).
+- **Snippets: weergave en groeperen**: een **Raster/Lijst**-schakelaar (onthouden in `localStorage`;
+  lijst = compacte rijen zonder codepreview) en **Groeperen op: Tag** (`?group_by=tag`, onder de
+  eerste tag alfabetisch, "Zonder tag" onderaan, blijft bewaard bij bulk-verwijderen). In de
+  rasterweergave maakt `snippets-view.js` **alle kaarten even hoog als de hoogste** (ook over
+  groepen heen; de knoppen staan onderaan de kaart) en meet opnieuw na laden en bij
+  vensterwijziging.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
