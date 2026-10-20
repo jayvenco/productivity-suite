@@ -4024,3 +4024,12 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
 }
 
 .mindmap-card[style*="--tag-hue"] .note-card-header { padding-right: 0; }
+
+/* Op een getagde taakkaart nemen de knoppen precies de breedte van de tag-banner in (72px
+   incl. kaartpadding), zodat tekst, tags en deadline vóór de banner eindigen en er niet overheen
+   lopen. */
+.task-card[style*="--tag-hue"] .task-card-actions {
+  width: 60px;
+  justify-content: center;
+  flex-shrink: 0;
+}
