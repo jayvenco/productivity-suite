@@ -242,8 +242,8 @@ Gebouwd:
   lus van één tegelbreedte; stilstaand bij `prefers-reduced-motion`).
   Snippetkaarten behouden de gradient-rand.
 - **Tag-streepjes**: een getagde taak- of notitiekaart krijgt twee schuine banen (een lichte en een
-  donkere tint, afgeleid van de kleur van de eerste tag via `--tag-hue`): bij notities klein
-  rechtsboven, bij taken over de volle hoogte aan het rechtereinde. Pure CSS (`::after` onder de
+  donkere tint, afgeleid van de kleur van de eerste tag via `--tag-hue`): bij notities een kleine banner (32×23px) rechtsboven met smallere banen en een
+  dekking die van onder (weinig) naar boven (volledig) loopt, bij taken over de volle hoogte aan het rechtereinde. Pure CSS (`::after` onder de
   inhoud), dus zonder extra markup.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,

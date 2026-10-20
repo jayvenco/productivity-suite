@@ -4002,9 +4002,24 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
 
 .task-card[style*="--tag-hue"]::after { bottom: 0; }
 
-.note-card[style*="--tag-hue"]::after { height: 46px; width: 64px; }
+/* Notitie: de banner is half zo groot (32x23px), de twee banen zijn 30% smaller en de dekking
+   loopt van onder (weinig zichtbaar) naar boven (volledig). */
+.note-card[style*="--tag-hue"]::after {
+  width: 32px;
+  height: 23px;
+  background: linear-gradient(
+    115deg,
+    transparent 0 24%,
+    hsla(var(--tag-hue), 75%, 72%, 0.55) 24% 46.4%,
+    transparent 46.4% 54.4%,
+    hsla(var(--tag-hue), 68%, 58%, 0.9) 54.4% 76.8%,
+    transparent 76.8%
+  );
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.1), #000);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.1), #000);
+}
 
-.note-card[style*="--tag-hue"] .note-card-header { padding-right: 52px; }
+.note-card[style*="--tag-hue"] .note-card-header { padding-right: 30px; }
 
 /* Knoppen rechts op een getagde taakkaart liggen boven de streepjes: wat meer contrast. */
 .task-card[style*="--tag-hue"] .task-card-delete,
