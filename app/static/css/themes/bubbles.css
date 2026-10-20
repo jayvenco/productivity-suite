@@ -23,12 +23,12 @@
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
-/* Notities en snippets: bubbles-schaduw (snippets houden hun gradient-rand voor tags). */
+/* Notities en snippets: bubbles-schaduw; de tag-banner komt uit app.css. */
 :root[data-theme="bubbles"] .note-card,
 :root[data-theme="bubbles"] .snippet-card {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
-:root[data-theme="bubbles"] .snippet-card:not([style*="--tag-hue"]) {
+:root[data-theme="bubbles"] .snippet-card {
   border: none;
 }

@@ -3879,21 +3879,6 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   overflow-y: auto;
 }
 
-/* Snippetkaart met tag: alleen de rand krijgt de tagkleur, in een gradient van links (tagkleur)
-   naar rechts (de randkleur van het actieve thema); de kaart zelf blijft de gewone
-   themakleur. Twee achtergrondlagen: een vlakke vulling binnen de padding-box en de gradient
-   in de border-box -- zo blijft border-radius gewoon werken (border-image zou dat breken). */
-.snippet-card[style*="--tag-hue"] {
-  border: 2px solid transparent;
-  background:
-    linear-gradient(var(--bg-elevated), var(--bg-elevated)) padding-box,
-    linear-gradient(90deg, hsl(var(--tag-hue), 65%, 50%), var(--border)) border-box;
-}
-
-.snippet-card[style*="--tag-hue"]:hover {
-  border-color: transparent;
-}
-
 /* ---- Notitiesjablonen ---- */
 .tpl-search { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
 .tpl-search input[type="search"] { flex: 1; min-width: 200px; }
@@ -3975,14 +3960,16 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
    (--tag-hue via row_tint_style). Notitiekaart: klein, rechtsboven. Taakkaart: over de volle
    hoogte, aan het rechtereinde van de kaart. Ze liggen onder de inhoud (isolation + z-index -1). */
 .task-card[style*="--tag-hue"],
-.note-card[style*="--tag-hue"] {
+.note-card[style*="--tag-hue"],
+.snippet-card[style*="--tag-hue"] {
   position: relative;
   isolation: isolate;
   overflow: hidden;
 }
 
 .task-card[style*="--tag-hue"]::after,
-.note-card[style*="--tag-hue"]::after {
+.note-card[style*="--tag-hue"]::after,
+.snippet-card[style*="--tag-hue"]::after {
   content: "";
   position: absolute;
   z-index: -1;
@@ -4004,7 +3991,8 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
 
 /* Notitie: de banner is half zo groot (32x23px), de twee banen zijn 30% smaller en de dekking
    loopt van onder (weinig zichtbaar) naar boven (volledig). */
-.note-card[style*="--tag-hue"]::after {
+.note-card[style*="--tag-hue"]::after,
+.snippet-card[style*="--tag-hue"]::after {
   width: 32px;
   height: 23px;
   background: linear-gradient(
@@ -4029,7 +4017,8 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
 }
 
 /* Mindmapkaart: dezelfde tag-banner als bij notities, maar in de onderste hoek rechts. */
-.mindmap-card[style*="--tag-hue"]::after {
+.mindmap-card[style*="--tag-hue"]::after,
+.snippet-card[style*="--tag-hue"]::after {
   top: auto;
   bottom: 0;
 }
