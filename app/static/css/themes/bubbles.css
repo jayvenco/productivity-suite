@@ -19,15 +19,23 @@
 }
 
 :root[data-theme="bubbles"] .task-card,
-:root[data-theme="bubbles"] .note-card,
 :root[data-theme="bubbles"] .snippet-card {
   border: none;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
 }
 
-:root[data-theme="bubbles"] .note-card[style*="--tag-hue"],
 :root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] {
   background: hsl(var(--tag-hue), 65%, 42%);
+}
+
+/* Notities: geen volle kleur, alleen de rand loopt in een gradient (zie .note-card in app.css);
+   de bubbles-schaduw houdt de kaart verder "zwevend". */
+:root[data-theme="bubbles"] .note-card {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+:root[data-theme="bubbles"] .note-card:not([style*="--tag-hue"]) {
+  border: none;
 }
 
 /* Taken: zelfde zachtere gradient als in de andere thema's (tagkleur -> kaartkleur), maar
@@ -40,7 +48,6 @@
    zelf -- de gewone tekstkleur is afgestemd op de neutrale kaartachtergrond, niet op een
    willekeurige volle kleur. */
 :root[data-theme="bubbles"] .task-card[style*="--tag-hue"] .task-card-title-link,
-:root[data-theme="bubbles"] .note-card[style*="--tag-hue"] .note-card-title,
 :root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] .snippet-card-title-text {
   color: #fff;
 }
@@ -49,8 +56,6 @@
    gedempte tekstkleur -- die laatste zou op een volle kleur te weinig contrast geven. */
 :root[data-theme="bubbles"] .task-card[style*="--tag-hue"] .task-card-preview,
 :root[data-theme="bubbles"] .task-card[style*="--tag-hue"] .task-card-status,
-:root[data-theme="bubbles"] .note-card[style*="--tag-hue"] .note-card-preview,
-:root[data-theme="bubbles"] .note-card[style*="--tag-hue"] .note-card-date,
 :root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] .snippet-card-description,
 :root[data-theme="bubbles"] .snippet-card[style*="--tag-hue"] .snippet-card-time {
   color: rgba(255, 255, 255, 0.82);

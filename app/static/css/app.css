@@ -3905,3 +3905,18 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   flex: 1;
   overflow-y: auto;
 }
+
+/* Notitiekaart met tag: alleen de rand krijgt de tagkleur, in een gradient van links (tagkleur)
+   naar rechts (de randkleur van het actieve thema); de kaart zelf blijft de gewone
+   themakleur. Twee achtergrondlagen: een vlakke vulling binnen de padding-box en de gradient
+   in de border-box -- zo blijft border-radius gewoon werken (border-image zou dat breken). */
+.note-card[style*="--tag-hue"] {
+  border: 2px solid transparent;
+  background:
+    linear-gradient(var(--bg-elevated), var(--bg-elevated)) padding-box,
+    linear-gradient(90deg, hsl(var(--tag-hue), 65%, 50%), var(--border)) border-box;
+}
+
+.note-card[style*="--tag-hue"]:hover {
+  border-color: transparent;
+}
