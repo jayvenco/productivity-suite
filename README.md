@@ -247,6 +247,9 @@ Gebouwd:
   tekst begint dus ná de ribbon). **Notities** een kleine banner (32×23px) rechtsboven met een
   dekking die van onder (weinig) naar boven (volledig) loopt; **mindmap- en snippetkaarten** dezelfde
   banner in de onderste hoek rechts. Pure CSS, zonder extra markup.
+  Bij **hover** op een notitie- of mindmapkaart wisselen de lichte en de donkere baan vloeiend van
+  plek (twee gradient-lagen met geregistreerde `@property`-startposities `--stripe-light`/
+  `--stripe-dark` die transitionen; uit bij `prefers-reduced-motion`).
 - **Snippets: weergave en groeperen**: een **Raster/Lijst**-schakelaar (onthouden in `localStorage`;
   lijst = compacte rijen zonder codepreview) en **Groeperen op: Tag** (`?group_by=tag`, onder de
   eerste tag alfabetisch, "Zonder tag" onderaan, blijft bewaard bij bulk-verwijderen). In de

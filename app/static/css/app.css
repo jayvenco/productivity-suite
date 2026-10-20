@@ -4067,3 +4067,46 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
 .task-card[style*="--tag-hue"] .task-check-form { order: 0; }
 .task-card[style*="--tag-hue"] .task-card-body { order: 2; }
 .task-card[style*="--tag-hue"] .task-card-actions { order: 3; }
+
+/* Notitie-/mindmapkaart: bij hover wisselen de lichte en de donkere baan van de banner van plek
+   (links <-> rechts, met een vloeiende overgang). Elke baan is een eigen gradient-laag waarvan
+   de startpositie een geregistreerde custom property is, zodat die kan transitionen. */
+@property --stripe-light {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 24%;
+}
+
+@property --stripe-dark {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 54.4%;
+}
+
+.note-card[style*="--tag-hue"]::after {
+  --stripe-light: 24%;
+  --stripe-dark: 54.4%;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0 var(--stripe-dark),
+      hsla(var(--tag-hue), 68%, 58%, 0.9) var(--stripe-dark) calc(var(--stripe-dark) + 22.4%),
+      transparent calc(var(--stripe-dark) + 22.4%)
+    ),
+    linear-gradient(
+      115deg,
+      transparent 0 var(--stripe-light),
+      hsla(var(--tag-hue), 75%, 72%, 0.55) var(--stripe-light) calc(var(--stripe-light) + 22.4%),
+      transparent calc(var(--stripe-light) + 22.4%)
+    );
+  transition: --stripe-light 0.5s ease, --stripe-dark 0.5s ease;
+}
+
+.note-card[style*="--tag-hue"]:hover::after {
+  --stripe-light: 54.4%;
+  --stripe-dark: 24%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .note-card[style*="--tag-hue"]::after { transition: none; }
+}
