@@ -238,16 +238,15 @@ Gebouwd:
   schaduw, titel links en datum rechts. Taak- en notitiekaarten hebben geen ribbon of gradient meer (zie
   "Tag-streepjes" hieronder); stickies gebruiken dezelfde kaartvorm met hun gekozen kleur als ribbon.
   **Dagtaken** hebben een geel-zwart **afzetlint** (schuine strepen) dat halverwege de taakbalk
-  begint, naar rechts oploopt van doorzichtig tot 50% dekking en horizontaal beweegt (naadloze
-  lus van één tegelbreedte; stilstaand bij `prefers-reduced-motion`).
+  begint, oploopt tot 50% dekking en weer **vervaagt vóór de pomodoro-knop**, en horizontaal
+  beweegt (naadloze lus van één tegelbreedte; stilstaand bij `prefers-reduced-motion`).
   Snippetkaarten krijgen de tag-banner (zie hieronder), geen gradient-rand meer.
-- **Tag-streepjes**: een getagde taak- of notitiekaart krijgt twee schuine banen (een lichte en een
-  donkere tint, afgeleid van de kleur van de eerste tag via `--tag-hue`): bij notities een kleine banner (32×23px) rechtsboven met smallere banen en een
-  dekking die van onder (weinig) naar boven (volledig) loopt, bij taken over de volle hoogte aan het rechtereinde. Pure CSS (`::after` onder de
-  inhoud), dus zonder extra markup.
-  **Mindmap- en snippetkaarten** krijgen dezelfde (kleine) banner, maar in de onderste hoek
-  rechts (`MindmapBoard.row_tint_style`, klasse `mindmap-card`; snippets gebruiken
-  `Snippet.row_tint_style`).
+- **Tag-streepjes**: een getagde kaart krijgt twee schuine banen (een lichte en een donkere
+  tint, afgeleid van de kleur van de eerste tag via `--tag-hue`). **Taken**: een smalle ribbon
+  (50px, over de volle hoogte) **tussen het afvinkrondje en de tekst** (flex-item `::before`, de
+  tekst begint dus ná de ribbon). **Notities** een kleine banner (32×23px) rechtsboven met een
+  dekking die van onder (weinig) naar boven (volledig) loopt; **mindmap- en snippetkaarten** dezelfde
+  banner in de onderste hoek rechts. Pure CSS, zonder extra markup.
 - **Snippets: weergave en groeperen**: een **Raster/Lijst**-schakelaar (onthouden in `localStorage`;
   lijst = compacte rijen zonder codepreview) en **Groeperen op: Tag** (`?group_by=tag`, onder de
   eerste tag alfabetisch, "Zonder tag" onderaan, blijft bewaard bij bulk-verwijderen). In de

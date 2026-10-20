@@ -3789,19 +3789,19 @@ body:has(#task-ticker:not([hidden])) .main {
   overflow: hidden;
 }
 
-.task-card-daily::before {
+.task-card-daily::after {
   content: "";
   position: absolute;
   z-index: -1;
   pointer-events: none;
   left: 50%;
-  right: 0;
+  right: 64px; /* stopt vóór de pomodoro-/verwijderknoppen */
   top: 0;
   bottom: 0;
   background: linear-gradient(135deg, #f5c518 25%, #1b1b1b 25% 50%, #f5c518 50% 75%, #1b1b1b 75%);
   background-size: 28px 28px;
-  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.5) 100%);
-  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.5) 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.5) 55%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.5) 55%, transparent 100%);
   animation: daily-tape-move 2.4s linear infinite;
 }
 
@@ -3811,7 +3811,7 @@ body:has(#task-ticker:not([hidden])) .main {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .task-card-daily::before { animation: none; }
+  .task-card-daily::after { animation: none; }
 }
 
 /* Takenpagina: dagtaken links, de rest rechts (onder elkaar per tag); onder elkaar op smalle schermen. */
@@ -3957,8 +3957,8 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
 .stickies-grid .sticky-note .sticky-color-dot:has(input:checked) { border-color: var(--text); }
 
 /* Tag-streepjes: twee schuine banen (een lichte en een donkere tint) afgeleid van de tagkleur
-   (--tag-hue via row_tint_style). Notitiekaart: klein, rechtsboven. Taakkaart: over de volle
-   hoogte, aan het rechtereinde van de kaart. Ze liggen onder de inhoud (isolation + z-index -1). */
+   (--tag-hue via row_tint_style). Notitiekaart: klein, rechtsboven (taken: zie de ribbon
+   tussen checkbox en tekst hieronder). Ze liggen onder de inhoud (isolation + z-index -1). */
 .task-card[style*="--tag-hue"],
 .note-card[style*="--tag-hue"],
 .snippet-card[style*="--tag-hue"] {
@@ -3967,7 +3967,6 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   overflow: hidden;
 }
 
-.task-card[style*="--tag-hue"]::after,
 .note-card[style*="--tag-hue"]::after,
 .snippet-card[style*="--tag-hue"]::after {
   content: "";
@@ -3986,8 +3985,6 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
     transparent 86%
   );
 }
-
-.task-card[style*="--tag-hue"]::after { bottom: 0; }
 
 /* Notitie: de banner is half zo groot (32x23px), de twee banen zijn 30% smaller en de dekking
    loopt van onder (weinig zichtbaar) naar boven (volledig). */
@@ -4009,13 +4006,6 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
 
 .note-card[style*="--tag-hue"] .note-card-header { padding-right: 30px; }
 
-/* Knoppen rechts op een getagde taakkaart liggen boven de streepjes: wat meer contrast. */
-.task-card[style*="--tag-hue"] .task-card-delete,
-.task-card[style*="--tag-hue"] .task-card-focus {
-  color: var(--text);
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.55);
-}
-
 /* Mindmapkaart: dezelfde tag-banner als bij notities, maar in de onderste hoek rechts. */
 .mindmap-card[style*="--tag-hue"]::after,
 .snippet-card[style*="--tag-hue"]::after {
@@ -4024,15 +4014,6 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
 }
 
 .mindmap-card[style*="--tag-hue"] .note-card-header { padding-right: 0; }
-
-/* Op een getagde taakkaart nemen de knoppen precies de breedte van de tag-banner in (72px
-   incl. kaartpadding), zodat tekst, tags en deadline vóór de banner eindigen en er niet overheen
-   lopen. */
-.task-card[style*="--tag-hue"] .task-card-actions {
-  width: 60px;
-  justify-content: center;
-  flex-shrink: 0;
-}
 
 /* Snippets: lijstweergave = compacte rijen zonder codepreview; in de rasterweergave maakt
    snippets-view.js alle kaarten even hoog als de hoogste. */
@@ -4062,3 +4043,27 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
    lijstweergave blijft rechts ruimte voor de tag-banner. */
 .snippets-list:not(.view-list) .snippet-card-actions-row { margin-top: auto; }
 .snippets-list.view-list .snippet-card[style*="--tag-hue"] { padding-right: 46px; }
+
+/* Tag-ribbon op de taakkaart: een eigen (smallere, 50px) baan tússen het afvinkrondje en de
+   tekst, over de volle hoogte van de kaart. Het is een flex-item (::before), dus de tekst
+   begint automatisch ná de ribbon. */
+.task-card[style*="--tag-hue"]::before {
+  content: "";
+  order: 1;
+  flex: 0 0 50px;
+  align-self: stretch;
+  margin: -6px 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 0 14%,
+    hsla(var(--tag-hue), 75%, 72%, 0.55) 14% 46%,
+    transparent 46% 54%,
+    hsla(var(--tag-hue), 68%, 58%, 0.9) 54% 86%,
+    transparent 86%
+  );
+}
+
+.task-card[style*="--tag-hue"] .task-check-form { order: 0; }
+.task-card[style*="--tag-hue"] .task-card-body { order: 2; }
+.task-card[style*="--tag-hue"] .task-card-actions { order: 3; }
