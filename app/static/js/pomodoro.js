@@ -9,6 +9,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const menuBtn = document.getElementById("pomodoro-menu-btn");
   if (!float || !menuBtn) return; // menuBtn blijft altijd in de DOM (eventueel hidden)
 
+  // Als allereerste koppelen: zelfs als een latere stap van de initialisatie mislukt, blijft
+  // de menuknop de timer tonen/verbergen.
+  menuBtn.addEventListener("click", () => {
+    float.hidden = !float.hidden;
+    menuBtn.classList.toggle("active", !float.hidden);
+  });
+
   const RADIUS = 90;
   const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
   const MIN_WORK_MINUTES = 5;
@@ -75,11 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupDragging();
   loadTasks();
   loadState();
-
-  menuBtn.addEventListener("click", () => {
-    float.hidden = !float.hidden;
-    menuBtn.classList.toggle("active", !float.hidden);
-  });
 
   closeBtn.addEventListener("click", () => {
     float.hidden = true;
@@ -203,11 +205,38 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Een mislukte servercall (verlopen sessie, serverfout) mag niet stil blijven: toon wat er
+  // misging in plaats van dat de timer "gewoon niet start".
+  async function callApi(url, options) {
+    let response;
+    try {
+      response = await fetch(url, options);
+    } catch (err) {
+      alert("Pomodoro: de server is niet bereikbaar.");
+      throw err;
+    }
+    if (response.redirected && response.url.includes("/login")) {
+      alert("Pomodoro: je sessie is verlopen. Log opnieuw in.");
+      throw new Error("sessie verlopen");
+    }
+    if (!response.ok) {
+      let detail = response.statusText;
+      try {
+        detail = (await response.json()).detail || detail;
+      } catch (err) {
+        /* geen JSON in het antwoord */
+      }
+      alert(`Pomodoro: starten mislukt (${response.status}: ${detail}).`);
+      throw new Error(`HTTP ${response.status}`);
+    }
+    return response;
+  }
+
   async function startPhase(phase, minutes, taskId) {
     const body = new URLSearchParams({ phase, minutes: String(minutes) });
     if (taskId) body.set("task_id", taskId);
 
-    const response = await fetch("/pomodoro/start", { method: "POST", body });
+    const response = await callApi("/pomodoro/start", { method: "POST", body });
     currentSession = await response.json();
     showActive();
     startTicking();
