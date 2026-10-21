@@ -3783,13 +3783,15 @@ body:has(#task-ticker:not([hidden])) .main {
 /* Dagtaken: een geel-zwart afzetlint (schuine strepen) dat halverwege de taakbalk begint en naar
    rechts toe oploopt van doorzichtig (links) tot 50% dekking (rechts), en horizontaal beweegt.
    De baan is exact één tegelbreedte (28px) per cyclus verschoven, dus de lus is naadloos. */
-.task-card-daily {
+.task-card-daily,
+.task-card-priority {
   position: relative;
   isolation: isolate;
   overflow: hidden;
 }
 
-.task-card-daily::after {
+.task-card-daily::after,
+.task-card-priority::after {
   content: "";
   position: absolute;
   z-index: -1;
@@ -3798,12 +3800,15 @@ body:has(#task-ticker:not([hidden])) .main {
   right: 64px; /* stopt vóór de pomodoro-/verwijderknoppen */
   top: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #ffdd00 25%, #1b1b1b 25% 50%, #ffdd00 50% 75%, #1b1b1b 75%);
+  background: linear-gradient(135deg, var(--tape-color, #ffdd00) 25%, #1b1b1b 25% 50%, var(--tape-color, #ffdd00) 50% 75%, #1b1b1b 75%);
   background-size: 28px 28px;
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.5) 55%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.5) 55%, transparent 100%);
   animation: daily-tape-move 2s linear infinite;
 }
+
+/* Prioriteit: hetzelfde lint, maar oranje-zwart (wint van geel als een taak beide is). */
+.task-card-priority::after { --tape-color: #ff7a00; }
 
 @keyframes daily-tape-move {
   from { background-position-x: 0; }
@@ -3811,7 +3816,8 @@ body:has(#task-ticker:not([hidden])) .main {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .task-card-daily::after { animation: none; }
+  .task-card-daily::after,
+  .task-card-priority::after { animation: none; }
 }
 
 /* Takenpagina: dagtaken links, de rest rechts (onder elkaar per tag); onder elkaar op smalle schermen. */

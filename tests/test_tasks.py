@@ -500,3 +500,22 @@ def test_tasks_split_into_daily_and_rest_columns_grouped_by_first_tag(logged_in_
     for title in ["Kolom-dagtaak", "Kolom-overig"]:
         task_id = _task_id_for_title(page, title)
         logged_in_client.post(f"/tasks/{task_id}/delete")
+
+
+def test_priority_task_gets_priority_card_class(logged_in_client):
+    logged_in_client.post(
+        "/tasks", data={"title": "Prio-lint-taak", "description": "", "deadline": "", "tags": "", "priority": "true"}
+    )
+    logged_in_client.post("/tasks", data={"title": "Geen-prio-lint-taak", "description": "", "deadline": "", "tags": ""})
+    page = logged_in_client.get("/tasks").text
+
+    def card_classes(title):
+        start = page.rindex('<div class="task-card ', 0, page.index(title))
+        return page[start: page.index(">", start)]
+
+    assert "task-card-priority" in card_classes("Prio-lint-taak")
+    assert "task-card-priority" not in card_classes("Geen-prio-lint-taak")
+    for title in ["Prio-lint-taak", "Geen-prio-lint-taak"]:
+        idx = page.index(title)
+        task_id = re.findall(r'href="/tasks/(\d+)/edit"', page[:idx])[-1]
+        logged_in_client.post(f"/tasks/{task_id}/delete")

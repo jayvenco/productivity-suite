@@ -240,6 +240,8 @@ Gebouwd:
   **Dagtaken** hebben een geel-zwart **afzetlint** (schuine strepen) dat halverwege de taakbalk
   begint, oploopt tot 50% dekking en weer **vervaagt vóór de pomodoro-knop**, en horizontaal
   beweegt (naadloze lus van één tegelbreedte; stilstaand bij `prefers-reduced-motion`).
+  **Taken met prioriteit** krijgen hetzelfde bewegende lint, maar **oranje-zwart** (de ★ blijft
+  staan); is een taak ook dagtaak, dan wint oranje.
   Snippetkaarten krijgen de tag-banner (zie hieronder), geen gradient-rand meer.
 - **Tag-streepjes**: een getagde kaart krijgt twee schuine banen (een lichte en een donkere
   tint, afgeleid van de kleur van de eerste tag via `--tag-hue`). **Taken**: een smalle ribbon
