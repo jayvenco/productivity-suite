@@ -56,3 +56,9 @@ def test_daily_task_has_no_star_badge_but_keeps_daily_class(logged_in_client):
     assert "task-card-daily" in card and "daily-task-badge" not in card
     task_id = re.search(r'/tasks/(\d+)/edit"', page[card_start:]).group(1)
     logged_in_client.post(f"/tasks/{task_id}/delete")
+
+
+def test_page_has_sidebar_collapse_and_show_buttons(logged_in_client):
+    page = logged_in_client.get("/tasks").text
+    assert 'id="sidebar-collapse-btn"' in page and 'id="sidebar-show-btn"' in page
+    assert "js/sidebar-early.js" in page  # vroege script (extern) tegen een flits

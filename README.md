@@ -228,6 +228,10 @@ Gebouwd:
     `template_version`, `template_name`, zichtbaar boven de editor); het sjabloon verhoogt
     `version` bij elke wijziging, verwijderen zet `template_id` op NULL en geen van beide
     raakt bestaande notities.
+- **Navigatiemenu verbergen**: de knop « rechts in de merkbalk bovenaan het menu verbergt het
+  hele menu (desktop); een kleine ☰-knop linksboven brengt het terug. De keuze wordt onthouden
+  in `localStorage` en vóór het eerste paint toegepast (`js/sidebar-early.js`), dus zonder flits.
+  Op mobiel blijft het bestaande hamburgermenu gelden.
 - **Navigatie-zichtbaarheid** (Account → Navigatie): per module (Taken, Kanban, Mindmap,
   Notities, Pomodoro, Stickies, Snippets, Kalender, Zoeken, Graph, Statistieken) een vinkje om
   'm uit het navigatiemenu te halen of terug te zetten; opgeslagen per gebruiker

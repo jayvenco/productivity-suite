@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="{{ static_url('js/sidebar-early.js') }}"></script>
   <title>{% block title %}Productivity Suite{% endblock %}</title>
   <link rel="icon" type="image/svg+xml" href="{{ static_url('images/favicon.svg') }}">
   <link rel="stylesheet" href="{{ static_url('css/themes/dracula.css') }}">
@@ -26,10 +27,11 @@
   {% if user %}
   <div class="app-background"></div>
   <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu openen">☰</button>
+  <button type="button" class="sidebar-show-btn" id="sidebar-show-btn" title="Menu tonen" aria-label="Menu tonen">☰</button>
   <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
   <div class="layout">
     <aside class="sidebar" id="sidebar">
-      <div class="brand">Productivity Suite</div>
+      <div class="brand">Productivity Suite<button type="button" class="sidebar-collapse-btn" id="sidebar-collapse-btn" title="Menu verbergen" aria-label="Menu verbergen">«</button></div>
 
       <div class="mini-calendar-widget" id="mini-calendar-widget">
         <div class="mini-calendar-header">

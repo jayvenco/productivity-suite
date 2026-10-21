@@ -7,6 +7,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const backdrop = document.getElementById("sidebar-backdrop");
   if (!menuBtn || !sidebar || !backdrop) return;
 
+  // Desktop: het hele menu verbergen/tonen (keuze onthouden in localStorage; de vroege
+  // inline-script in <head> zet data-sidebar al voor het eerste paint, zonder flits).
+  const root = document.documentElement;
+  const setHidden = (hidden) => {
+    if (hidden) root.dataset.sidebar = "hidden";
+    else delete root.dataset.sidebar;
+    try {
+      localStorage.setItem("sidebar-hidden", hidden ? "1" : "0");
+    } catch (err) {
+      /* localStorage geblokkeerd: de keuze geldt dan alleen tot de volgende pagina */
+    }
+  };
+  const collapseBtn = document.getElementById("sidebar-collapse-btn");
+  const showBtn = document.getElementById("sidebar-show-btn");
+  if (collapseBtn) collapseBtn.addEventListener("click", () => setHidden(true));
+  if (showBtn) showBtn.addEventListener("click", () => setHidden(false));
+
   function openMenu() {
     sidebar.classList.add("mobile-open");
     backdrop.classList.add("visible");
