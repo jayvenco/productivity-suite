@@ -264,6 +264,17 @@ Gebouwd:
   rasterweergave maakt `snippets-view.js` **alle kaarten even hoog als de hoogste** (ook over
   groepen heen; de knoppen staan onderaan de kaart) en meet opnieuw na laden en bij
   vensterwijziging.
+- **Pomodoro-timer in nieuw ontwerp**: een donkere ronde timer met dikke oranje voortgangsboog (die
+  tijdens het aftellen slinkt; in rust een volle ring), een ring van 60 streepjes (kwartieren in
+  oranje), een tomaat, "POMODORO" in gespatieerde letters, de tijd groot (minuten wit, seconden
+  oranje), een grote ronde afspeelknop met oranje rand en daarnaast **reset** (↻: stopt een
+  lopende sessie, anders terug naar de standaardduur) en **overslaan** (⏭: focus → pauze →
+  klaar; zonder sessie het volgende tijdblok 25 → 5 → 15 min). −/+ (5 min), de presets en de
+  taakkeuze zitten klein onder de tijd. In de pauze wordt alles groen.
+  *Betrouwbaarheid*: de menuknop blijft altijd in de DOM (`hidden` als Pomodoro uit het menu is
+  gehaald), zodat de ▶-knop bij een taak blijft werken; een opgeslagen positie buiten beeld
+  wordt teruggezet binnen het venster; en bij een verborgen menu opent de ◷-knop naast de ☰
+  linksboven de timer.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief

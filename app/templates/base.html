@@ -28,6 +28,7 @@
   <div class="app-background"></div>
   <button type="button" class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu openen">☰</button>
   <button type="button" class="sidebar-show-btn" id="sidebar-show-btn" title="Menu tonen" aria-label="Menu tonen">☰</button>
+  <button type="button" class="sidebar-show-btn sidebar-pomodoro-btn" id="sidebar-pomodoro-btn" title="Pomodoro" aria-label="Pomodoro">◷</button>
   <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
   <div class="layout">
     <aside class="sidebar" id="sidebar">
@@ -62,7 +63,7 @@
 {% if user is none or user.module_visible('kanban') %}<a href="/kanban" class="nav-item {{ 'active' if request.url.path.startswith('/kanban') }}"><span class="nav-icon">▦</span>Kanban</a>{% endif %}
 {% if user is none or user.module_visible('mindmap') %}<a href="/mindmap" class="nav-item {{ 'active' if request.url.path.startswith('/mindmap') }}"><span class="nav-icon">◇</span>Mindmap</a>{% endif %}
 {% if user is none or user.module_visible('notes') %}<a href="/notes" class="nav-item {{ 'active' if request.url.path.startswith('/notes') }}"><span class="nav-icon">▤</span>Notities</a>{% endif %}
-{% if user is none or user.module_visible('pomodoro') %}<button type="button" id="pomodoro-menu-btn" class="nav-item"><span class="nav-icon">◷</span>Pomodoro</button>{% endif %}
+<button type="button" id="pomodoro-menu-btn" class="nav-item" {% if user and not user.module_visible('pomodoro') %}hidden{% endif %}><span class="nav-icon">◷</span>Pomodoro</button>
 {% if user is none or user.module_visible('stickies') %}<a href="/stickies" class="nav-item {{ 'active' if request.url.path.startswith('/stickies') }}"><span class="nav-icon">■</span>Stickies</a>{% endif %}
 {% if user is none or user.module_visible('snippets') %}<a href="/snippets" class="nav-item {{ 'active' if request.url.path.startswith('/snippets') }}"><span class="nav-icon">&lt;/&gt;</span>Snippets</a>{% endif %}
 {% if user is none or user.module_visible('calendar') %}<a href="/calendar" class="nav-item {{ 'active' if request.url.path.startswith('/calendar') }}"><span class="nav-icon">▢</span>Kalender</a>{% endif %}
@@ -99,32 +100,37 @@
   <div class="pomodoro-float" id="pomodoro-float" hidden>
     <button type="button" id="pomodoro-close-btn" class="pomodoro-float-close" title="Verbergen">×</button>
     <div class="pomodoro-circle">
-      <svg class="pomodoro-ring" viewBox="0 0 200 200">
+      <svg class="pomodoro-ring" viewBox="0 0 200 200" aria-hidden="true">
+        <circle class="pomodoro-ring-rim" cx="100" cy="100" r="98"></circle>
         <circle class="pomodoro-ring-bg" cx="100" cy="100" r="90"></circle>
-        <circle class="pomodoro-ring-progress" id="pomodoro-ring-progress" cx="100" cy="100" r="90"></circle>
+        <g id="pomodoro-ticks"></g>
+        <circle class="pomodoro-ring-progress" id="pomodoro-ring-progress" cx="100" cy="100" r="90" transform="rotate(-90 100 100)"></circle>
       </svg>
       <div class="pomodoro-circle-content">
         <div class="pomodoro-drag-handle" id="pomodoro-drag-handle">
           <div class="pomodoro-icon" id="pomodoro-icon">🍅</div>
           <div class="pomodoro-title">Pomodoro</div>
-          <div class="pomodoro-tagline" id="pomodoro-tagline">Focus vandaag, bereik morgen</div>
+          <div class="pomodoro-tagline" id="pomodoro-tagline" hidden>Focus vandaag, bereik morgen</div>
         </div>
+
+        <div class="pomodoro-time" id="pomodoro-time"><span class="pomodoro-time-min">25</span><span class="pomodoro-time-sep">:</span><span class="pomodoro-time-sec">00</span></div>
 
         <div class="pomodoro-adjust-row">
           <button type="button" class="pomodoro-adjust-btn" id="pomodoro-minus-btn" title="-5 min">−</button>
-          <div class="pomodoro-time-block">
-            <div class="pomodoro-time" id="pomodoro-time">25:00</div>
-            <div class="pomodoro-time-total" id="pomodoro-time-total">van 25 min</div>
-          </div>
+          <div class="pomodoro-time-total" id="pomodoro-time-total">van 25 min</div>
           <button type="button" class="pomodoro-adjust-btn" id="pomodoro-plus-btn" title="+5 min">+</button>
         </div>
 
-        <button type="button" class="pomodoro-toggle-btn" id="pomodoro-toggle-btn" title="Start">▶</button>
+        <div class="pomodoro-controls">
+          <button type="button" class="pomodoro-side-btn" id="pomodoro-reset-btn" title="Resetten" aria-label="Resetten">↻</button>
+          <button type="button" class="pomodoro-toggle-btn" id="pomodoro-toggle-btn" title="Start">▶</button>
+          <button type="button" class="pomodoro-side-btn" id="pomodoro-skip-btn" title="Volgende / overslaan" aria-label="Overslaan">⏭</button>
+        </div>
 
         <div class="pomodoro-presets" id="pomodoro-presets">
-          <button type="button" class="pomodoro-preset" data-minutes="25">🍅<span>25 min</span></button>
-          <button type="button" class="pomodoro-preset" data-minutes="5">☕<span>5 min</span></button>
-          <button type="button" class="pomodoro-preset" data-minutes="15">☕<span>15 min</span></button>
+          <button type="button" class="pomodoro-preset" data-minutes="25"><span>25</span></button>
+          <button type="button" class="pomodoro-preset" data-minutes="5"><span>5</span></button>
+          <button type="button" class="pomodoro-preset" data-minutes="15"><span>15</span></button>
         </div>
 
         <select id="pomodoro-task" class="pomodoro-task-select">

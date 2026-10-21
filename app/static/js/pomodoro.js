@@ -7,7 +7,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const float = document.getElementById("pomodoro-float");
   const menuBtn = document.getElementById("pomodoro-menu-btn");
-  if (!float || !menuBtn) return;
+  if (!float || !menuBtn) return; // menuBtn blijft altijd in de DOM (eventueel hidden)
 
   const RADIUS = 90;
   const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
@@ -20,6 +20,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const icon = document.getElementById("pomodoro-icon");
   const tagline = document.getElementById("pomodoro-tagline");
   const timeLabel = document.getElementById("pomodoro-time");
+  const timeMin = timeLabel.querySelector(".pomodoro-time-min");
+  const timeSec = timeLabel.querySelector(".pomodoro-time-sec");
+  const resetBtn = document.getElementById("pomodoro-reset-btn");
+  const skipBtn = document.getElementById("pomodoro-skip-btn");
+  const ticksGroup = document.getElementById("pomodoro-ticks");
+  const sideMenuBtn = document.getElementById("sidebar-pomodoro-btn");
   const timeTotalLabel = document.getElementById("pomodoro-time-total");
   const minusBtn = document.getElementById("pomodoro-minus-btn");
   const plusBtn = document.getElementById("pomodoro-plus-btn");
@@ -31,12 +37,38 @@ document.addEventListener("DOMContentLoaded", () => {
   const DEFAULT_TAGLINE = "Focus vandaag, bereik morgen";
 
   ring.style.strokeDasharray = String(CIRCUMFERENCE);
-  ring.style.strokeDashoffset = String(CIRCUMFERENCE);
+  ring.style.strokeDashoffset = "0";
 
   let currentSession = null;
   let intervalId = null;
   let workMinutes = 25;
   let breakMinutes = 5;
+  let defaultWorkMinutes = 25;
+
+  const pad = (n) => String(n).padStart(2, "0");
+  function setTime(minutes, seconds) {
+    timeMin.textContent = pad(minutes);
+    timeSec.textContent = pad(seconds);
+  }
+
+  // 60 streepjes rond de timer; elk kwartier (12/3/6/9 uur) oranje en iets langer.
+  function buildTicks() {
+    const NS = "http://www.w3.org/2000/svg";
+    for (let i = 0; i < 60; i++) {
+      const major = i % 15 === 0;
+      const angle = (i * 6 * Math.PI) / 180;
+      const inner = major ? 72 : 76;
+      const outer = 82;
+      const line = document.createElementNS(NS, "line");
+      line.setAttribute("x1", String(100 + inner * Math.sin(angle)));
+      line.setAttribute("y1", String(100 - inner * Math.cos(angle)));
+      line.setAttribute("x2", String(100 + outer * Math.sin(angle)));
+      line.setAttribute("y2", String(100 - outer * Math.cos(angle)));
+      line.setAttribute("class", major ? "pomodoro-tick pomodoro-tick-major" : "pomodoro-tick");
+      ticksGroup.appendChild(line);
+    }
+  }
+  buildTicks();
 
   restoreSavedMinutes();
   restoreFloatPosition();
@@ -83,6 +115,35 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Resetten: een lopende sessie stoppen, anders terug naar de standaardduur.
+  resetBtn.addEventListener("click", async () => {
+    if (currentSession) {
+      clearInterval(intervalId);
+      await fetch(`/pomodoro/${currentSession.id}/cancel`, { method: "POST" });
+      currentSession = null;
+      showIdle();
+    } else {
+      setWorkMinutes(defaultWorkMinutes);
+    }
+  });
+
+  // Overslaan: tijdens een sessie naar de volgende fase (focus -> pauze -> klaar); zonder
+  // sessie het volgende voorgestelde tijdblok (25 -> 5 -> 15 min).
+  skipBtn.addEventListener("click", async () => {
+    if (currentSession) {
+      clearInterval(intervalId);
+      await handlePhaseComplete();
+    } else {
+      const options = presetButtons.map((b) => parseInt(b.dataset.minutes, 10));
+      const next = options[(options.indexOf(workMinutes) + 1) % options.length];
+      setWorkMinutes(next);
+    }
+  });
+
+  // Het menu kan verborgen zijn (of de menuknop ontbreken in de nav): ook via de ◷-knop
+  // naast de ☰ linksboven is de timer te openen.
+  if (sideMenuBtn) sideMenuBtn.addEventListener("click", () => menuBtn.click());
+
   // ---- Pomodoro direct starten vanaf een taak (taaklijst/-bewerkpagina) ----
   document.addEventListener("click", (event) => {
     const btn = event.target.closest(".pomodoro-focus-btn");
@@ -110,6 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadState() {
     const response = await fetch("/pomodoro/state");
     const data = await response.json();
+    defaultWorkMinutes = data.default_work_minutes;
     if (!hasSavedMinutes()) {
       workMinutes = data.default_work_minutes;
       breakMinutes = data.default_break_minutes;
@@ -168,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const minutes = Math.floor(remaining / 60);
     const seconds = Math.floor(remaining % 60);
-    timeLabel.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    setTime(minutes, seconds);
 
     if (remaining <= 0) {
       clearInterval(intervalId);
@@ -197,7 +259,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderIdleTime() {
-    timeLabel.textContent = `${String(workMinutes).padStart(2, "0")}:00`;
+    setTime(workMinutes, 0);
     timeTotalLabel.textContent = `van ${workMinutes} min`;
   }
 
@@ -221,7 +283,7 @@ document.addEventListener("DOMContentLoaded", () => {
     toggleBtn.textContent = "▶";
     toggleBtn.title = "Start";
     setControlsEnabled(true);
-    ring.style.strokeDashoffset = String(CIRCUMFERENCE);
+    ring.style.strokeDashoffset = "0"; // in rust: volle ring (de resterende tijd is nog 100%)
     renderIdleTime();
     highlightPreset();
   }
@@ -315,8 +377,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const left = localStorage.getItem("pomodoro-float-left");
       const top = localStorage.getItem("pomodoro-float-top");
       if (left && top) {
-        float.style.left = left;
-        float.style.top = top;
+        // Een positie uit een groter venster kan nu buiten beeld vallen: binnen het scherm houden,
+        // anders lijkt de timer "niet te openen".
+        const size = 304;
+        const x = Math.max(0, Math.min(window.innerWidth - size, parseFloat(left) || 0));
+        const y = Math.max(0, Math.min(window.innerHeight - size, parseFloat(top) || 0));
+        float.style.left = `${x}px`;
+        float.style.top = `${y}px`;
         float.style.right = "auto";
         float.style.bottom = "auto";
       }
