@@ -98,7 +98,27 @@
   </div>
 
   <div class="pomodoro-float" id="pomodoro-float" hidden>
-    <button type="button" id="pomodoro-close-btn" class="pomodoro-float-close" title="Verbergen">×</button>
+    <div class="pomodoro-corner-btns">
+      <button type="button" id="pomodoro-settings-btn" class="pomodoro-corner-btn" title="Duur en taak" aria-label="Duur en taak">⚙</button>
+      <button type="button" id="pomodoro-close-btn" class="pomodoro-corner-btn" title="Verbergen" aria-label="Verbergen">×</button>
+    </div>
+
+    <div class="pomodoro-extras" id="pomodoro-extras">
+      <div class="pomodoro-adjust-row">
+        <button type="button" class="pomodoro-adjust-btn" id="pomodoro-minus-btn" title="-5 min">−</button>
+        <div class="pomodoro-presets" id="pomodoro-presets">
+          <button type="button" class="pomodoro-preset" data-minutes="25"><span>25</span></button>
+          <button type="button" class="pomodoro-preset" data-minutes="5"><span>5</span></button>
+          <button type="button" class="pomodoro-preset" data-minutes="15"><span>15</span></button>
+        </div>
+        <button type="button" class="pomodoro-adjust-btn" id="pomodoro-plus-btn" title="+5 min">+</button>
+      </div>
+      <div class="pomodoro-time-total" id="pomodoro-time-total">van 25 min</div>
+      <select id="pomodoro-task" class="pomodoro-task-select">
+        <option value="">Geen taak</option>
+      </select>
+    </div>
+
     <div class="pomodoro-circle">
       <svg class="pomodoro-ring" viewBox="0 0 200 200" aria-hidden="true">
         <circle class="pomodoro-ring-rim" cx="100" cy="100" r="98"></circle>
@@ -108,34 +128,28 @@
       </svg>
       <div class="pomodoro-circle-content">
         <div class="pomodoro-drag-handle" id="pomodoro-drag-handle">
-          <div class="pomodoro-icon" id="pomodoro-icon">🍅</div>
+          <div class="pomodoro-icon" id="pomodoro-icon">
+            <svg class="pomodoro-icon-tomato" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 8.2c-5.9 0-10.5 3.6-10.5 8.9 0 5 4.3 8.7 10.5 8.7s10.5-3.7 10.5-8.7c0-5.3-4.6-8.9-10.5-8.9z"/><path class="leaves" d="M16 9.4 12.6 4.6l2.3 2.1L16 3.4l1.1 3.3 2.3-2.1L16 9.4zM16 9.4l-5.4-.9 3.1 2.3zM16 9.4l5.4-.9-3.1 2.3z"/></svg>
+            <svg class="pomodoro-icon-cup" viewBox="0 0 32 32" aria-hidden="true"><path d="M7 11h15v8a6 6 0 0 1-6 6h-3a6 6 0 0 1-6-6v-8zm15 2h2.5a3 3 0 0 1 0 6H22v-2h2.5a1 1 0 0 0 0-2H22v-2zM9 6.5c0 1.2 1 1.6 1 2.8M13 5c0 1.5 1.2 2 1.2 3.4"/></svg>
+          </div>
           <div class="pomodoro-title">Pomodoro</div>
           <div class="pomodoro-tagline" id="pomodoro-tagline" hidden>Focus vandaag, bereik morgen</div>
         </div>
 
         <div class="pomodoro-time" id="pomodoro-time"><span class="pomodoro-time-min">25</span><span class="pomodoro-time-sep">:</span><span class="pomodoro-time-sec">00</span></div>
 
-        <div class="pomodoro-adjust-row">
-          <button type="button" class="pomodoro-adjust-btn" id="pomodoro-minus-btn" title="-5 min">−</button>
-          <div class="pomodoro-time-total" id="pomodoro-time-total">van 25 min</div>
-          <button type="button" class="pomodoro-adjust-btn" id="pomodoro-plus-btn" title="+5 min">+</button>
-        </div>
-
         <div class="pomodoro-controls">
-          <button type="button" class="pomodoro-side-btn" id="pomodoro-reset-btn" title="Resetten" aria-label="Resetten">↻</button>
-          <button type="button" class="pomodoro-toggle-btn" id="pomodoro-toggle-btn" title="Start">▶</button>
-          <button type="button" class="pomodoro-side-btn" id="pomodoro-skip-btn" title="Volgende / overslaan" aria-label="Overslaan">⏭</button>
+          <button type="button" class="pomodoro-side-btn" id="pomodoro-reset-btn" title="Resetten" aria-label="Resetten">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V2.5L8 6l4 3.5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>
+          </button>
+          <button type="button" class="pomodoro-toggle-btn" id="pomodoro-toggle-btn" title="Start" aria-label="Start/stop">
+            <svg class="pomodoro-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10.5-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5z"/></svg>
+            <svg class="pomodoro-stop" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="6.5" width="11" height="11" rx="2"/></svg>
+          </button>
+          <button type="button" class="pomodoro-side-btn" id="pomodoro-skip-btn" title="Volgende / overslaan" aria-label="Overslaan">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5v11a.8.8 0 0 0 1.3.6l7-5.5a.8.8 0 0 0 0-1.2l-7-5.5A.8.8 0 0 0 4 6.5zm9 0v11a.8.8 0 0 0 1.3.6l7-5.5a.8.8 0 0 0 0-1.2l-7-5.5A.8.8 0 0 0 13 6.5z"/></svg>
+          </button>
         </div>
-
-        <div class="pomodoro-presets" id="pomodoro-presets">
-          <button type="button" class="pomodoro-preset" data-minutes="25"><span>25</span></button>
-          <button type="button" class="pomodoro-preset" data-minutes="5"><span>5</span></button>
-          <button type="button" class="pomodoro-preset" data-minutes="15"><span>15</span></button>
-        </div>
-
-        <select id="pomodoro-task" class="pomodoro-task-select">
-          <option value="">Geen taak</option>
-        </select>
       </div>
     </div>
   </div>

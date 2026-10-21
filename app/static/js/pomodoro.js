@@ -23,8 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const dragHandle = document.getElementById("pomodoro-drag-handle");
   const closeBtn = document.getElementById("pomodoro-close-btn");
+  const settingsBtn = document.getElementById("pomodoro-settings-btn");
   const ring = document.getElementById("pomodoro-ring-progress");
-  const icon = document.getElementById("pomodoro-icon");
   const tagline = document.getElementById("pomodoro-tagline");
   const timeLabel = document.getElementById("pomodoro-time");
   const timeMin = timeLabel.querySelector(".pomodoro-time-min");
@@ -44,7 +44,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const DEFAULT_TAGLINE = "Focus vandaag, bereik morgen";
 
   ring.style.strokeDasharray = String(CIRCUMFERENCE);
-  ring.style.strokeDashoffset = "0";
+  // De boog is een wijzerplaat van 60 minuten: 25:00 = 25/60 van de cirkel; tijdens het aftellen
+  // slinkt hij mee (zoals in het ontwerp).
+  function setRing(remainingSeconds) {
+    const fraction = Math.max(0, Math.min(1, remainingSeconds / 3600));
+    ring.style.strokeDashoffset = String(CIRCUMFERENCE * (1 - fraction));
+  }
+  setRing(25 * 60);
 
   let currentSession = null;
   let intervalId = null;
@@ -82,6 +88,9 @@ document.addEventListener("DOMContentLoaded", () => {
   setupDragging();
   loadTasks();
   loadState();
+
+  // Duur/taak-paneeltje: verschijnt bij hover, en met ⚙ ook op touch/vastgezet.
+  settingsBtn.addEventListener("click", () => float.classList.toggle("pomodoro-show-extras"));
 
   closeBtn.addEventListener("click", () => {
     float.hidden = true;
@@ -254,8 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const elapsed = (Date.now() - startedAtMs) / 1000;
     const remaining = Math.max(0, totalSeconds - elapsed);
 
-    const fraction = totalSeconds > 0 ? elapsed / totalSeconds : 1;
-    ring.style.strokeDashoffset = String(CIRCUMFERENCE * Math.min(1, fraction));
+    setRing(remaining);
 
     const minutes = Math.floor(remaining / 60);
     const seconds = Math.floor(remaining % 60);
@@ -289,6 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function renderIdleTime() {
     setTime(workMinutes, 0);
+    setRing(workMinutes * 60);
     timeTotalLabel.textContent = `van ${workMinutes} min`;
   }
 
@@ -307,12 +316,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function showIdle() {
     float.classList.remove("pomodoro-active", "pomodoro-break");
-    icon.textContent = "🍅";
     tagline.textContent = DEFAULT_TAGLINE;
-    toggleBtn.textContent = "▶";
     toggleBtn.title = "Start";
     setControlsEnabled(true);
-    ring.style.strokeDashoffset = "0"; // in rust: volle ring (de resterende tijd is nog 100%)
     renderIdleTime();
     highlightPreset();
   }
@@ -320,10 +326,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function showActive() {
     float.classList.add("pomodoro-active");
     float.classList.toggle("pomodoro-break", currentSession.phase === "break");
-    icon.textContent = currentSession.phase === "work" ? "🍅" : "☕";
     tagline.textContent = currentSession.phase === "work" ? "Focus loopt..." : "Pauze";
     timeTotalLabel.textContent = `van ${currentSession.planned_minutes} min`;
-    toggleBtn.textContent = "⏹";
     toggleBtn.title = "Stop";
     setControlsEnabled(false);
   }
