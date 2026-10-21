@@ -3979,9 +3979,9 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   background: linear-gradient(
     115deg,
     transparent 0 14%,
-    hsla(var(--tag-hue), 85%, 84%, 0.55) 14% 46%,
+    hsla(var(--tag-hue), 100%, 76%, 0.75) 14% 46%,
     transparent 46% 54%,
-    hsla(var(--tag-hue), 72%, 44%, 0.95) 54% 86%,
+    hsla(var(--tag-hue), 95%, 46%, 1) 54% 86%,
     transparent 86%
   );
 }
@@ -3995,9 +3995,9 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   background: linear-gradient(
     115deg,
     transparent 0 24%,
-    hsla(var(--tag-hue), 85%, 84%, 0.55) 24% 46.4%,
+    hsla(var(--tag-hue), 100%, 76%, 0.75) 24% 46.4%,
     transparent 46.4% 54.4%,
-    hsla(var(--tag-hue), 72%, 44%, 0.95) 54.4% 76.8%,
+    hsla(var(--tag-hue), 95%, 46%, 1) 54.4% 76.8%,
     transparent 76.8%
   );
   -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.1), #000);
@@ -4057,9 +4057,9 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   background: linear-gradient(
     115deg,
     transparent 0 14%,
-    hsla(var(--tag-hue), 85%, 84%, 0.55) 14% 46%,
+    hsla(var(--tag-hue), 100%, 76%, 0.75) 14% 46%,
     transparent 46% 54%,
-    hsla(var(--tag-hue), 72%, 44%, 0.95) 54% 86%,
+    hsla(var(--tag-hue), 95%, 46%, 1) 54% 86%,
     transparent 86%
   );
 }
@@ -4092,13 +4092,13 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
     linear-gradient(
       115deg,
       transparent 0 var(--stripe-dark),
-      hsla(var(--tag-hue), 72%, 44%, 0.95) var(--stripe-dark) calc(var(--stripe-dark) + 22.4%),
+      hsla(var(--tag-hue), 95%, 46%, 1) var(--stripe-dark) calc(var(--stripe-dark) + 22.4%),
       transparent calc(var(--stripe-dark) + 22.4%)
     ),
     linear-gradient(
       115deg,
       transparent 0 var(--stripe-light),
-      hsla(var(--tag-hue), 85%, 84%, 0.55) var(--stripe-light) calc(var(--stripe-light) + 22.4%),
+      hsla(var(--tag-hue), 100%, 76%, 0.75) var(--stripe-light) calc(var(--stripe-light) + 22.4%),
       transparent calc(var(--stripe-light) + 22.4%)
     );
   transition: --stripe-light 0.5s ease, --stripe-dark 0.5s ease;
@@ -4118,13 +4118,13 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
     linear-gradient(
       115deg,
       transparent 0 var(--stripe-dark),
-      hsla(var(--tag-hue), 72%, 44%, 0.95) var(--stripe-dark) calc(var(--stripe-dark) + 32%),
+      hsla(var(--tag-hue), 95%, 46%, 1) var(--stripe-dark) calc(var(--stripe-dark) + 32%),
       transparent calc(var(--stripe-dark) + 32%)
     ),
     linear-gradient(
       115deg,
       transparent 0 var(--stripe-light),
-      hsla(var(--tag-hue), 85%, 84%, 0.55) var(--stripe-light) calc(var(--stripe-light) + 32%),
+      hsla(var(--tag-hue), 100%, 76%, 0.75) var(--stripe-light) calc(var(--stripe-light) + 32%),
       transparent calc(var(--stripe-light) + 32%)
     );
   transition: --stripe-light 0.5s ease, --stripe-dark 0.5s ease;
@@ -4139,4 +4139,12 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
   .note-card[style*="--tag-hue"]::after,
   .snippet-card[style*="--tag-hue"]::after,
   .task-card[style*="--tag-hue"]::before { transition: none; }
+}
+
+/* Alle tag-ribbons: een lichte schaduw onder de banen (filter: drop-shadow volgt de vorm van de
+   baan, ook na de mask/gradient). */
+.task-card[style*="--tag-hue"]::before,
+.note-card[style*="--tag-hue"]::after,
+.snippet-card[style*="--tag-hue"]::after {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
 }

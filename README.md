@@ -250,7 +250,8 @@ Gebouwd:
   Bij **hover** op een getagde taak-, notitie-, mindmap- of snippetkaart wisselen de lichte en de donkere baan vloeiend van
   plek (twee gradient-lagen met geregistreerde `@property`-startposities `--stripe-light`/
   `--stripe-dark` die transitionen; uit bij `prefers-reduced-motion`). Het kleurverschil tussen
-  de lichte en de donkere baan is groot (L 84% vs 44%).
+  de lichte en de donkere baan is groot en de kleuren zijn fel (L 76% vs 46%, verzadiging 95-100%),
+  met een lichte `drop-shadow` onder de banen.
 - **Snippets: weergave en groeperen**: een **Raster/Lijst**-schakelaar (onthouden in `localStorage`;
   lijst = compacte rijen zonder codepreview) en **Groeperen op: Tag** (`?group_by=tag`, onder de
   eerste tag alfabetisch, "Zonder tag" onderaan, blijft bewaard bij bulk-verwijderen). In de
