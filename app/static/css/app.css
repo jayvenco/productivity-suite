@@ -3804,13 +3804,13 @@ body:has(#task-ticker:not([hidden])) .main {
   background-size: 28px 28px;
   -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.5) 55%, transparent 100%);
   mask-image: linear-gradient(90deg, transparent 0%, rgba(0, 0, 0, 0.5) 55%, transparent 100%);
-  animation: daily-tape-move 2s linear infinite;
+  animation: daily-tape-move 1.67s linear infinite;
 }
 
 /* Lintvarianten (strepen a/b): dagtaak = geel-zwart (standaard); prioriteit zonder dagtaak = alleen
-   gele strepen (de zwarte vallen weg); dagtaak én prioriteit = oranje afgewisseld met geel. */
+   gele strepen (de zwarte vallen weg); dagtaak én prioriteit = rood afgewisseld met geel. */
 .task-card-priority:not(.task-card-daily)::after { --tape-b: transparent; }
-.task-card-priority.task-card-daily::after { --tape-a: #ff7a00; --tape-b: #ffdd00; }
+.task-card-priority.task-card-daily::after { --tape-a: #e8212b; --tape-b: #ffdd00; }
 
 @keyframes daily-tape-move {
   from { background-position-x: 0; }

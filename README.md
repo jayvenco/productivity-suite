@@ -241,7 +241,7 @@ Gebouwd:
   begint, oploopt tot 50% dekking en weer **vervaagt vóór de pomodoro-knop**, en horizontaal
   beweegt (naadloze lus van één tegelbreedte; stilstaand bij `prefers-reduced-motion`).
   **Lintvarianten**: dagtaak = geel-zwart; **prioriteit zonder dagtaak** = alleen gele strepen (geen
-  zwart); **dagtaak én prioriteit** = oranje afgewisseld met geel (de ★ blijft bij prioriteit staan).
+  zwart); **dagtaak én prioriteit** = rood afgewisseld met geel (de ★ blijft bij prioriteit staan).
   Snippetkaarten krijgen de tag-banner (zie hieronder), geen gradient-rand meer.
 - **Tag-streepjes**: een getagde kaart krijgt twee schuine banen (een lichte en een donkere
   tint, afgeleid van de kleur van de eerste tag via `--tag-hue`). **Taken**: een smalle ribbon
