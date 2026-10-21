@@ -1,5 +1,5 @@
-// Quick-add-wiel: klik op de ronde hub-knop rechtsonder om een semi-transparant
-// rond menu met 5 snelkoppelingen te openen (Notities/Kanban/Snippets/Taken/
+// Quick-add-wiel: klik op de ronde hub-knop rechtsonder om een rond menu met 6
+// sectoren en snelkoppelingen te openen (Notities/Kanban/Snippets/Taken/
 // Mindmap), elk een gewone link naar de bijbehorende aanmaakpagina -- geen los
 // formulier, gewoon navigeren zoals een klik op de sidebar.
 document.addEventListener("DOMContentLoaded", () => {

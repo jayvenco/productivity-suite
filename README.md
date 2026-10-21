@@ -276,6 +276,11 @@ Gebouwd:
   gehaald), de knop wordt als eerste gekoppeld, servercalls tonen een melding bij falen, een
   opgeslagen positie buiten beeld wordt teruggezet, en bij een verborgen menu opent de ◷-knop
   naast de ☰ linksboven de timer.
+- **Snelmenu (wiel) in nieuw ontwerp**: de hub rechtsonder (donkere cirkel, oranje rand, vier
+  puntjes) klapt open naar een donker rond wiel met dikke gloeiende oranje rand, **zes sectoren**
+  gescheiden door dunne lijnen (inline SVG) en **lijn-iconen met oranje accenten** (Notities,
+  Kanban, Snippets, Voice, Taken, Mindmap) met label; hover kleurt het label oranje en tilt het icoon
+  op. Zelfde acties en links als voorheen (Voice opent het opnamepaneel).
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief

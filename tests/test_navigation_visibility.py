@@ -62,3 +62,11 @@ def test_page_has_sidebar_collapse_and_show_buttons(logged_in_client):
     page = logged_in_client.get("/tasks").text
     assert 'id="sidebar-collapse-btn"' in page and 'id="sidebar-show-btn"' in page
     assert "js/sidebar-early.js" in page  # vroege script (extern) tegen een flits
+
+
+def test_quickadd_wheel_has_six_sectors_with_svg_icons(logged_in_client):
+    page = logged_in_client.get("/tasks").text
+    assert page.count('class="quickadd-spoke"') == 6
+    assert page.count('class="quickadd-spoke-icon"') == 6 and "quickadd-dividers" in page
+    for label in ["Notities", "Kanban", "Snippets", "Voice", "Taken", "Mindmap"]:
+        assert f'class="quickadd-spoke-label">{label}<' in page
