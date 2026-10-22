@@ -12,6 +12,7 @@ from app.models.inbox import InboxItem
 from app.models.kanban import KanbanBoard
 from app.models.user import User
 from app.services import inbox as inbox_service
+from app.services.richtext import plain_text, sanitize_rich
 from app.templating import templates
 
 router = APIRouter(prefix="/inbox", tags=["inbox"])
@@ -56,8 +57,8 @@ def add_item(
 ):
     """Voegt een item toe. Vanuit het snelle invoervenster (fetch) komt er JSON terug, vanuit
     het formulier op de inbox-pagina een redirect."""
-    clean = text.strip()
-    if not clean:
+    clean = sanitize_rich(text.strip())
+    if not plain_text(clean).strip() and "<img" not in clean:
         if request.headers.get("x-requested-with") == "fetch":
             return JSONResponse({"detail": "Tekst is leeg"}, status_code=400)
         return RedirectResponse("/inbox", status_code=303)
@@ -74,8 +75,9 @@ def update_item(
     item_id: int, text: str = Form(...), user: User = Depends(require_user), db: Session = Depends(get_db)
 ):
     item = _get_item_or_404(db, item_id, user.id)
-    if text.strip():
-        item.text = text.strip()
+    clean = sanitize_rich(text.strip())
+    if plain_text(clean).strip() or "<img" in clean:
+        item.text = clean
         db.commit()
     return RedirectResponse("/inbox", status_code=303)
 

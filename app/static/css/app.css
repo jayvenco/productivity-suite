@@ -1090,18 +1090,18 @@ textarea {
 }
 
 /* Schermvullende editor: titel en tags houden hun hoogte, de beschrijving vult de rest. */
-.card-edit-form.kanban-modal .md-editor,
-.add-card-form[open] > .add-card-modal-form .md-editor {
+.card-edit-form.kanban-modal .rich-wrap,
+.add-card-form[open] > .add-card-modal-form .rich-wrap {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-height: 200px;
 }
 
-.card-edit-form.kanban-modal .md-textarea,
-.add-card-form[open] > .add-card-modal-form .md-textarea {
+.card-edit-form.kanban-modal .rich-editor,
+.add-card-form[open] > .add-card-modal-form .rich-editor {
   flex: 1;
-  resize: none;
+  overflow-y: auto;
 }
 
 /* "+ Kaart toevoegen" geopend: zelfde schermvullende editor als bij bewerken. */
@@ -4342,3 +4342,60 @@ body:has(#task-ticker:not([hidden])) .form-page.note-form-page {
 .inbox-item-options-body label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--text-muted); }
 .inbox-item-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .inbox-empty { color: var(--text-muted); }
+
+/* ---- Rich-text-editor (static/js/rich-editor.js) ---- */
+.rich-wrap { display: flex; flex-direction: column; min-height: 0; }
+.rich-wrap .rich-toolbar { margin-bottom: 6px; }
+.rich-wrap .rich-editor { min-height: 140px; overflow-y: auto; }
+
+.rich-editor.is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--text-muted);
+  pointer-events: none;
+  position: absolute;
+}
+
+.note-form-page .rich-wrap { flex: 1; }
+
+/* Afvinkbare checklist (ul.rt-checklist > li[data-checked]): overal hetzelfde, in de editor en in
+   weergaven (kaart, taak, inbox, notitiepreview). */
+ul.rt-checklist { list-style: none; padding-left: 4px; margin: 4px 0; }
+
+ul.rt-checklist > li[data-checked] {
+  position: relative;
+  padding-left: 26px;
+  margin: 2px 0;
+  min-height: 18px;
+}
+
+ul.rt-checklist > li[data-checked]::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 3px;
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+ul.rt-checklist > li[data-checked]:hover::before { border-color: var(--accent); }
+
+ul.rt-checklist > li[data-checked="1"]::before {
+  background: color-mix(in srgb, var(--accent) 60%, transparent);
+  border-color: var(--accent);
+}
+
+ul.rt-checklist > li[data-checked="1"] { color: var(--text-muted); text-decoration: line-through; }
+
+.rich-html p, .rich-html ul, .rich-html ol { margin: 0 0 4px; }
+.rich-html img { max-width: 100%; height: auto; border-radius: 10px; }
+.card-description .rich-html { font-size: 12px; }
+.inbox-item-text .rich-html { white-space: normal; }
+.inbox-item-text { white-space: normal; }
+.inbox-capture .rich-editor,
+.inbox-add-form .rich-editor { min-height: 110px; max-height: 40vh; }
+.inbox-add-form .rich-wrap { flex: 1; }
+.task-card-preview { }

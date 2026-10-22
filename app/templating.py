@@ -9,6 +9,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.config import BASE_DIR
 from app.services.checklist import render_description_html
+from app.services.richtext import looks_like_html, plain_text, sanitize_note_html
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
 
@@ -27,7 +28,20 @@ def render_markdown(text: str) -> str:
 
 
 def render_card_description(description: str, card_id: int) -> str:
+    """Kaartbeschrijving: HTML van de rich-text-editor (afvinkbare items via data-checked, zie
+    kanban.js), of -- voor oudere kaarten -- markdown met de klassieke checklist-regels."""
+    if looks_like_html(description):
+        return f'<div class="rich-html" data-card-id="{card_id}">{sanitize_note_html(description)}</div>'
     return render_description_html(description, card_id, render_markdown)
+
+
+def render_rich(text: str) -> str:
+    """Taak-/inbox-tekst: HTML van de editor, of platte tekst/markdown van vóór de editor."""
+    if not text:
+        return ""
+    if looks_like_html(text):
+        return f'<div class="rich-html">{sanitize_note_html(text)}</div>'
+    return render_markdown(text)
 
 
 def relative_time(dt: datetime | None) -> str:
@@ -75,5 +89,7 @@ def static_url(path: str) -> str:
 
 templates.env.filters["markdown"] = render_markdown
 templates.env.filters["checklist_html"] = render_card_description
+templates.env.filters["rich_html"] = render_rich
+templates.env.filters["plain_text"] = plain_text
 templates.env.filters["relative_time"] = relative_time
 templates.env.globals["static_url"] = static_url

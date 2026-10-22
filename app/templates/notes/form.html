@@ -11,25 +11,8 @@
   </div>
 
   <div class="field">
-    <label>Inhoud</label>
-    <div class="rich-toolbar" id="rich-toolbar">
-      <button type="button" data-cmd="bold" title="Vet"><b>V</b></button>
-      <button type="button" data-cmd="italic" title="Cursief"><i>C</i></button>
-      <select data-cmd="formatBlock" title="Kop">
-        <option value="p">Normale tekst</option>
-        <option value="h2">Kop 1</option>
-        <option value="h3">Kop 2</option>
-      </select>
-      <button type="button" data-cmd="insertUnorderedList" title="Opsomming">• Lijst</button>
-      <button type="button" data-cmd="insertOrderedList" title="Genummerde lijst">1. Lijst</button>
-      <button type="button" data-cmd="createLink" title="Link invoegen">Link</button>
-      <button type="button" data-cmd="code" title="Code">&lt;/&gt;</button>
-      <button type="button" data-cmd="insertImage" title="Afbeelding invoegen (of plak/sleep een afbeelding in het tekstvak)">🖼 Afbeelding</button>
-      <button type="button" data-cmd="removeFormat" title="Opmaak wissen">Wissen</button>
-    </div>
-    <div id="note-editor" class="rich-editor" contenteditable="true">{{ note.content|safe if note else '' }}</div>
-    <input type="file" id="note-image-input" accept="image/*" hidden>
-    <textarea name="content" id="content" hidden></textarea>
+    <label for="content">Inhoud</label>
+    <textarea name="content" id="content" data-rich-editor>{{ note.content if note else '' }}</textarea>
   </div>
 
   <div class="field">
@@ -55,5 +38,4 @@
 {% endif %}
 </div>
 
-<script src="{{ static_url('js/notes.js') }}"></script>
 {% endblock %}

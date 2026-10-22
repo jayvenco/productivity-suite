@@ -15,15 +15,9 @@
     <input type="text" id="title" name="title" required value="{{ task.title if task else '' }}">
   </div>
   <div class="field">
-    <label for="description">Beschrijving (Markdown ondersteund: **vet**, *cursief*, lijsten, `code`, [links](url))</label>
-    <textarea id="description" name="description" rows="6">{{ task.description if task else '' }}</textarea>
+    <label for="description">Beschrijving</label>
+    <textarea id="description" name="description" data-rich-editor>{{ task.description if task else '' }}</textarea>
   </div>
-  {% if task and task.description %}
-  <div class="field">
-    <label>Voorbeeld</label>
-    <div class="markdown-preview">{{ task.description|markdown|safe }}</div>
-  </div>
-  {% endif %}
   <div class="field">
     <label for="deadline">Deadline</label>
     <input type="date" id="deadline" name="deadline" value="{{ task.deadline.isoformat() if task and task.deadline else '' }}">

@@ -101,7 +101,7 @@
   <div class="inbox-capture-backdrop" id="inbox-capture-backdrop" hidden></div>
   <form class="inbox-capture" id="inbox-capture" hidden>
     <div class="inbox-capture-title">Inbox <span>Alt+I</span></div>
-    <textarea id="inbox-capture-text" rows="5" placeholder="Typ meteen... (eerste regel = titel)"></textarea>
+    <textarea id="inbox-capture-text" rows="5" data-rich-editor placeholder="Typ meteen... (eerste regel = titel)"></textarea>
     <div class="inbox-capture-actions">
       <span class="inbox-capture-hint">Cmd/Ctrl+Enter = opslaan</span>
       <button type="button" class="btn btn-secondary" id="inbox-capture-cancel">Annuleren</button>
@@ -271,6 +271,7 @@
 
   <script src="{{ static_url('js/pomodoro.js') }}"></script>
   <script src="{{ static_url('js/quickadd.js') }}"></script>
+  <script src="{{ static_url('js/rich-editor.js') }}"></script>
   <script src="{{ static_url('js/inbox-capture.js') }}"></script>
   <script src="{{ static_url('js/voice.js') }}"></script>
   <script src="{{ static_url('js/mobile-nav.js') }}"></script>

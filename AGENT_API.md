@@ -30,6 +30,8 @@ Ontbrekende/ongeldige token → `401` met `{"detail": "..."}`. Verbinding testen
 | Uit archief halen | `POST /tasks/{id}/restore` |
 | Verwijderen | `DELETE /tasks/{id}` |
 
+`description` (taken, kaarten) en inbox-tekst mogen HTML zijn (opmaak van de editor: `<p>`, `<b>`, lijsten, `<ul class="rt-checklist"><li data-checked="0">…</li></ul>` voor afvinkbare items); platte tekst blijft toegestaan. HTML wordt opgeschoond.
+
 Afgeronde taken verdwijnen 8 uur na afronden naar het archief (`status=archived`), en worden daar na 30 dagen definitief verwijderd. Zonder `status` zie je alles behalve gearchiveerde taken.
 
 ## Inbox (`/inbox`)
@@ -49,7 +51,7 @@ Omzetten (en uit de inbox halen): `POST /inbox/{id}/convert` `{"to": "note"|"tas
 - Kaart aanmaken: `POST /kanban/cards` `{"title", "description", "tags", "color", "swimlane_id", "column_id"}` (zonder swimlane/kolom komt hij in de eerste cel).
 - `GET /kanban/cards?swimlane_id=&column_id=&tag=` · `GET|PATCH|DELETE /kanban/cards/{id}` (PATCH: `title`, `description`, `tags`, `color`).
 - Verplaatsen: `POST /kanban/cards/{id}/move` `{"swimlane_id": 1, "column_id": 3, "position": 0}` (de kolom moet bij die swimlane horen).
-- Checklist: items staan in `description` als `- [ ] stap` / `- [x] stap`; voortgang in `checklist: {done, total}`. Afvinken: `POST /kanban/cards/{id}/checklist-toggle` `{"line_index": 0}` (regelnummer in de beschrijving, vanaf 0).
+- Checklist: items staan in `description` als `- [ ] stap` / `- [x] stap`; voortgang in `checklist: {done, total}`. Afvinken: `POST /kanban/cards/{id}/checklist-toggle` `{"item_index": 0}` (HTML-beschrijving: n-de afvinkbare item) of `{"line_index": 0}` (oude markdown-kaarten: regelnummer).
 - Swimlanes: `GET|POST /kanban/swimlanes` (`{"name"}`; een nieuwe krijgt 5 standaardkolommen) · `PATCH|DELETE /kanban/swimlanes/{id}` (de laatste swimlane kan niet verwijderd worden).
 
 ## Voorbeeld

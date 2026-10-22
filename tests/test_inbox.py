@@ -46,12 +46,12 @@ def test_convert_to_task_note_and_card_removes_item(logged_in_client):
         db.commit()
     assert "Taak-titel" not in logged_in_client.get("/inbox").text
 
-    _add(logged_in_client, "Notitie-titel\nregel <b>een</b>\nregel twee")
+    _add(logged_in_client, "Notitie-titel\nregel 5 & 6\nregel twee")
     note = logged_in_client.post(f"/inbox/{_item_id(logged_in_client, 'Notitie-titel')}/to-note", follow_redirects=False)
     assert note.status_code == 303 and "/edit" in note.headers["location"]
     with SessionLocal() as db:
         created = db.query(Note).filter(Note.title == "Notitie-titel").one()
-        assert "<p>regel &lt;b&gt;een&lt;/b&gt;</p>" in created.content and "<p>regel twee</p>" in created.content
+        assert "<p>regel 5 &amp; 6</p>" in created.content and "<p>regel twee</p>" in created.content
         db.delete(created)
         db.commit()
 

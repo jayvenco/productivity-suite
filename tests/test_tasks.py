@@ -20,21 +20,21 @@ def test_create_and_list_task(logged_in_client):
 
 
 def test_bare_url_in_description_is_auto_linked(logged_in_client):
+    """De rich-text-editor stuurt HTML; kale URL's worden bij het opslaan aanklikbaar gemaakt."""
     logged_in_client.post(
         "/tasks",
         data={
             "title": "Linktest taak",
-            "description": "Zie www.mondschoon.nl voor meer info",
+            "description": "<p>Zie www.mondschoon.nl voor meer info</p>",
             "deadline": "",
             "tags": "",
         },
     )
-    listing = logged_in_client.get("/tasks").text
-    idx = listing.rindex("Linktest taak")
-    task_id = re.findall(r'href="/tasks/(\d+)/edit"', listing[:idx])[-1]
-
-    edit_page = logged_in_client.get(f"/tasks/{task_id}/edit").text
-    assert '<a href="http://www.mondschoon.nl"' in edit_page
+    with SessionLocal() as db:
+        task = db.query(Task).filter(Task.title == "Linktest taak").order_by(Task.id.desc()).first()
+        assert '<a href="http://www.mondschoon.nl"' in task.description
+        db.delete(task)
+        db.commit()
 
 
 def test_task_requires_login(client):

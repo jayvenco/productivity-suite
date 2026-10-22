@@ -290,6 +290,19 @@ Gebouwd:
   een specifieke kanban-kolom mee (standaard de eerste). Ook via de API
   (`/api/v1/inbox`, incl. `POST .../convert`) en de MCP-server (`add_to_inbox`, `list_inbox`,
   `convert_inbox_item`, `delete_inbox_item`); te verbergen via Account → Navigatie.
+- **Rich-text-editor overal** (`static/js/rich-editor.js`): één herbruikbare WYSIWYG-editor voor
+  **notities, taken, kanban-kaarten en de inbox** (ook het snelle Alt+I-venster). Elke
+  `<textarea data-rich-editor>` wordt automatisch een editor; de textarea blijft verborgen en bevat
+  de HTML, dus formulieren werken ongewijzigd. Werkbalk: vet, cursief, onderstrepen, doorhalen,
+  koppen, opsomming, genummerde lijst, **afvinkbare checklist** (klik het ronde vakje), citaat,
+  link, code, **afbeelding** (knop, plakken of slepen; groot → 1600px) en ongedaan/opnieuw/opmaak wissen.
+  Opslag is gesaneerde HTML (`sanitize_note_html`, nu ook `s`/`del`/`hr`, `ul[class]` en
+  `li[data-checked]`); **bestaande platte tekst/markdown blijft werken** (wordt bij het openen
+  omgezet; kaarten met `- [ ]`-regels behouden hun klassieke checklist). Kaartbeschrijvingen met
+  afvinkbare items kun je in de kaartweergave zelf afvinken (`POST .../checklist-toggle` met
+  `item_index`, de API ook). Previews (takenlijst) tonen platte tekst. Eerste regel/blok van een
+  inbox-item blijft de titel. De oude markdown-werkbalk (`markdown-toolbar.js`) en `notes.js` zijn
+  vervangen.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
@@ -1022,6 +1035,10 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
 68. Druk Alt+I (of klik het +-knopje naast Inbox), typ "Bel de tandarts" + Enter + een tweede regel,
     druk Cmd/Ctrl+Enter → de teller bij Inbox springt op 1. Open Inbox → "→ Taak" → de taak staat onder
     Taken met "Bel de tandarts" als titel en de tweede regel als beschrijving.
+69. Open Taken → Nieuwe taak: de beschrijving heeft een werkbalk; maak een checklist, vink een vakje
+    aan, sla op en open de taak opnieuw → alles staat er nog. Open een kanban-kaart (Bewerken): zelfde
+    editor, schermvullend; vink in de kaartweergave zelf een item af. Alt+I: typ twee regels → in de
+    inbox → "→ Taak": eerste regel = titel, tweede = beschrijving.
 
 ## Architectuur
 

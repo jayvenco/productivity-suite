@@ -7,14 +7,14 @@
 <p style="color:var(--text-muted);margin-top:4px">Typ snel iets in en categoriseer het later als notitie, taak of kanban-kaart. De eerste regel wordt de titel, de rest de beschrijving. Overal beschikbaar met <kbd>Alt</kbd>+<kbd>I</kbd>.</p>
 
 <form method="post" action="/inbox" class="inbox-add-form">
-  <textarea name="text" rows="3" placeholder="Typ hier direct..." required autofocus></textarea>
+  <textarea name="text" rows="3" data-rich-editor placeholder="Typ hier direct..."></textarea>
   <button type="submit" class="btn">Toevoegen</button>
 </form>
 
 <div class="inbox-list">
   {% for item in items %}
   <form method="post" class="inbox-item">
-    <div class="inbox-item-text">{{ item.text }}</div>
+    <div class="inbox-item-text">{{ item.text|rich_html|safe }}</div>
     <div class="inbox-item-time">{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
 
     <details class="inbox-item-options">

@@ -24,7 +24,13 @@ from app.routers.api import router
 from app.routers.notes import TEMP_NOTE_LIFETIME
 from app.routers.tasks import _apply_status, _archive_and_purge_tasks
 from app.services.checklist import checklist_progress, toggle_checklist_line
-from app.services.richtext import sanitize_note_html
+from app.services.richtext import (
+    html_checklist_progress,
+    looks_like_html,
+    sanitize_note_html,
+    sanitize_rich,
+    toggle_html_checklist,
+)
 from app.services.tags import resolve_tags
 
 DEFAULT_LIMIT = 100
@@ -142,7 +148,7 @@ def patch_task_api(
             raise HTTPException(status_code=400, detail="Titel is verplicht")
         task.title = title
     if "description" in sent and body.description is not None:
-        task.description = body.description
+        task.description = sanitize_rich(body.description)
     if "deadline" in sent:
         task.deadline = body.deadline
     if "tags" in sent and body.tags is not None:
@@ -391,7 +397,8 @@ def _board(db: Session, user: User) -> KanbanBoard:
 
 
 def card_out(card: KanbanCard) -> dict:
-    done, total = checklist_progress(card.description or "")
+    description = card.description or ""
+    done, total = html_checklist_progress(description) if looks_like_html(description) else checklist_progress(description)
     return {
         "id": card.id,
         "title": card.title,
@@ -520,7 +527,7 @@ def patch_card_api(
             raise HTTPException(status_code=400, detail="Titel is verplicht")
         card.title = title
     if "description" in sent and body.description is not None:
-        card.description = body.description
+        card.description = sanitize_rich(body.description)
     if "tags" in sent and body.tags is not None:
         card.tags = resolve_tags(db, _tags_in(body.tags))
     if "color" in sent:
@@ -560,7 +567,8 @@ def move_card_api(
 
 
 class ChecklistToggle(BaseModel):
-    line_index: int
+    line_index: int | None = None  # markdown-regel (oudere kaarten)
+    item_index: int | None = None  # afvinkbaar item in de HTML van de editor
 
 
 @router.post("/kanban/cards/{card_id}/checklist-toggle")
@@ -568,7 +576,13 @@ def toggle_card_checklist_api(
     card_id: int, body: ChecklistToggle, user: User = Depends(require_api_user), db: Session = Depends(get_db)
 ):
     card = _get_card(db, card_id, _board(db, user))
-    card.description = toggle_checklist_line(card.description, body.line_index)
+    if looks_like_html(card.description) and (body.item_index is not None or body.line_index is not None):
+        index = body.item_index if body.item_index is not None else body.line_index
+        card.description = toggle_html_checklist(card.description, index)
+    elif body.line_index is not None:
+        card.description = toggle_checklist_line(card.description, body.line_index)
+    else:
+        raise HTTPException(status_code=422, detail="line_index of item_index is verplicht")
     db.commit()
     return card_out(card)
 
@@ -653,7 +667,7 @@ def list_inbox_api(
 def add_inbox_api(body: InboxIn, user: User = Depends(require_api_user), db: Session = Depends(get_db)):
     from app.models.inbox import InboxItem
 
-    text = body.text.strip()
+    text = sanitize_rich(body.text.strip())
     if not text:
         raise HTTPException(status_code=400, detail="Tekst is verplicht")
     item = InboxItem(user_id=user.id, text=text)

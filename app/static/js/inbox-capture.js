@@ -20,10 +20,12 @@ document.addEventListener("DOMContentLoaded", () => {
     .then((data) => data && setCount(data.count))
     .catch(() => {});
 
+  const rich = () => text.richEditor;
+
   function openCapture() {
     form.hidden = false;
     backdrop.hidden = false;
-    text.focus();
+    rich() ? rich().focus() : text.focus();
   }
 
   function closeCapture() {
@@ -45,8 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function save() {
-    const value = text.value.trim();
-    if (!value) return;
+    const value = rich() ? rich().getHTML() : text.value.trim();
+    if (!value.trim()) return;
     const response = await fetch("/inbox", {
       method: "POST",
       headers: { "X-Requested-With": "fetch" },
@@ -58,7 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const data = await response.json();
     setCount(data.count);
-    text.value = "";
+    if (rich()) rich().clear();
+    else text.value = "";
     closeCapture();
     // Staan we op de inbox-pagina zelf, dan meteen de nieuwe lijst tonen.
     if (location.pathname === "/inbox") location.reload();
@@ -69,7 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
     save();
   });
 
-  text.addEventListener("keydown", (event) => {
+  (rich() ? rich().editor : text).addEventListener("keydown", (event) => {
     if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
       event.preventDefault();
       save();

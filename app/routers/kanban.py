@@ -11,6 +11,7 @@ from app.models.task import Task, TaskStatus
 from app.models.user import User
 from app.services.checklist import toggle_checklist_line
 from app.services.seed import DEFAULT_COLUMNS
+from app.services.richtext import looks_like_html, sanitize_rich, toggle_html_checklist
 from app.services.tags import resolve_tags
 from app.templating import templates
 
@@ -202,7 +203,7 @@ def create_card(
         column_id=column_id,
         swimlane_id=swimlane_id,
         title=title.strip(),
-        description=description,
+        description=sanitize_rich(description),
         position=max_position,
     )
     card.tags = resolve_tags(db, tags)
@@ -278,7 +279,7 @@ def update_card(
         raise HTTPException(status_code=404, detail="Kaart niet gevonden")
 
     card.title = title.strip()
-    card.description = description
+    card.description = sanitize_rich(description)
     card.color = None if clear_color or not color else color
     card.tags = resolve_tags(db, tags)
     db.commit()
@@ -317,17 +318,24 @@ def move_card(
 @router.post("/cards/{card_id}/checklist-toggle")
 def toggle_checklist(
     card_id: int,
-    line_index: int = Form(...),
+    line_index: int | None = Form(None),
+    item_index: int | None = Form(None),
     user: User = Depends(require_user),
     db: Session = Depends(get_db),
 ):
-    """Vinkt een regel '- [ ] ...' / '- [x] ...' in de kaartbeschrijving aan/uit."""
+    """Vinkt een checklist-item van de kaart aan/uit: een afvinkbaar item (`item_index`) in de HTML
+    van de rich-text-editor, of -- voor oudere kaarten -- een markdown-regel '- [ ] ...' (`line_index`)."""
     board = _get_board_or_404(db, user.id)
     card = db.get(KanbanCard, card_id)
     if card is None or card.board_id != board.id:
         raise HTTPException(status_code=404, detail="Kaart niet gevonden")
 
-    card.description = toggle_checklist_line(card.description, line_index)
+    if looks_like_html(card.description) and item_index is not None:
+        card.description = toggle_html_checklist(card.description, item_index)
+    elif line_index is not None:
+        card.description = toggle_checklist_line(card.description, line_index)
+    else:
+        raise HTTPException(status_code=422, detail="line_index of item_index is verplicht")
     db.commit()
     return {"ok": True}
 

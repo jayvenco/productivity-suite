@@ -15,29 +15,24 @@ from app.models.note import Note
 from app.models.task import Task
 from app.models.user import User
 from app.services.kanban_cells import get_or_create_default_cell
-from app.services.richtext import sanitize_note_html
+from app.services.richtext import looks_like_html, sanitize_note_html, sanitize_rich, split_rich
 from app.services.tags import resolve_tags
 
 TITLE_MAX = 200
 
 
 def split_text(text: str) -> tuple[str, str]:
-    """Eerste niet-lege regel = titel (max. 200 tekens), de rest = beschrijving."""
-    lines = (text or "").strip().splitlines()
-    title = ""
-    rest_start = len(lines)
-    for index, line in enumerate(lines):
-        if line.strip():
-            title = line.strip()[:TITLE_MAX]
-            rest_start = index + 1
-            break
-    return title, "\n".join(lines[rest_start:]).strip()
+    """Eerste regel/blok = titel (max. 200 tekens), de rest = beschrijving (HTML of platte tekst)."""
+    return split_rich(text)
 
 
 def to_note(db: Session, user: User, item: InboxItem, tags: str = "") -> Note:
     title, rest = split_text(item.text)
-    paragraphs = "".join(f"<p>{html.escape(line)}</p>" for line in rest.splitlines() if line.strip())
-    note = Note(user_id=user.id, title=title or "Inbox-notitie", content=sanitize_note_html(paragraphs))
+    if looks_like_html(rest):
+        content = sanitize_note_html(rest)
+    else:
+        content = sanitize_note_html("".join(f"<p>{html.escape(line)}</p>" for line in rest.splitlines() if line.strip()))
+    note = Note(user_id=user.id, title=title or "Inbox-notitie", content=content)
     note.tags = resolve_tags(db, tags)
     db.add(note)
     db.delete(item)
@@ -47,7 +42,7 @@ def to_note(db: Session, user: User, item: InboxItem, tags: str = "") -> Note:
 
 def to_task(db: Session, user: User, item: InboxItem, deadline: date | None = None, tags: str = "") -> Task:
     title, rest = split_text(item.text)
-    task = Task(user_id=user.id, title=title or "Inbox-taak", description=rest, deadline=deadline)
+    task = Task(user_id=user.id, title=title or "Inbox-taak", description=sanitize_rich(rest), deadline=deadline)
     task.tags = resolve_tags(db, tags)
     db.add(task)
     db.delete(item)
@@ -88,7 +83,7 @@ def to_card(
         column_id=column.id,
         swimlane_id=swimlane.id,
         title=title or "Inbox-kaart",
-        description=rest,
+        description=sanitize_rich(rest),
         position=position,
     )
     card.tags = resolve_tags(db, tags)

@@ -1,18 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Kanban - Productivity Suite{% endblock %}
 
-{% macro md_toolbar() %}
-<div class="md-toolbar">
-  <button type="button" data-md="bold" title="Vet"><b>V</b></button>
-  <button type="button" data-md="italic" title="Cursief"><i>C</i></button>
-  <button type="button" data-md="heading" title="Kop">Kop</button>
-  <button type="button" data-md="bullet" title="Opsomming">• Lijst</button>
-  <button type="button" data-md="link" title="Link invoegen">Link</button>
-  <button type="button" data-md="code" title="Code">&lt;/&gt;</button>
-  <button type="button" class="add-checklist-item-btn" title="Checklist-item toevoegen">☑ Item</button>
-</div>
-{% endmacro %}
-
 {% block content %}
 <div class="toolbar">
   <h2 style="margin:0">{{ board.name }}</h2>
@@ -71,10 +59,7 @@
             <form method="post" action="/kanban/cards/{{ card.id }}" class="card-edit-form kanban-modal" id="card-edit-{{ card.id }}" hidden>
               <h3 class="kanban-modal-title">Kaart bewerken</h3>
               <input type="text" name="title" value="{{ card.title }}" required>
-              <div class="md-editor">
-                {{ md_toolbar() }}
-                <textarea name="description" class="md-textarea" rows="10">{{ card.description }}</textarea>
-              </div>
+              <textarea name="description" data-rich-editor>{{ card.description }}</textarea>
               <input type="text" name="tags" placeholder="Tags (komma-gescheiden)" value="{{ card.tags|map(attribute='name')|join(', ') }}">
               <div class="card-color-row">
                 <input type="color" name="color" value="{{ card.color or '#6c7086' }}">
@@ -95,10 +80,7 @@
             <input type="hidden" name="column_id" value="{{ column.id }}">
             <input type="hidden" name="swimlane_id" value="{{ swimlane.id }}">
             <input type="text" name="title" placeholder="Titel" required>
-            <div class="md-editor">
-              {{ md_toolbar() }}
-              <textarea name="description" class="md-textarea" placeholder="Beschrijving" rows="4"></textarea>
-            </div>
+            <textarea name="description" data-rich-editor placeholder="Beschrijving"></textarea>
             <input type="text" name="tags" placeholder="Tags (komma-gescheiden)">
             <div class="kanban-modal-actions">
               <button type="submit" class="btn">Toevoegen</button>
@@ -144,5 +126,4 @@
 </details>
 
 <script src="{{ static_url('js/kanban.js') }}"></script>
-<script src="{{ static_url('js/markdown-toolbar.js') }}"></script>
 {% endblock %}

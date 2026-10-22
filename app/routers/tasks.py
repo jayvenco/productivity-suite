@@ -12,6 +12,7 @@ from app.database import get_db
 from app.models.tag import Tag
 from app.models.task import Task, TaskStatus
 from app.models.user import User
+from app.services.richtext import sanitize_rich
 from app.services.tags import resolve_tags
 from app.templating import templates
 
@@ -270,7 +271,7 @@ def create_task(
     task = Task(
         user_id=user.id,
         title=title.strip(),
-        description=description,
+        description=sanitize_rich(description),
         deadline=date.fromisoformat(deadline) if deadline else None,
         priority=priority,
         daily_task=daily_task,
@@ -302,7 +303,7 @@ def update_task(
 ):
     task = _get_task_or_404(db, task_id, user.id)
     task.title = title.strip()
-    task.description = description
+    task.description = sanitize_rich(description)
     task.deadline = date.fromisoformat(deadline) if deadline else None
     _apply_status(task, TaskStatus(status_value))
     task.priority = priority

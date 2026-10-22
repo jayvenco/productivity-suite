@@ -19,7 +19,7 @@
       <div class="task-card-meta">
         {% if task.status.value == 'in_progress' %}<span class="task-card-status">Bezig</span>{% endif %}
         {% if task.description %}
-          <span class="task-card-preview">{{ task.description[:20] }}{{ '…' if task.description|length > 20 }}</span>
+          {% set preview = task.description|plain_text %}<span class="task-card-preview">{{ preview[:20] }}{{ '…' if preview|length > 20 }}</span>
         {% endif %}
       </div>
       <div class="task-card-meta task-card-meta-end">

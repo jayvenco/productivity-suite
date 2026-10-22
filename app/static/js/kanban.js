@@ -75,6 +75,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Afvinkbare items in de HTML-beschrijving van een kaart (rich-text-editor): klik op het vakje
+  // links van het item -> optimistisch omzetten en de server bijwerken (index binnen de kaart).
+  board.addEventListener("click", async (event) => {
+    const li = event.target.closest(".rich-html li[data-checked]");
+    if (!li || event.clientX - li.getBoundingClientRect().left > 26) return;
+    const container = li.closest(".rich-html");
+    const cardId = container.dataset.cardId;
+    if (!cardId) return;
+    const index = [...container.querySelectorAll("li[data-checked]")].indexOf(li);
+    li.setAttribute("data-checked", li.getAttribute("data-checked") === "1" ? "0" : "1");
+    await fetch(`/kanban/cards/${cardId}/checklist-toggle`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ item_index: String(index) }),
+    });
+  });
+
   // Swimlane-kleur: direct opslaan zodra de gebruiker een kleur kiest, en de
   // kolomkopjes/heading-rand live bijwerken zonder page reload.
   board.addEventListener("change", async (event) => {

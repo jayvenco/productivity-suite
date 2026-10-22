@@ -13,7 +13,7 @@ from app.models.note import Note
 from app.models.snippet import Snippet, SnippetFile
 from app.models.task import Task
 from app.models.user import User
-from app.services.richtext import sanitize_note_html
+from app.services.richtext import sanitize_note_html, sanitize_rich
 from app.services.kanban_cells import get_or_create_default_cell
 from app.services.seed import DEFAULT_COLUMNS
 from app.services.tags import resolve_tags
@@ -46,7 +46,7 @@ def create_task_api(body: TaskIn, user: User = Depends(require_api_user), db: Se
     if not title:
         raise HTTPException(status_code=400, detail="Titel is verplicht")
 
-    task = Task(user_id=user.id, title=title, description=body.description, deadline=body.deadline, priority=body.priority)
+    task = Task(user_id=user.id, title=title, description=sanitize_rich(body.description), deadline=body.deadline, priority=body.priority)
     task.tags = resolve_tags(db, body.tags)
     db.add(task)
     db.commit()
@@ -154,7 +154,7 @@ def create_kanban_card_api(
         column_id=column.id,
         swimlane_id=swimlane.id,
         title=title,
-        description=body.description,
+        description=sanitize_rich(body.description),
         color=body.color,
         position=max_position,
     )
