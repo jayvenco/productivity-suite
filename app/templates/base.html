@@ -59,7 +59,8 @@
         </ul>
       </div>
 
-{% if user is none or user.module_visible('tasks') %}<a href="/tasks" class="nav-item {{ 'active' if request.url.path.startswith('/tasks') }}"><span class="nav-icon">✓</span>Taken</a>{% endif %}
+{% if user is none or user.module_visible('inbox') %}<div class="nav-inbox-row"><a href="/inbox" class="nav-item {{ 'active' if request.url.path.startswith('/inbox') }}"><span class="nav-icon">✎</span>Inbox<span class="nav-badge" id="inbox-badge" hidden></span></a><button type="button" class="nav-inbox-add" id="inbox-quick-btn" title="Snel typen (Alt+I)" aria-label="Snel typen">+</button></div>{% endif %}
+      {% if user is none or user.module_visible('tasks') %}<a href="/tasks" class="nav-item {{ 'active' if request.url.path.startswith('/tasks') }}"><span class="nav-icon">✓</span>Taken</a>{% endif %}
 {% if user is none or user.module_visible('kanban') %}<a href="/kanban" class="nav-item {{ 'active' if request.url.path.startswith('/kanban') }}"><span class="nav-icon">▦</span>Kanban</a>{% endif %}
 {% if user is none or user.module_visible('mindmap') %}<a href="/mindmap" class="nav-item {{ 'active' if request.url.path.startswith('/mindmap') }}"><span class="nav-icon">◇</span>Mindmap</a>{% endif %}
 {% if user is none or user.module_visible('notes') %}<a href="/notes" class="nav-item {{ 'active' if request.url.path.startswith('/notes') }}"><span class="nav-icon">▤</span>Notities</a>{% endif %}
@@ -96,6 +97,17 @@
       {% block content %}{% endblock %}
     </main>
   </div>
+
+  <div class="inbox-capture-backdrop" id="inbox-capture-backdrop" hidden></div>
+  <form class="inbox-capture" id="inbox-capture" hidden>
+    <div class="inbox-capture-title">Inbox <span>Alt+I</span></div>
+    <textarea id="inbox-capture-text" rows="5" placeholder="Typ meteen... (eerste regel = titel)"></textarea>
+    <div class="inbox-capture-actions">
+      <span class="inbox-capture-hint">Cmd/Ctrl+Enter = opslaan</span>
+      <button type="button" class="btn btn-secondary" id="inbox-capture-cancel">Annuleren</button>
+      <button type="submit" class="btn">Opslaan</button>
+    </div>
+  </form>
 
   <div class="pomodoro-float" id="pomodoro-float" hidden>
     <div class="pomodoro-corner-btns">
@@ -259,6 +271,7 @@
 
   <script src="{{ static_url('js/pomodoro.js') }}"></script>
   <script src="{{ static_url('js/quickadd.js') }}"></script>
+  <script src="{{ static_url('js/inbox-capture.js') }}"></script>
   <script src="{{ static_url('js/voice.js') }}"></script>
   <script src="{{ static_url('js/mobile-nav.js') }}"></script>
   <script src="{{ static_url('js/deadlines.js') }}"></script>

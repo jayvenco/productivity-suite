@@ -131,6 +131,44 @@ def restore_task(task_id: int) -> dict:
     return _call("POST", f"/tasks/{task_id}/restore")
 
 
+# ---- Inbox ----
+
+
+@mcp.tool()
+def add_to_inbox(text: str) -> dict:
+    """Zet snel een tekst in de inbox om later te categoriseren (eerste regel = titel, de rest =
+    beschrijving). Gebruik dit als je niet zeker weet of iets een notitie, taak of kaart is."""
+    return _call("POST", "/inbox", json={"text": text})
+
+
+@mcp.tool()
+def list_inbox(limit: int = 100, offset: int = 0) -> dict:
+    """Lijst de openstaande inbox-items, nieuwste eerst."""
+    return _call("GET", "/inbox", params={"limit": limit, "offset": offset})
+
+
+@mcp.tool()
+def convert_inbox_item(
+    item_id: int,
+    to: str,
+    tags: str = "",
+    deadline: str | None = None,
+    swimlane_id: int | None = None,
+    column_id: int | None = None,
+) -> dict:
+    """Zet een inbox-item om naar een notitie, taak of kanban-kaart en verwijdert het uit de inbox.
+    to: 'note', 'task' of 'card'. deadline (YYYY-MM-DD) alleen voor taken; swimlane_id/column_id alleen
+    voor kaarten (leeg = eerste kolom van het bord)."""
+    return _call("POST", f"/inbox/{item_id}/convert", json=_drop_unset(
+        to=to, tags=tags, deadline=deadline, swimlane_id=swimlane_id, column_id=column_id))
+
+
+@mcp.tool()
+def delete_inbox_item(item_id: int) -> dict:
+    """Verwijdert een inbox-item."""
+    return _call("DELETE", f"/inbox/{item_id}")
+
+
 # ---- Notities ----
 
 

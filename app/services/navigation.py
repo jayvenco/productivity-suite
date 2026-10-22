@@ -4,6 +4,7 @@ onder Account -> Navigatie per module één aan- of uitzetten (User.hidden_modul
 from __future__ import annotations
 
 NAV_MODULES = [
+    ("inbox", "Inbox"),
     ("tasks", "Taken"),
     ("kanban", "Kanban"),
     ("mindmap", "Mindmap"),

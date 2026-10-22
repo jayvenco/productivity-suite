@@ -1,4 +1,5 @@
 from app.models.calendar_event import CalendarEvent
+from app.models.inbox import InboxItem
 from app.models.kanban import KanbanBoard, KanbanCard, KanbanColumn, KanbanSwimlane
 from app.models.mindmap import MindmapBoard, MindmapEdge, MindmapNode
 from app.models.note import Note
@@ -12,6 +13,7 @@ from app.models.user import User
 
 __all__ = [
     "User",
+    "InboxItem",
     "Task",
     "Tag",
     "KanbanBoard",

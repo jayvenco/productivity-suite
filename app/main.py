@@ -14,6 +14,7 @@ from app.routers import (
     auth,
     calendar,
     graph,
+    inbox,
     kanban,
     mindmap,
     note_templates,
@@ -56,6 +57,7 @@ app.include_router(notes.router)
 app.include_router(calendar.router)
 app.include_router(graph.router)
 app.include_router(pomodoro.router)
+app.include_router(inbox.router)
 app.include_router(snippets.router)
 app.include_router(stickies.router)
 app.include_router(settings_router.router)

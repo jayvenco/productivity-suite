@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Inbox - Productivity Suite{% endblock %}
+{% block content %}
+<div class="toolbar">
+  <h2 style="margin:0">Inbox <span class="task-group-count">({{ items | length }})</span></h2>
+</div>
+<p style="color:var(--text-muted);margin-top:4px">Typ snel iets in en categoriseer het later als notitie, taak of kanban-kaart. De eerste regel wordt de titel, de rest de beschrijving. Overal beschikbaar met <kbd>Alt</kbd>+<kbd>I</kbd>.</p>
+
+<form method="post" action="/inbox" class="inbox-add-form">
+  <textarea name="text" rows="3" placeholder="Typ hier direct..." required autofocus></textarea>
+  <button type="submit" class="btn">Toevoegen</button>
+</form>
+
+<div class="inbox-list">
+  {% for item in items %}
+  <form method="post" class="inbox-item">
+    <div class="inbox-item-text">{{ item.text }}</div>
+    <div class="inbox-item-time">{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+
+    <details class="inbox-item-options">
+      <summary>Opties</summary>
+      <div class="inbox-item-options-body">
+        <label>Tags <input type="text" name="tags" placeholder="komma-gescheiden"></label>
+        <label>Deadline (taak) <input type="date" name="deadline"></label>
+        {% if cells %}
+        <label>Kanban-kolom
+          <select name="cell">
+            <option value="">Eerste kolom</option>
+            {% for cell in cells %}<option value="{{ cell.value }}">{{ cell.label }}</option>{% endfor %}
+          </select>
+        </label>
+        {% endif %}
+      </div>
+    </details>
+
+    <div class="inbox-item-actions">
+      <button type="submit" class="btn" formaction="/inbox/{{ item.id }}/to-note">→ Notitie</button>
+      <button type="submit" class="btn" formaction="/inbox/{{ item.id }}/to-task">→ Taak</button>
+      <button type="submit" class="btn" formaction="/inbox/{{ item.id }}/to-card">→ Kanban</button>
+      <button type="submit" class="btn btn-danger" formaction="/inbox/{{ item.id }}/delete" formnovalidate
+              onclick="return confirm('Inbox-item verwijderen?')">Verwijderen</button>
+    </div>
+  </form>
+  {% else %}
+  <p class="inbox-empty">De inbox is leeg. Typ hierboven iets in, of druk <kbd>Alt</kbd>+<kbd>I</kbd> waar je ook bent.</p>
+  {% endfor %}
+</div>
+{% endblock %}

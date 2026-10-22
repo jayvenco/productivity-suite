@@ -32,6 +32,10 @@ Ontbrekende/ongeldige token → `401` met `{"detail": "..."}`. Verbinding testen
 
 Afgeronde taken verdwijnen 8 uur na afronden naar het archief (`status=archived`), en worden daar na 30 dagen definitief verwijderd. Zonder `status` zie je alles behalve gearchiveerde taken.
 
+## Inbox (`/inbox`)
+Snelle opvang voor tekst die je later pas categoriseert. `POST /inbox` `{"text": "titel\nbeschrijving"}` (eerste regel = titel) · `GET /inbox` (nieuwste eerst) · `GET|DELETE /inbox/{id}`.
+Omzetten (en uit de inbox halen): `POST /inbox/{id}/convert` `{"to": "note"|"task"|"card", "tags": "", "deadline": "2026-12-31", "swimlane_id": 1, "column_id": 2}` — `deadline` alleen bij `task`, `swimlane_id`/`column_id` alleen bij `card` (leeg = eerste kolom). Het antwoord is de nieuwe notitie/taak/kaart met een extra veld `type`.
+
 ## Notities (`/notes`)
 `POST /notes` `{"title", "content" (HTML), "tags"}` · `GET /notes?tag=&is_temp=` · `GET|PATCH|DELETE /notes/{id}` (PATCH: `title`, `content`, `tags`, `is_temp`).
 `is_temp: true` = wordt na een week automatisch verwijderd. HTML in `content` wordt opgeschoond (scripts e.d. verdwijnen).

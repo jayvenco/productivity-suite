@@ -36,7 +36,7 @@ Voor Claude Desktop/Code: zelfde `command`/`args`/`env` in de MCP-configuratie v
 
 ## Tools
 
-`health` · taken: `list_tasks`, `get_task`, `create_task`, `update_task` (ook afvinken met
+`health` · inbox: `add_to_inbox`, `list_inbox`, `convert_inbox_item`, `delete_inbox_item` · taken: `list_tasks`, `get_task`, `create_task`, `update_task` (ook afvinken met
 `done`), `delete_task`, `restore_task` · notities: `list_notes`, `get_note`, `create_note`,
 `update_note`, `delete_note` · snippets: `list_snippets`, `get_snippet`, `create_snippet`,
 `update_snippet`, `delete_snippet` · kanban: `get_kanban_board`, `list_kanban_cards`,

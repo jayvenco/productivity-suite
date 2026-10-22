@@ -610,3 +610,91 @@ def delete_swimlane_api(swimlane_id: int, user: User = Depends(require_api_user)
     db.delete(swimlane)
     db.commit()
     return _deleted(swimlane_id)
+
+
+# ---- Inbox ----
+
+
+def inbox_out(item) -> dict:
+    from app.services.inbox import split_text
+
+    title, rest = split_text(item.text)
+    return {"id": item.id, "text": item.text, "title": title, "rest": rest, "created_at": _iso(item.created_at),
+            "url": "/inbox"}
+
+
+def _get_inbox_item(db: Session, item_id: int, user: User):
+    from app.models.inbox import InboxItem
+
+    item = db.query(InboxItem).filter(InboxItem.id == item_id, InboxItem.user_id == user.id).first()
+    if item is None:
+        raise HTTPException(status_code=404, detail="Inbox-item niet gevonden")
+    return item
+
+
+class InboxIn(BaseModel):
+    text: str
+
+
+@router.get("/inbox")
+def list_inbox_api(
+    limit: int = Query(DEFAULT_LIMIT, ge=1, le=MAX_LIMIT),
+    offset: int = Query(0, ge=0),
+    user: User = Depends(require_api_user),
+    db: Session = Depends(get_db),
+):
+    from app.models.inbox import InboxItem
+
+    query = db.query(InboxItem).filter(InboxItem.user_id == user.id).order_by(InboxItem.created_at.desc(), InboxItem.id.desc())
+    return _page(query, limit, offset, inbox_out)
+
+
+@router.post("/inbox")
+def add_inbox_api(body: InboxIn, user: User = Depends(require_api_user), db: Session = Depends(get_db)):
+    from app.models.inbox import InboxItem
+
+    text = body.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Tekst is verplicht")
+    item = InboxItem(user_id=user.id, text=text)
+    db.add(item)
+    db.commit()
+    return inbox_out(item)
+
+
+@router.get("/inbox/{item_id}")
+def get_inbox_api(item_id: int, user: User = Depends(require_api_user), db: Session = Depends(get_db)):
+    return inbox_out(_get_inbox_item(db, item_id, user))
+
+
+@router.delete("/inbox/{item_id}")
+def delete_inbox_api(item_id: int, user: User = Depends(require_api_user), db: Session = Depends(get_db)):
+    db.delete(_get_inbox_item(db, item_id, user))
+    db.commit()
+    return _deleted(item_id)
+
+
+class InboxConvert(BaseModel):
+    to: str  # "note" | "task" | "card"
+    tags: Tags = ""
+    deadline: date | None = None  # alleen voor taken
+    swimlane_id: int | None = None  # alleen voor kaarten
+    column_id: int | None = None
+
+
+@router.post("/inbox/{item_id}/convert")
+def convert_inbox_api(
+    item_id: int, body: InboxConvert, user: User = Depends(require_api_user), db: Session = Depends(get_db)
+):
+    """Zet het inbox-item om (en verwijdert het uit de inbox): geeft de nieuwe notitie/taak/kaart terug."""
+    from app.services import inbox as inbox_service
+
+    item = _get_inbox_item(db, item_id, user)
+    tags = _tags_in(body.tags)
+    if body.to == "note":
+        return {"type": "note", **note_out(inbox_service.to_note(db, user, item, tags))}
+    if body.to == "task":
+        return {"type": "task", **task_out(inbox_service.to_task(db, user, item, body.deadline, tags))}
+    if body.to == "card":
+        return {"type": "card", **card_out(inbox_service.to_card(db, user, item, body.swimlane_id, body.column_id, tags))}
+    raise HTTPException(status_code=422, detail="'to' moet note, task of card zijn")

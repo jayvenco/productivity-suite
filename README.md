@@ -281,6 +281,15 @@ Gebouwd:
   gescheiden door dunne lijnen (inline SVG) en **lijn-iconen met oranje accenten** (Notities,
   Kanban, Snippets, Voice, Taken, Mindmap) met label; hover kleurt het label oranje en tilt het icoon
   op. Zelfde acties en links als voorheen (Voice opent het opnamepaneel).
+- **Inbox**: snel iets intypen en het later categoriseren. Klik **Inbox** in het menu (met teller)
+  of het **+**-knopje ernaast, of druk overal **Alt+I**: er opent een venster met de cursor in een
+  tekstvak (Cmd/Ctrl+Enter = opslaan, Escape = sluiten; opslaan gaat via `fetch`, je blijft waar
+  je was). Op de pagina `/inbox` staan alle items (nieuwste eerst); per item zet je ze om met
+  **→ Notitie**, **→ Taak** of **→ Kanban** (en verdwijnt het uit de inbox): de **eerste regel
+  wordt de titel, de rest de beschrijving**. Onder "Opties" geef je tags, een deadline (taak) of
+  een specifieke kanban-kolom mee (standaard de eerste). Ook via de API
+  (`/api/v1/inbox`, incl. `POST .../convert`) en de MCP-server (`add_to_inbox`, `list_inbox`,
+  `convert_inbox_item`, `delete_inbox_item`); te verbergen via Account → Navigatie.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
@@ -1010,6 +1019,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     notitie blijft ongewijzigd.
 67. Account → Navigatie: vink "Statistieken" aan → verschijnt in het menu; vink "Stickies" uit →
     verdwijnt; blijft zo na verversen. Taken: een dagtaak heeft rechts een bewegend geel-zwart afzetlint.
+68. Druk Alt+I (of klik het +-knopje naast Inbox), typ "Bel de tandarts" + Enter + een tweede regel,
+    druk Cmd/Ctrl+Enter → de teller bij Inbox springt op 1. Open Inbox → "→ Taak" → de taak staat onder
+    Taken met "Bel de tandarts" als titel en de tweede regel als beschrijving.
 
 ## Architectuur
 
