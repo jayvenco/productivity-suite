@@ -21,15 +21,27 @@ def test_board_shows_ten_dots_per_swimlane_before_edit_button(logged_in_client):
 
 
 def test_progress_updates_when_a_card_moves(logged_in_client):
+    """Eigen swimlane, zodat kaarten uit andere tests de uitkomst niet beïnvloeden."""
+    logged_in_client.post("/kanban/swimlanes", data={"name": "Voortgangs-lane"})
     board = logged_in_client.get("/kanban").text
-    cols = re.findall(r'data-column-id="(\d+)" data-swimlane-id="(\d+)"', board)
-    swimlane = cols[0][1]
-    lane_cols = [c for c, s in cols if s == swimlane]
+    block = board[board.index("Voortgangs-lane"):]
+    swimlane = re.search(r'data-swimlane-id="(\d+)"', block).group(1)
+    lane_cols = re.findall(rf'data-column-id="(\d+)" data-swimlane-id="{swimlane}"', board)
+    assert len(lane_cols) == 5
+
+    def widget():
+        page = logged_in_client.get("/kanban").text
+        return re.search(rf'data-swimlane-progress="{swimlane}".*?</div>', page, re.S).group(0)
+
+    assert "0%" in widget() and "swimlane-progress-dot filled" not in widget()  # lege lane
+
     logged_in_client.post("/kanban/cards", data={"column_id": lane_cols[0], "swimlane_id": swimlane, "title": "Voortgangskaart"})
     page = logged_in_client.get("/kanban").text
     card_id = re.search(r'data-card-id="(\d+)"[^>]*>\s*<div class="card-title">Voortgangskaart', page).group(1)
+    assert "0%" in widget()  # nog in Backlog
 
     logged_in_client.post(f"/kanban/cards/{card_id}/move", data={"column_id": lane_cols[-1], "swimlane_id": swimlane, "position": "0"})
-    widget = re.search(rf'data-swimlane-progress="{swimlane}".*?</div>', logged_in_client.get("/kanban").text, re.S).group(0)
-    assert 'swimlane-progress-dot filled' in widget and "100%" in widget
-    logged_in_client.post(f"/kanban/cards/{card_id}/delete")
+    done = widget()
+    assert done.count("swimlane-progress-dot filled") == 10 and "100%" in done
+
+    logged_in_client.post(f"/kanban/swimlanes/{swimlane}/delete")
