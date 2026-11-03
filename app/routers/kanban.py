@@ -11,6 +11,7 @@ from app.models.task import Task, TaskStatus
 from app.models.user import User
 from app.services.checklist import toggle_checklist_line
 from app.services.seed import DEFAULT_COLUMNS
+from app.services.kanban_progress import swimlane_progress
 from app.services.richtext import looks_like_html, sanitize_rich, toggle_html_checklist
 from app.services.tags import resolve_tags
 from app.templating import templates
@@ -72,10 +73,23 @@ def board_view(request: Request, user: User = Depends(require_user), db: Session
         .all()
     )
 
+    progress = {
+        swimlane.id: swimlane_progress(
+            [len(cards_by_cell.get((swimlane.id, column.id), [])) for column in swimlane.columns]
+        )
+        for swimlane in board.swimlanes
+    }
+
     return templates.TemplateResponse(
         request,
         "kanban/board.html",
-        {"user": user, "board": board, "cards_by_cell": cards_by_cell, "available_tasks": available_tasks},
+        {
+            "user": user,
+            "board": board,
+            "cards_by_cell": cards_by_cell,
+            "available_tasks": available_tasks,
+            "progress": progress,
+        },
     )
 
 

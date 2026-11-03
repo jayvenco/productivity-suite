@@ -4399,3 +4399,36 @@ ul.rt-checklist > li[data-checked="1"] { color: var(--text-muted); text-decorati
 .inbox-add-form .rich-editor { min-height: 110px; max-height: 40vh; }
 .inbox-add-form .rich-wrap { flex: 1; }
 .task-card-preview { }
+
+/* Voortgang per swimlane: 10 kleine cirkeltjes net vóór de bewerkknop; gevulde cirkels hebben een
+   kleur die van rood naar groen loopt naarmate de voortgang vordert. */
+.swimlane-progress {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+.swimlane-progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  box-sizing: border-box;
+  transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.swimlane-progress-dot.filled {
+  background: var(--dot);
+  border-color: var(--dot);
+  box-shadow: 0 0 4px color-mix(in srgb, var(--dot) 60%, transparent);
+}
+
+.swimlane-progress-label {
+  margin-left: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 30px;
+}

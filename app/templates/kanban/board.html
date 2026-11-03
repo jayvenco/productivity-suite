@@ -18,6 +18,12 @@
       <button type="button" class="swimlane-heading swimlane-toggle" style="{{ swimlane.heading_style }}" data-swimlane-toggle="{{ swimlane.id }}">
         <span class="swimlane-toggle-arrow">▾</span> {{ swimlane.name }}
       </button>
+      {% set p = progress[swimlane.id] %}
+      <div class="swimlane-progress" data-swimlane-progress="{{ swimlane.id }}"
+           title="Voortgang: {{ p.percent }}% ({{ p.cards }} kaart{{ 'en' if p.cards != 1 }})">
+        {% for i in range(1, 11) %}<span class="swimlane-progress-dot {{ 'filled' if i <= p.filled }}" style="--dot: hsl({{ 4 + (i - 1) * 12 }}, 85%, 52%)"></span>{% endfor %}
+        <span class="swimlane-progress-label">{{ p.percent }}%</span>
+      </div>
       <details class="swimlane-rename-form">
         <summary title="Naam wijzigen">✎</summary>
         <form method="post" action="/kanban/swimlanes/{{ swimlane.id }}/rename">

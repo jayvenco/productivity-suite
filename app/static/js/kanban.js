@@ -25,6 +25,25 @@ document.addEventListener("DOMContentLoaded", () => {
     if (card) card.classList.remove("dragging");
   });
 
+  // Voortgang per swimlane (10 bolletjes): dezelfde formule als app/services/kanban_progress.py --
+  // elke kolom telt naar haar positie (eerste 0%, laatste 100%, ertussen lineair); gemiddelde over
+  // alle kaarten. Wordt na elke verplaatsing opnieuw berekend zodat je het direct ziet bewegen.
+  function updateAllProgress() {
+    board.querySelectorAll("[data-swimlane-block]").forEach((block) => {
+      const widget = block.querySelector(".swimlane-progress");
+      if (!widget) return;
+      const columns = [...block.querySelectorAll(".board-row .column")];
+      const counts = columns.map((col) => col.querySelectorAll(".kanban-card").length);
+      const total = counts.reduce((a, b) => a + b, 0);
+      const weighted = counts.reduce((sum, count, index) => sum + (columns.length > 1 ? (count * index) / (columns.length - 1) : 0), 0);
+      const percent = total && columns.length > 1 ? Math.round((100 * weighted) / total) : 0;
+      const filled = Math.floor(percent / 10 + 0.5);
+      widget.querySelectorAll(".swimlane-progress-dot").forEach((dot, i) => dot.classList.toggle("filled", i < filled));
+      widget.querySelector(".swimlane-progress-label").textContent = `${percent}%`;
+      widget.title = `Voortgang: ${percent}% (${total} kaart${total === 1 ? "" : "en"})`;
+    });
+  }
+
   board.querySelectorAll(".card-list").forEach((list) => {
     list.addEventListener("dragover", (event) => {
       event.preventDefault();
@@ -55,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
           position: String(position),
         }),
       });
+      updateAllProgress();
     });
   });
 

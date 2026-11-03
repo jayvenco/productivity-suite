@@ -303,6 +303,13 @@ Gebouwd:
   `item_index`, de API ook). Previews (takenlijst) tonen platte tekst. Eerste regel/blok van een
   inbox-item blijft de titel. De oude markdown-werkbalk (`markdown-toolbar.js`) en `notes.js` zijn
   vervangen.
+- **Kanban: voortgang per swimlane**: vlak vóór de bewerkknop (✎) staan **10 kleine cirkeltjes** plus
+  een percentage; de gevulde cirkels kleuren van rood naar groen naarmate de voortgang vordert (hover =
+  aantal kaarten). Berekening (`app/services/kanban_progress.py`, dezelfde formule in `kanban.js`):
+  elke kolom telt naar haar positie in de swimlane — eerste kolom (Backlog) 0%, laatste (Done)
+  100%, ertussen lineair (bij 5 kolommen 0/25/50/75/100%) — en de voortgang is het gemiddelde over
+  alle kaarten. Dus aanwezig (Backlog), opgepakt (To Do/In Progress/Review) en gedaan (Done) tellen
+  allemaal mee. Wordt na elke sleepactie direct bijgewerkt.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
