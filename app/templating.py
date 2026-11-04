@@ -8,8 +8,8 @@ import markdown as md
 from fastapi.templating import Jinja2Templates
 
 from app.config import BASE_DIR
-from app.services.checklist import render_description_html
-from app.services.richtext import looks_like_html, plain_text, sanitize_note_html
+from app.services.checklist import checklist_progress, render_description_html
+from app.services.richtext import html_checklist_progress, looks_like_html, plain_text, sanitize_note_html
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
 
@@ -33,6 +33,14 @@ def render_card_description(description: str, card_id: int) -> str:
     if looks_like_html(description):
         return f'<div class="rich-html" data-card-id="{card_id}">{sanitize_note_html(description)}</div>'
     return render_description_html(description, card_id, render_markdown)
+
+
+def checklist_summary(description: str) -> str:
+    """"2/5" voor de checklist-voortgang van een kaart (leeg als er geen checklist is)."""
+    done, total = (
+        html_checklist_progress(description) if looks_like_html(description) else checklist_progress(description or "")
+    )
+    return f"{done}/{total}" if total else ""
 
 
 def render_rich(text: str) -> str:
@@ -90,6 +98,7 @@ def static_url(path: str) -> str:
 templates.env.filters["markdown"] = render_markdown
 templates.env.filters["checklist_html"] = render_card_description
 templates.env.filters["rich_html"] = render_rich
+templates.env.filters["checklist_summary"] = checklist_summary
 templates.env.filters["plain_text"] = plain_text
 templates.env.filters["relative_time"] = relative_time
 templates.env.globals["static_url"] = static_url

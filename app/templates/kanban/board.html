@@ -4,9 +4,62 @@
 {% block content %}
 <div class="toolbar">
   <h2 style="margin:0">{{ board.name }}</h2>
+  <div class="notes-view-toggle kanban-view-toggle" id="kanban-view-toggle" role="group" aria-label="Weergave">
+    <button type="button" class="notes-view-btn" data-view="list" title="Alle kaarten in een lijst">☰ Lijst</button>
+    <button type="button" class="notes-view-btn" data-view="lanes" title="Eén swimlane tegelijk als bord">▥ Lanes</button>
+    <button type="button" class="notes-view-btn" data-view="swimlanes" title="Alle swimlanes onder elkaar">▤ Swimlanes</button>
+  </div>
   <label class="kanban-collapse-default" title="Bij elke keer openen starten alle swimlanes ingeklapt, zodat alleen de namen zichtbaar zijn">
     <input type="checkbox" class="round-checkbox" id="kanban-collapse-default"> Lanes standaard ingeklapt
   </label>
+</div>
+
+<div class="kanban-root" id="kanban-root" data-view="list">
+
+<div class="kanban-lane-tabs" id="kanban-lane-tabs">
+  {% for swimlane in board.swimlanes %}
+  <button type="button" class="kanban-lane-tab" data-lane="{{ swimlane.id }}" style="{{ swimlane.heading_style }}">{{ swimlane.name }}</button>
+  {% endfor %}
+</div>
+
+<div class="kanban-list-view" id="kanban-list-view">
+  <input type="search" class="kanban-list-filter" id="kanban-list-filter" placeholder="Filter op titel, tag of kolom...">
+  {% for swimlane in board.swimlanes %}
+  {% set p = progress[swimlane.id] %}
+  <section class="kl-group" data-kl-swimlane="{{ swimlane.id }}">
+    <div class="kl-group-head">
+      <span class="kl-group-name" style="{{ swimlane.heading_style }}">{{ swimlane.name }}</span>
+      <div class="swimlane-progress" title="Voortgang: {{ p.percent }}% ({{ p.cards }} kaart{{ 'en' if p.cards != 1 }})">
+        {% for i in range(1, 11) %}<span class="swimlane-progress-dot {{ 'filled' if i <= p.filled }}" style="--dot: hsl({{ 4 + (i - 1) * 12 }}, 85%, 52%)"></span>{% endfor %}
+        <span class="swimlane-progress-label">{{ p.percent }}%</span>
+      </div>
+      <button type="button" class="btn btn-secondary btn-sm kl-add" data-swimlane-id="{{ swimlane.id }}">+ Kaart</button>
+    </div>
+    <table class="kl-table">
+      <thead><tr><th>Kaart</th><th>Kolom</th><th>Tags</th><th>Checklist</th><th>Aangemaakt</th></tr></thead>
+      <tbody>
+        {% set ns = namespace(count=0) %}
+        {% for column in swimlane.columns %}
+        {% for card in cards_by_cell.get((swimlane.id, column.id), []) %}
+        {% set ns.count = ns.count + 1 %}
+        <tr class="kl-row" data-card-id="{{ card.id }}" data-search="{{ (card.title ~ ' ' ~ column.name ~ ' ' ~ card.tags|map(attribute='name')|join(' '))|lower }}">
+          <td class="kl-title">{% if card.color %}<span class="kl-color" style="background: {{ card.color }}"></span>{% endif %}{{ card.title }}</td>
+          <td>
+            <select class="kl-column" data-card-id="{{ card.id }}" data-swimlane-id="{{ swimlane.id }}" aria-label="Kolom">
+              {% for c in swimlane.columns %}<option value="{{ c.id }}" {{ 'selected' if c.id == column.id }}>{{ c.name }}</option>{% endfor %}
+            </select>
+          </td>
+          <td>{% for t in card.tags %}<span class="tag" style="{{ t.badge_style }}">{{ t.name }}</span>{% endfor %}</td>
+          <td class="kl-check">{{ card.description|checklist_summary }}</td>
+          <td class="kl-date">{{ card.created_at.strftime('%Y-%m-%d') if card.created_at }}</td>
+        </tr>
+        {% endfor %}
+        {% endfor %}
+        {% if ns.count == 0 %}<tr class="kl-empty"><td colspan="5">Geen kaarten in deze swimlane.</td></tr>{% endif %}
+      </tbody>
+    </table>
+  </section>
+  {% endfor %}
 </div>
 
 <div class="kanban-modal-backdrop" id="kanban-modal-backdrop" hidden></div>
@@ -123,6 +176,8 @@
   {% endfor %}
 </div>
 
+</div>
+
 <details class="add-swimlane-form">
   <summary>+ Swimlane toevoegen</summary>
   <form method="post" action="/kanban/swimlanes">
@@ -132,4 +187,5 @@
 </details>
 
 <script src="{{ static_url('js/kanban.js') }}"></script>
+<script src="{{ static_url('js/kanban-views.js') }}"></script>
 {% endblock %}

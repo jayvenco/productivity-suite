@@ -310,6 +310,16 @@ Gebouwd:
   100%, ertussen lineair (bij 5 kolommen 0/25/50/75/100%) — en de voortgang is het gemiddelde over
   alle kaarten. Dus aanwezig (Backlog), opgepakt (To Do/In Progress/Review) en gedaan (Done) tellen
   allemaal mee. Wordt na elke sleepactie direct bijgewerkt.
+- **Kanban-weergaven (Lijst / Lanes / Swimlanes)**: een schakelaar rechtsboven op het bord kiest de
+  weergave (onthouden in `localStorage`). **Lijst** (standaard): een tabel van alle kaarten per
+  swimlane (met de voortgangscirkeltjes), kolommen Kaart / Kolom / Tags / Checklist / Aangemaakt; de
+  kolom is een keuzelijst waarmee je de kaart direct verplaatst, een klik op een rij opent de
+  kaart-editor, "+ Kaart" opent het toevoegformulier en het filterveld zoekt op titel, tag of
+  kolom. **Lanes**: één swimlane tegelijk als klassiek bord, met tabs om te wisselen (altijd
+  uitgeklapt). **Swimlanes**: alle swimlanes onder elkaar (het oorspronkelijke bord). De
+  bordweergaven staan altijd in de DOM (de editors zitten erin), in de lijstweergave alleen
+  onzichtbaar. Geen kaart-/datamodelwijzigingen; "Lanes standaard ingeklapt" geldt alleen voor
+  Swimlanes.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief

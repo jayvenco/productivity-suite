@@ -4432,3 +4432,101 @@ ul.rt-checklist > li[data-checked="1"] { color: var(--text-muted); text-decorati
   color: var(--text-muted);
   min-width: 30px;
 }
+
+/* ---- Kanban-weergaven: Lijst (standaard) / Lanes / Swimlanes ---- */
+.kanban-view-toggle { margin-left: auto; }
+
+/* Lijst: tabel per swimlane. Het bord blijft in de DOM (de kaart-editor en het toevoegformulier
+   zitten erin) maar is onzichtbaar; een geopende modal krijgt visibility: visible terug. */
+.kanban-root[data-view="list"] .board-swimlanes {
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.kanban-root[data-view="list"] .card-edit-form.kanban-modal:not([hidden]),
+.kanban-root[data-view="list"] .add-card-form[open] > .add-card-modal-form { visibility: visible; }
+
+.kanban-root:not([data-view="list"]) .kanban-list-view { display: none; }
+.kanban-root:not([data-view="lanes"]) .kanban-lane-tabs { display: none; }
+
+/* Lanes: alleen de gekozen swimlane, altijd uitgeklapt */
+.kanban-root[data-view="lanes"] .swimlane-block:not(.lane-active) { display: none; }
+.kanban-root[data-view="lanes"] .board-row[hidden] { display: flex; }
+.kanban-root[data-view="lanes"] .swimlane-heading-row { display: none; }
+
+.kanban-lane-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 12px; }
+
+.kanban-lane-tab {
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.kanban-lane-tab.active { border-color: var(--accent); color: var(--accent); }
+
+.kanban-list-filter { width: 100%; max-width: 340px; margin: 6px 0 14px; }
+
+.kl-group { margin-bottom: 22px; }
+.kl-group-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+
+.kl-group-name {
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding-left: 8px;
+}
+
+.kl-add { margin-left: auto; }
+
+.kl-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 4px;
+  font-size: 13px;
+}
+
+.kl-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 12px;
+}
+
+.kl-table td {
+  background: var(--bg-elevated);
+  padding: 8px 12px;
+  vertical-align: middle;
+}
+
+.kl-table td:first-child { border-radius: 10px 0 0 10px; }
+.kl-table td:last-child { border-radius: 0 10px 10px 0; }
+.kl-row { cursor: pointer; }
+.kl-row:hover td { background: var(--bg-hover); }
+.kl-row[hidden] { display: none; }
+.kl-title { font-weight: 600; }
+.kl-color { display: inline-block; width: 4px; height: 14px; border-radius: 2px; margin-right: 8px; vertical-align: middle; }
+.kl-check, .kl-date { color: var(--text-muted); white-space: nowrap; }
+.kl-empty td { color: var(--text-muted); border-radius: 10px; }
+.kl-column { padding: 3px 8px; font-size: 12px; max-width: 150px; }
+
+.kanban-list-filter {
+  background: var(--bg-elevated);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+
+.kanban-list-filter::placeholder { color: var(--text-muted); }

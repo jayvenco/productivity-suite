@@ -24,8 +24,7 @@ def test_progress_updates_when_a_card_moves(logged_in_client):
     """Eigen swimlane, zodat kaarten uit andere tests de uitkomst niet beïnvloeden."""
     logged_in_client.post("/kanban/swimlanes", data={"name": "Voortgangs-lane"})
     board = logged_in_client.get("/kanban").text
-    block = board[board.index("Voortgangs-lane"):]
-    swimlane = re.search(r'data-swimlane-id="(\d+)"', block).group(1)
+    swimlane = re.search(r'data-lane="(\d+)"[^>]*>Voortgangs-lane<', board).group(1)
     lane_cols = re.findall(rf'data-column-id="(\d+)" data-swimlane-id="{swimlane}"', board)
     assert len(lane_cols) == 5
 
@@ -45,3 +44,19 @@ def test_progress_updates_when_a_card_moves(logged_in_client):
     assert done.count("swimlane-progress-dot filled") == 10 and "100%" in done
 
     logged_in_client.post(f"/kanban/swimlanes/{swimlane}/delete")
+
+
+def test_board_has_list_view_with_cards_and_view_switch(logged_in_client):
+    board = logged_in_client.get("/kanban").text
+    ids = re.search(r'data-column-id="(\d+)" data-swimlane-id="(\d+)"', board)
+    logged_in_client.post("/kanban/cards", data={"column_id": ids.group(1), "swimlane_id": ids.group(2),
+                                                 "title": "Lijst-kaart", "description": "- [x] a\n- [ ] b", "tags": "lijsttag"})
+    page = logged_in_client.get("/kanban").text
+    assert 'id="kanban-root" data-view="list"' in page  # lijst is de standaard
+    for view in ["list", "lanes", "swimlanes"]:
+        assert f'data-view="{view}"' in page
+    assert "Lijst-kaart" in page and 'class="kl-column"' in page and "1/2" in page and "lijsttag" in page
+    assert "kanban-lane-tab" in page and "js/kanban-views.js" in page
+
+    card_id = re.search(r'class="kl-row" data-card-id="(\d+)"[^>]*>\s*<td class="kl-title">Lijst-kaart', page).group(1)
+    logged_in_client.post(f"/kanban/cards/{card_id}/delete")

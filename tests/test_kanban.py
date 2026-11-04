@@ -67,8 +67,10 @@ def test_board_has_seeded_columns_and_swimlane(logged_in_client):
     assert "Review" in response.text
     assert "Done" in response.text
     assert "Algemeen" in response.text
-    # Backlog hoort vóór To Do te staan (eerste kolom van de Algemeen-swimlane).
-    assert response.text.index("Backlog") < response.text.index(">To Do<")
+    # Backlog hoort vóór To Do te staan (eerste kolom van de Algemeen-swimlane) -- in het bord zelf;
+    # de lijstweergave erboven toont alleen kaarten.
+    board = response.text[response.text.index('class="board-swimlanes"'):]
+    assert board.index("Backlog") < board.index(">To Do<")
 
 
 def test_create_card_with_checklist_and_toggle(logged_in_client):
