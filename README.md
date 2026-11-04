@@ -550,7 +550,7 @@ Gebouwd:
   bord van een gloednieuwe installatie) krijgen nu **Backlog / To Do / In Progress / Review /
   Done** i.p.v. de eerdere 4 (Backlog/Todo/In Progress/Done) — bestaande swimlanes op een
   al langer lopende installatie veranderen niet met terugwerkende kracht, dit geldt alleen
-  voor nieuw aangemaakte. Tussen de kolommen staat een **oranje stippellijn van 1px** (merk-oranje #ef8354, even
+  voor nieuw aangemaakte. Tussen de kolommen staat een **doorgetrokken donkergrijze lijn van 1px** (even
   dik als de randen van lanes/kolommen), zonder kleur-cyclus of gradient.
 
 Nog niet gebouwd: CI/CD, voice-commando's matchen op een al bestaand item i.p.v. altijd een
@@ -980,7 +980,7 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     blijft verborgen.
 53. Maak een nieuwe swimlane aan (of, op een verse installatie, kijk naar "Mijn bord") →
     de kolommen heten Backlog/To Do/In Progress/Review/Done (5 stuks). Tussen elke kolom
-    staat een strakke, oranje, 1px dikke stippellijn (geen gloed).
+    staat een strakke, doorgetrokken, donkergrijze 1px lijn.
 54. Maak een snippet aan met een beschrijving en één bestand → op de kaart in de lijst zie
     je meteen de titel + "zojuist" rechtsboven, de beschrijving, tags (of "Geen tags"), en
     een live preview van het bestand met een bestandsnaam-balkje. Klik het kopieer-icoontje

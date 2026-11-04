@@ -880,14 +880,14 @@ textarea {
   background: linear-gradient(90deg, transparent 3px, var(--accent) 3px, var(--accent) 7px, transparent 7px);
 }
 
-/* Strakke, oranje (merk-oranje #ef8354) stippellijn tussen kolommen: 1px, net zo dik als de randen van de lanes
+/* Strakke, doorgetrokken donkergrijze lijn tussen kolommen: 1px, net zo dik als de randen van de lanes
    en kolommen zelf, zonder kleur-cyclus of gradient. */
 .column-divider {
   align-self: stretch;
   width: 0;
   flex-shrink: 0;
   margin: 4px 6px;
-  border-left: 1px dotted #ef8354;
+  border-left: 1px solid #44444b;
   pointer-events: none;
 }
 
