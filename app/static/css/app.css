@@ -4549,3 +4549,5 @@ body:has(#task-ticker:not([hidden])) .scratchpad-page { height: calc(100vh - 112
 
 .scratchpad-page .rich-wrap { flex: 1; min-height: 0; }
 .scratchpad-page .rich-editor { flex: 1; font-size: 16px; line-height: 1.6; padding: 18px 22px; }
+.scratchpad-opt { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+.scratchpad-opt select { padding: 4px 8px; font-size: 12px; max-width: 190px; }

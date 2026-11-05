@@ -5,6 +5,16 @@
   <div class="scratchpad-bar">
     <h2>Scratchpad</h2>
     <span class="scratchpad-hint">Los van projecten en tags — alles wordt automatisch bewaard.</span>
+    <label class="scratchpad-opt">Lettertype
+      <select id="scratchpad-font">
+        {% for font_id, label, css in fonts %}<option value="{{ font_id }}" data-css="{{ css }}" {{ 'selected' if pad.font_family == font_id }}>{{ label }}</option>{% endfor %}
+      </select>
+    </label>
+    <label class="scratchpad-opt">Grootte
+      <select id="scratchpad-size">
+        {% for size in sizes %}<option value="{{ size }}" {{ 'selected' if pad.font_size == size }}>{{ size }} px</option>{% endfor %}
+      </select>
+    </label>
     <span class="scratchpad-status" id="scratchpad-status" aria-live="polite">Opgeslagen</span>
     <button type="button" class="btn btn-secondary" id="scratchpad-clear">Leegmaken</button>
   </div>

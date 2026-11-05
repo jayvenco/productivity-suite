@@ -64,5 +64,28 @@ document.addEventListener("DOMContentLoaded", () => {
     save();
   });
 
+  // ---- Lettertype en grootte: direct toepassen op de editor en op de server bewaren ----
+  const fontSelect = document.getElementById("scratchpad-font");
+  const sizeSelect = document.getElementById("scratchpad-size");
+
+  function applyLook() {
+    const css = fontSelect.selectedOptions[0].dataset.css;
+    rich.editor.style.fontFamily = css || "";
+    rich.editor.style.fontSize = `${sizeSelect.value}px`;
+  }
+
+  function saveLook() {
+    applyLook();
+    fetch("/scratchpad/settings", {
+      method: "POST",
+      body: new URLSearchParams({ font_family: fontSelect.value, font_size: sizeSelect.value }),
+    }).catch(() => {});
+    rich.focus();
+  }
+
+  fontSelect.addEventListener("change", saveLook);
+  sizeSelect.addEventListener("change", saveLook);
+  applyLook();
+
   rich.focus();
 });

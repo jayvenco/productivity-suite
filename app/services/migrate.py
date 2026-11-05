@@ -20,6 +20,10 @@ _COLUMNS_TO_ENSURE = {
         ("recurrence", "VARCHAR(10) DEFAULT 'none'"),
         ("recurrence_until", "DATE"),
     ],
+    "scratchpads": [
+        ("font_family", "VARCHAR(50) DEFAULT 'system'"),
+        ("font_size", "INTEGER DEFAULT 16"),
+    ],
     "notes": [
         ("is_temp", "BOOLEAN DEFAULT 0"),
         ("template_id", "INTEGER"),

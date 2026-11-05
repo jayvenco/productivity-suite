@@ -1,3 +1,5 @@
+import re
+
 from tests.test_api import _auth_headers, _get_api_token
 
 
@@ -31,3 +33,18 @@ def test_scratchpad_api_get_put_append(logged_in_client):
     assert c.get("/api/v1/scratchpad", headers=h).json()["content"] == appended["content"]
     assert c.post("/api/v1/scratchpad/append", json={"text": "  "}, headers=h).status_code == 400
     c.put("/api/v1/scratchpad", json={"content": ""}, headers=h)
+
+
+def test_font_and_size_are_saved_and_applied(logged_in_client):
+    page = logged_in_client.get("/scratchpad").text
+    assert 'id="scratchpad-font"' in page and 'id="scratchpad-size"' in page and 'value="georgia"' in page
+
+    r = logged_in_client.post("/scratchpad/settings", data={"font_family": "georgia", "font_size": "24"})
+    assert r.json() == {"ok": True, "font_family": "georgia", "font_size": 24}
+    page = logged_in_client.get("/scratchpad").text
+    assert re.search(r'<option value="georgia"[^>]*selected', page) and re.search(r'<option value="24"[^>]*selected', page)
+
+    # onbekende waarden worden genegeerd
+    again = logged_in_client.post("/scratchpad/settings", data={"font_family": "nepfont", "font_size": "999"}).json()
+    assert again["font_family"] == "georgia" and again["font_size"] == 24
+    logged_in_client.post("/scratchpad/settings", data={"font_family": "system", "font_size": "16"})

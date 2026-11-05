@@ -326,7 +326,10 @@ Gebouwd:
   `sendBeacon`); een statusregel toont "Opgeslagen 10:54"; "Leegmaken" (met bevestiging) wist alles.
   Ook via de API (`GET`/`PUT /api/v1/scratchpad`, `POST .../append`) en de MCP-server
   (`read_scratchpad`, `append_to_scratchpad`, `write_scratchpad`); te verbergen via Account → Navigatie.
-  Tabel `scratchpads` (user_id, content, updated_at). `rich-editor.js` wordt nu vroeg in `<head>` geladen
+  **Lettertype** (22 keuzes: systeem- en Google-lettertypen, serif/mono) en **grootte** (12–32 px) kies je
+  bovenin; direct toegepast en server-side bewaard (`scratchpads.font_family`/`font_size`, dus op elk
+  apparaat hetzelfde; `POST /scratchpad/settings`, lijst in `app/services/scratchpad_fonts.py`).
+  Tabel `scratchpads` (user_id, content, font_family, font_size, updated_at). `rich-editor.js` wordt nu vroeg in `<head>` geladen
   zodat pagina-scripts de editor direct kunnen gebruiken.
 - **Installeren als app (PWA)**: de site is installeerbaar op Android (Chrome → menu → "App
   installeren" / "Toevoegen aan startscherm") met eigen icoon, zonder browserbalk, en een
