@@ -328,6 +328,19 @@ Gebouwd:
   (`read_scratchpad`, `append_to_scratchpad`, `write_scratchpad`); te verbergen via Account → Navigatie.
   Tabel `scratchpads` (user_id, content, updated_at). `rich-editor.js` wordt nu vroeg in `<head>` geladen
   zodat pagina-scripts de editor direct kunnen gebruiken.
+- **Installeren als app (PWA)**: de site is installeerbaar op Android (Chrome → menu → "App
+  installeren" / "Toevoegen aan startscherm") met eigen icoon, zonder browserbalk, en een
+  offline-pagina als de server niet bereikbaar is. Onderdelen: `/manifest.webmanifest` (naam, iconen
+  192/512/maskable in `static/pwa/`, kleuren, **snelkoppelingen** Inbox/Scratchpad/Nieuwe taak en een
+  **share_target**), `/service-worker.js` (cachet alleen `/static/` en de offline-pagina; pagina's en
+  data komen altijd van de server) en `/offline`; de routes staan in `app/routers/pwa.py` en zijn
+  publiek. **Delen naar je Inbox**: na installeren verschijnt de app in het Android-deelmenu; gedeelde
+  titel/tekst/link wordt een inbox-item (`POST /inbox/share`).
+  **HTTPS is nodig** voor installeren en de service worker (alleen `localhost` is uitgezonderd): zet de
+  app achter Tailscale (`tailscale serve`/MagicDNS-HTTPS) of een reverse proxy (Caddy, Nginx Proxy
+  Manager, Cloudflare Tunnel). Over gewoon `http://192.168.x.x` blijft de site gewoon bruikbaar in de
+  browser, maar installeren en offline werken lukt dan niet. Een nieuwe versie van de app wordt bij
+  het volgende bezoek automatisch opgepikt (de service worker wordt nooit gecachet).
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
@@ -1066,6 +1079,9 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     inbox → "→ Taak": eerste regel = titel, tweede = beschrijving.
 70. Menu → Scratchpad: typ iets, wacht even tot "Opgeslagen" staat, ververs de pagina → de tekst is er nog.
     Open het scratchpad in een ander tabblad/op een andere pagina → dezelfde inhoud.
+71. Open de site via HTTPS in Chrome op Android → menu → "App installeren". Start de app: geen
+    browserbalk. Deel in een andere app een link → kies "Productivity Suite" → het staat in je Inbox.
+    Zet je telefoon in vliegtuigmodus en open de app → "Je bent offline" met een knop om opnieuw te proberen.
 
 ## Architectuur
 

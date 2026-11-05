@@ -19,6 +19,7 @@ from app.routers import (
     mindmap,
     note_templates,
     notes,
+    pwa,
     pomodoro,
     scratchpad,
     search,
@@ -48,6 +49,7 @@ start_backup_scheduler()
 app = FastAPI(title=settings.app_name)
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "app" / "static")), name="static")
 
+app.include_router(pwa.router)
 app.include_router(auth.router)
 app.include_router(account.router)
 app.include_router(tasks.router)

@@ -70,6 +70,28 @@ def add_item(
     return RedirectResponse("/inbox", status_code=303)
 
 
+@router.post("/share")
+def share_to_inbox(
+    title: str = Form(""),
+    text: str = Form(""),
+    url: str = Form(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    """Android-deelmenu (PWA share_target): gedeelde titel/tekst/link wordt een inbox-item. Staat vóór
+    de /{item_id}-routes, anders matcht "share" daar als id (422)."""
+    import html as _html
+
+    lines = [part.strip() for part in (title, text) if part and part.strip()]
+    if url.strip() and url.strip() not in " ".join(lines):
+        lines.append(url.strip())
+    if lines:
+        body = "".join(f"<p>{_html.escape(line)}</p>" for chunk in lines for line in chunk.splitlines() if line.strip())
+        db.add(InboxItem(user_id=user.id, text=sanitize_rich(body)))
+        db.commit()
+    return RedirectResponse("/inbox", status_code=303)
+
+
 @router.post("/{item_id}")
 def update_item(
     item_id: int, text: str = Form(...), user: User = Depends(require_user), db: Session = Depends(get_db)
