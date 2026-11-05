@@ -712,3 +712,60 @@ def convert_inbox_api(
     if body.to == "card":
         return {"type": "card", **card_out(inbox_service.to_card(db, user, item, body.swimlane_id, body.column_id, tags))}
     raise HTTPException(status_code=422, detail="'to' moet note, task of card zijn")
+
+
+# ---- Scratchpad ----
+
+
+class ScratchpadIn(BaseModel):
+    content: str = ""
+
+
+class ScratchpadAppend(BaseModel):
+    text: str
+
+
+def scratchpad_out(pad) -> dict:
+    return {"content": pad.content, "updated_at": _iso(pad.updated_at), "url": "/scratchpad"}
+
+
+@router.get("/scratchpad")
+def get_scratchpad_api(user: User = Depends(require_api_user), db: Session = Depends(get_db)):
+    from app.routers.scratchpad import get_pad
+
+    return scratchpad_out(get_pad(db, user.id))
+
+
+@router.put("/scratchpad")
+def put_scratchpad_api(body: ScratchpadIn, user: User = Depends(require_api_user), db: Session = Depends(get_db)):
+    """Vervangt de hele inhoud van het scratchpad (HTML of platte tekst)."""
+    from app.routers.scratchpad import get_pad
+
+    pad = get_pad(db, user.id)
+    pad.content = sanitize_rich(body.content)
+    db.commit()
+    return scratchpad_out(pad)
+
+
+@router.post("/scratchpad/append")
+def append_scratchpad_api(
+    body: ScratchpadAppend, user: User = Depends(require_api_user), db: Session = Depends(get_db)
+):
+    """Voegt tekst onderaan toe (platte tekst wordt een of meer alinea's) zonder de rest te raken."""
+    import html as _h
+
+    from app.routers.scratchpad import get_pad
+
+    text = body.text.strip()
+    if not text:
+        raise HTTPException(status_code=400, detail="Tekst is verplicht")
+    addition = sanitize_rich(text) if looks_like_html(text) else "".join(
+        f"<p>{_h.escape(line)}</p>" for line in text.splitlines() if line.strip()
+    )
+    pad = get_pad(db, user.id)
+    existing = pad.content or ""
+    if existing and not looks_like_html(existing):  # oudere platte tekst eerst netjes naar HTML
+        existing = "".join(f"<p>{_h.escape(line)}</p>" for line in existing.splitlines() if line.strip())
+    pad.content = existing + addition
+    db.commit()
+    return scratchpad_out(pad)

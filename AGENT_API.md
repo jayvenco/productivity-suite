@@ -38,6 +38,9 @@ Afgeronde taken verdwijnen 8 uur na afronden naar het archief (`status=archived`
 Snelle opvang voor tekst die je later pas categoriseert. `POST /inbox` `{"text": "titel\nbeschrijving"}` (eerste regel = titel) · `GET /inbox` (nieuwste eerst) · `GET|DELETE /inbox/{id}`.
 Omzetten (en uit de inbox halen): `POST /inbox/{id}/convert` `{"to": "note"|"task"|"card", "tags": "", "deadline": "2026-12-31", "swimlane_id": 1, "column_id": 2}` — `deadline` alleen bij `task`, `swimlane_id`/`column_id` alleen bij `card` (leeg = eerste kolom). Het antwoord is de nieuwe notitie/taak/kaart met een extra veld `type`.
 
+## Scratchpad (`/scratchpad`)
+Eén groot kladblok, los van projecten en tags. `GET /scratchpad` → `{content (HTML), updated_at}` · `PUT /scratchpad` `{"content": "..."}` vervangt **alles** · `POST /scratchpad/append` `{"text": "..."}` voegt onderaan toe (platte tekst wordt alinea's) en laat de rest staan.
+
 ## Notities (`/notes`)
 `POST /notes` `{"title", "content" (HTML), "tags"}` · `GET /notes?tag=&is_temp=` · `GET|PATCH|DELETE /notes/{id}` (PATCH: `title`, `content`, `tags`, `is_temp`).
 `is_temp: true` = wordt na een week automatisch verwijderd. HTML in `content` wordt opgeschoond (scripts e.d. verdwijnen).

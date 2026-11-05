@@ -131,6 +131,29 @@ def restore_task(task_id: int) -> dict:
     return _call("POST", f"/tasks/{task_id}/restore")
 
 
+# ---- Scratchpad ----
+
+
+@mcp.tool()
+def read_scratchpad() -> dict:
+    """Leest het scratchpad (het grote kladblok); content is HTML."""
+    return _call("GET", "/scratchpad")
+
+
+@mcp.tool()
+def append_to_scratchpad(text: str) -> dict:
+    """Voegt tekst onderaan het scratchpad toe zonder de bestaande inhoud te raken (platte tekst wordt
+    een of meer alinea's)."""
+    return _call("POST", "/scratchpad/append", json={"text": text})
+
+
+@mcp.tool()
+def write_scratchpad(content: str) -> dict:
+    """Vervangt de HELE inhoud van het scratchpad (HTML of platte tekst). Gebruik append_to_scratchpad
+    als je bestaande aantekeningen wilt behouden."""
+    return _call("PUT", "/scratchpad", json={"content": content})
+
+
 # ---- Inbox ----
 
 

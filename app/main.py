@@ -20,6 +20,7 @@ from app.routers import (
     note_templates,
     notes,
     pomodoro,
+    scratchpad,
     search,
     settings as settings_router,
     snippets,
@@ -58,6 +59,7 @@ app.include_router(calendar.router)
 app.include_router(graph.router)
 app.include_router(pomodoro.router)
 app.include_router(inbox.router)
+app.include_router(scratchpad.router)
 app.include_router(snippets.router)
 app.include_router(stickies.router)
 app.include_router(settings_router.router)

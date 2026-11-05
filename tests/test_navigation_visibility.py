@@ -11,7 +11,7 @@ def _set_visible(client, keys):
     client.post("/settings/navigation", data={"visible": keys, "redirect_to": "/account"})
 
 
-ALL = ["tasks", "kanban", "mindmap", "notes", "pomodoro", "stickies", "snippets", "calendar", "search", "graph", "stats"]
+ALL = ["inbox", "scratchpad", "tasks", "kanban", "mindmap", "notes", "pomodoro", "stickies", "snippets", "calendar", "search", "graph", "stats"]
 
 
 def test_statistics_hidden_by_default_and_toggle_shows_it(logged_in_client):

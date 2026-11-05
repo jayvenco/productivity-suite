@@ -5,6 +5,7 @@ from __future__ import annotations
 
 NAV_MODULES = [
     ("inbox", "Inbox"),
+    ("scratchpad", "Scratchpad"),
     ("tasks", "Taken"),
     ("kanban", "Kanban"),
     ("mindmap", "Mindmap"),

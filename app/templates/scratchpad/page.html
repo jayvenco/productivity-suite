@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Scratchpad - Productivity Suite{% endblock %}
+{% block content %}
+<div class="scratchpad-page">
+  <div class="scratchpad-bar">
+    <h2>Scratchpad</h2>
+    <span class="scratchpad-hint">Los van projecten en tags — alles wordt automatisch bewaard.</span>
+    <span class="scratchpad-status" id="scratchpad-status" aria-live="polite">Opgeslagen</span>
+    <button type="button" class="btn btn-secondary" id="scratchpad-clear">Leegmaken</button>
+  </div>
+  <textarea id="scratchpad-text" data-rich-editor placeholder="Typ hier je aantekeningen...">{{ pad.content }}</textarea>
+</div>
+<script src="{{ static_url('js/scratchpad.js') }}"></script>
+{% endblock %}

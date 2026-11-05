@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="{{ static_url('js/sidebar-early.js') }}"></script>
+  <script src="{{ static_url('js/rich-editor.js') }}"></script>  {# vroeg: pagina-scripts kunnen de editor dan al gebruiken #}
   <title>{% block title %}Productivity Suite{% endblock %}</title>
   <link rel="icon" type="image/svg+xml" href="{{ static_url('images/favicon.svg') }}">
   <link rel="stylesheet" href="{{ static_url('css/themes/dracula.css') }}">
@@ -60,6 +61,7 @@
       </div>
 
 {% if user is none or user.module_visible('inbox') %}<div class="nav-inbox-row"><a href="/inbox" class="nav-item {{ 'active' if request.url.path.startswith('/inbox') }}"><span class="nav-icon">✎</span>Inbox<span class="nav-badge" id="inbox-badge" hidden></span></a><button type="button" class="nav-inbox-add" id="inbox-quick-btn" title="Snel typen (Alt+I)" aria-label="Snel typen">+</button></div>{% endif %}
+      {% if user is none or user.module_visible('scratchpad') %}<a href="/scratchpad" class="nav-item {{ 'active' if request.url.path.startswith('/scratchpad') }}"><span class="nav-icon">✍</span>Scratchpad</a>{% endif %}
       {% if user is none or user.module_visible('tasks') %}<a href="/tasks" class="nav-item {{ 'active' if request.url.path.startswith('/tasks') }}"><span class="nav-icon">✓</span>Taken</a>{% endif %}
 {% if user is none or user.module_visible('kanban') %}<a href="/kanban" class="nav-item {{ 'active' if request.url.path.startswith('/kanban') }}"><span class="nav-icon">▦</span>Kanban</a>{% endif %}
 {% if user is none or user.module_visible('mindmap') %}<a href="/mindmap" class="nav-item {{ 'active' if request.url.path.startswith('/mindmap') }}"><span class="nav-icon">◇</span>Mindmap</a>{% endif %}
@@ -271,7 +273,6 @@
 
   <script src="{{ static_url('js/pomodoro.js') }}"></script>
   <script src="{{ static_url('js/quickadd.js') }}"></script>
-  <script src="{{ static_url('js/rich-editor.js') }}"></script>
   <script src="{{ static_url('js/inbox-capture.js') }}"></script>
   <script src="{{ static_url('js/voice.js') }}"></script>
   <script src="{{ static_url('js/mobile-nav.js') }}"></script>

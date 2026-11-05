@@ -320,6 +320,14 @@ Gebouwd:
   bordweergaven staan altijd in de DOM (de editors zitten erin), in de lijstweergave alleen
   onzichtbaar. Geen kaart-/datamodelwijzigingen; "Lanes standaard ingeklapt" geldt alleen voor
   Swimlanes.
+- **Scratchpad** (menu → Scratchpad, `/scratchpad`): een **schermvullend kladblok** met dezelfde
+  rich-text-editor voor snelle aantekeningen, **los van projecten en tags**. Eén pad per gebruiker,
+  **automatisch opgeslagen** (kort na het typen, met Cmd/Ctrl+S, en bij het verlaten van de pagina via
+  `sendBeacon`); een statusregel toont "Opgeslagen 10:54"; "Leegmaken" (met bevestiging) wist alles.
+  Ook via de API (`GET`/`PUT /api/v1/scratchpad`, `POST .../append`) en de MCP-server
+  (`read_scratchpad`, `append_to_scratchpad`, `write_scratchpad`); te verbergen via Account → Navigatie.
+  Tabel `scratchpads` (user_id, content, updated_at). `rich-editor.js` wordt nu vroeg in `<head>` geladen
+  zodat pagina-scripts de editor direct kunnen gebruiken.
 - **Taken-archief**: een afgeronde taak verdwijnt 8 uur na afvinken uit de takenlijst (en
   kalender/zoeken/graph) en komt in het **Archief** (knop "Archief" op de takenpagina,
   `/tasks/archive`). Daar kun je 'm **herstellen** (terug naar "todo") of definitief
@@ -1056,6 +1064,8 @@ HOST_PORT=9000 bash scripts/install-unraid.sh
     aan, sla op en open de taak opnieuw → alles staat er nog. Open een kanban-kaart (Bewerken): zelfde
     editor, schermvullend; vink in de kaartweergave zelf een item af. Alt+I: typ twee regels → in de
     inbox → "→ Taak": eerste regel = titel, tweede = beschrijving.
+70. Menu → Scratchpad: typ iets, wacht even tot "Opgeslagen" staat, ververs de pagina → de tekst is er nog.
+    Open het scratchpad in een ander tabblad/op een andere pagina → dezelfde inhoud.
 
 ## Architectuur
 
