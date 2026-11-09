@@ -683,23 +683,22 @@ python3.12 -m venv .venv
 
 ## Installeren op Unraid
 
+De image wordt door GitHub Actions gepubliceerd als `ghcr.io/jayvenco/productivity-suite:latest`
+(zet het package na de eerste build op **Public**, of gebruik `GHCR_USER`/`GHCR_TOKEN`).
+
 ```bash
 bash scripts/install-unraid.sh
 ```
 
-Draai dit via SSH op de Unraid-server (of als "User Script"). Het script:
-1. clonet/update de code naar `/mnt/user/appdata/productivity-suite/src`;
-2. bouwt de Docker image lokaal (`docker build`);
-3. start/herstart de container `productivity-suite` op poort **8887** (standaard, want
-   8000 is op Unraid vaak al bezet), met de data persistent in
-   `/mnt/user/appdata/productivity-suite/data`.
+Het script haalt de image op, maakt `/mnt/user/appdata/productivity-suite/data` aan, start de
+container `productivity-suite` op poort **8887** met Unraid-labels (icoon, WebUI-knop) en
+schrijft een template naar `/boot/config/plugins/dockerMan/templates-user/`, zodat de
+container in de **Docker-tab** staat en daar te bewerken is. Updaten: script opnieuw draaien
+of in de Docker-tab op "force update" klikken; data blijft behouden.
+Instelbaar via omgevingsvariabelen: `HOST_PORT`, `APPDATA`, `IMAGE_TAG`, `GHCR_USER`/`GHCR_TOKEN`,
+`WHISPER_SERVICE_URL`, `WHISPER_MODEL`.
 
-Opnieuw draaien = updaten naar de laatste commit op `main` zonder dataverlies.
-Instelbaar via omgevingsvariabelen bij het aanroepen, bv. een andere poort:
-
-```bash
-HOST_PORT=9000 bash scripts/install-unraid.sh
-```
+Alternatief: template `unraid/productivity-suite.xml` handmatig in de templates-user-map zetten.
 
 ## Tests
 

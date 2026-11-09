@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>productivity-suite</Name>
+  <Repository>ghcr.io/jayvenco/productivity-suite:latest</Repository>
+  <Registry>https://github.com/jayvenco/productivity-suite/pkgs/container/productivity-suite</Registry>
+  <Network>bridge</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/jayvenco/productivity-suite/issues</Support>
+  <Project>https://github.com/jayvenco/productivity-suite</Project>
+  <Overview>Zelfgehoste productiviteitssuite: taken, notities, snippets, Kanban-bord, Pomodoro, inbox en scratchpad in één app. Alle data staat in een SQLite-database op je eigen server. Standaard login na de eerste start: admin / admin (direct wijzigen via Account).</Overview>
+  <Category>Productivity:</Category>
+  <WebUI>http://[IP]:[PORT:8000]/</WebUI>
+  <TemplateURL>https://raw.githubusercontent.com/jayvenco/productivity-suite/main/unraid/productivity-suite.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/jayvenco/productivity-suite/main/unraid/icon.png</Icon>
+  <ExtraParams>--restart=unless-stopped</ExtraParams>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled/>
+  <Config Name="WebUI-poort" Target="8000" Default="8887" Mode="tcp" Description="Poort waarop de web-interface bereikbaar is (in de container altijd 8000)." Type="Port" Display="always" Required="true" Mask="false">8887</Config>
+  <Config Name="Data (database, back-ups, geheime sleutel)" Target="/app/data" Default="/mnt/user/appdata/productivity-suite/data" Mode="rw" Description="Hier staan de SQLite-database, de automatische back-ups en de sessiesleutel. Bewaar dit op de array/cache zodat updates geen data kosten." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/productivity-suite/data</Config>
+  <Config Name="WHISPER_SERVICE_URL" Target="WHISPER_SERVICE_URL" Default="" Mode="" Description="Optioneel: URL van je Speaches/faster-whisper-container voor spraaknotities, bv. http://192.168.1.50:8000. Kan ook in de app (Account)." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="WHISPER_MODEL" Target="WHISPER_MODEL" Default="" Mode="" Description="Optioneel: modelnaam die je Speaches-container geladen heeft, bv. Systran/faster-whisper-base." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="DEFAULT_THEME" Target="DEFAULT_THEME" Default="" Mode="" Description="Optioneel: standaardthema voor nieuwe gebruikers." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="BACKUP_ENABLED" Target="BACKUP_ENABLED" Default="" Mode="" Description="Optioneel: automatische database-back-ups aan/uit (true/false). Leeg = standaard van de app." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="BACKUP_KEEP" Target="BACKUP_KEEP" Default="" Mode="" Description="Optioneel: aantal back-ups dat bewaard wordt. Leeg = standaard van de app." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+</Container>

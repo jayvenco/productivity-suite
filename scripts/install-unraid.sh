@@ -1,84 +1,108 @@
 #!/usr/bin/env bash
-# Installatiescript voor Unraid.
+# Productivity Suite installeren/updaten op Unraid (beheerbaar vanuit de Docker-tab).
 #
-# Gebruik: log in op Unraid via SSH (of de "User Scripts"-plugin) en draai:
-#   bash install-unraid.sh
+# Haalt de image op uit GHCR, maakt de container aan met Unraid-labels (icoon, WebUI-knop)
+# en schrijft een gebruikerstemplate zodat "Edit" in de Docker-tab werkt.
+# Opnieuw draaien = updaten; je data in <appdata>/data blijft staan.
 #
-# Het script kan gewoon opnieuw gedraaid worden om te updaten naar de laatste
-# commit: het haalt de nieuwste code op, bouwt een nieuwe image en herstart de
-# container. Je data (database, sessies, thema-voorkeur) blijft altijd staan
-# in $INSTALL_DIR/data, los van de broncode/image.
-#
-# Geen .env of omgevingsvariabelen nodig: inloggegevens (admin/admin) en de
-# sessie-secret-key worden door de applicatie zelf beheerd. Wijzig het
-# wachtwoord na de eerste keer inloggen via de "Account"-pagina in de app.
-#
-# Voor voice-notities (optioneel, zie README → Configuratie) heb je een losse
-# Speaches-container (voorheen faster-whisper-server) nodig. Vul hieronder
-# WHISPER_SERVICE_URL en WHISPER_MODEL in (of zet ze als omgevingsvariabele
-# vóór het draaien van dit script) zodat de app-container die weet te vinden.
-
+# Overschrijfbaar via omgevingsvariabelen, bv.:  HOST_PORT=9000 bash install-unraid.sh
 set -euo pipefail
 
-# ---- Configuratie (pas aan indien gewenst) ---------------------------------
-REPO_URL="${REPO_URL:-https://github.com/jayvenco/productivity-suite.git}"
-INSTALL_DIR="${INSTALL_DIR:-/mnt/user/appdata/productivity-suite}"
-CONTAINER_NAME="${CONTAINER_NAME:-productivity-suite}"
+NAME="${CONTAINER_NAME:-productivity-suite}"
+IMAGE="${IMAGE:-ghcr.io/jayvenco/productivity-suite}"
+TAG="${IMAGE_TAG:-latest}"
 HOST_PORT="${HOST_PORT:-8887}"
-IMAGE_TAG="${IMAGE_TAG:-productivity-suite:latest}"
-# URL van je Speaches-container, bv. http://<unraid-ip>:8000 (leeg = app-default
-# http://whisper:8000, werkt alleen als die container toevallig zo heet/bereikbaar is).
+CONTAINER_PORT=8000
+APPDATA="${APPDATA:-/mnt/user/appdata/${NAME}}"
+RAW="${RAW_URL:-https://raw.githubusercontent.com/jayvenco/productivity-suite/main/unraid}"
+TEMPLATE_DIR="${TEMPLATE_DIR:-/boot/config/plugins/dockerMan/templates-user}"
 WHISPER_SERVICE_URL="${WHISPER_SERVICE_URL:-}"
-# Exacte modelnaam die Speaches geladen heeft, bv. Systran/faster-whisper-base
-# (leeg = app-default, zie README → Configuratie om te checken welk model actief is).
 WHISPER_MODEL="${WHISPER_MODEL:-}"
-# -----------------------------------------------------------------------------
 
-SRC_DIR="$INSTALL_DIR/src"
-DATA_DIR="$INSTALL_DIR/data"
+log() { printf '==> %s\n' "$*"; }
 
-echo "==> Installatiemap: $INSTALL_DIR"
-mkdir -p "$DATA_DIR"
+command -v docker >/dev/null 2>&1 || { echo "Docker niet gevonden. Draai dit script op de Unraid-server." >&2; exit 1; }
 
-if [ -d "$SRC_DIR/.git" ]; then
-  echo "==> Bestaande checkout gevonden, code bijwerken..."
-  git -C "$SRC_DIR" fetch --depth 1 origin main
-  git -C "$SRC_DIR" reset --hard origin/main
+# 1. Appdata-mappen (Unraid-standaard eigenaar nobody:users = 99:100)
+log "Mappen aanmaken in ${APPDATA}"
+mkdir -p "${APPDATA}/data"
+chown -R 99:100 "${APPDATA}" 2>/dev/null || true
+
+# 2. Optioneel inloggen bij GHCR (alleen nodig als het package privé is)
+if [ -n "${GHCR_USER:-}" ] && [ -n "${GHCR_TOKEN:-}" ]; then
+  log "Inloggen bij ghcr.io als ${GHCR_USER}"
+  printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USER}" --password-stdin
+fi
+
+# 3. Image ophalen
+if [ "${SKIP_PULL:-0}" = "1" ]; then
+  log "Pull overgeslagen (SKIP_PULL=1), lokale image ${IMAGE}:${TAG} wordt gebruikt"
 else
-  echo "==> Repo clonen naar $SRC_DIR..."
-  rm -rf "$SRC_DIR"
-  git clone --depth 1 "$REPO_URL" "$SRC_DIR"
+  log "Image ophalen: ${IMAGE}:${TAG}"
+  docker pull "${IMAGE}:${TAG}"
 fi
 
-echo "==> Docker image bouwen ($IMAGE_TAG)..."
-docker build -t "$IMAGE_TAG" "$SRC_DIR"
-
-if docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER_NAME"; then
-  echo "==> Bestaande container stoppen en verwijderen..."
-  docker stop "$CONTAINER_NAME" >/dev/null
-  docker rm "$CONTAINER_NAME" >/dev/null
+# 4. Bestaande container vervangen (data staat op het volume en blijft behouden)
+if docker inspect "${NAME}" >/dev/null 2>&1; then
+  log "Bestaande container '${NAME}' stoppen en verwijderen (data blijft staan)"
+  docker stop "${NAME}" >/dev/null 2>&1 || true
+  docker rm "${NAME}" >/dev/null
 fi
 
-echo "==> Container starten op poort $HOST_PORT..."
-# -e's alleen meegeven als er ook echt iets is ingevuld, anders overschrijft een lege
-# waarde de eigen default van de app (zie app/config.py).
 ENV_ARGS=()
-[ -n "$WHISPER_SERVICE_URL" ] && ENV_ARGS+=(-e "WHISPER_SERVICE_URL=$WHISPER_SERVICE_URL")
-[ -n "$WHISPER_MODEL" ] && ENV_ARGS+=(-e "WHISPER_MODEL=$WHISPER_MODEL")
+[ -n "${WHISPER_SERVICE_URL}" ] && ENV_ARGS+=(-e "WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL}")
+[ -n "${WHISPER_MODEL}" ] && ENV_ARGS+=(-e "WHISPER_MODEL=${WHISPER_MODEL}")
 
+# 5. Container starten, met labels zodat Unraid 'm als eigen container toont
+log "Container '${NAME}' starten op poort ${HOST_PORT}"
 docker run -d \
-  --name "$CONTAINER_NAME" \
+  --name "${NAME}" \
   --restart unless-stopped \
-  -p "$HOST_PORT:8000" \
-  -v "$DATA_DIR:/app/data" \
-  "${ENV_ARGS[@]}" \
-  "$IMAGE_TAG"
+  -p "${HOST_PORT}:${CONTAINER_PORT}" \
+  -v "${APPDATA}/data:/app/data" \
+  ${ENV_ARGS[@]+"${ENV_ARGS[@]}"} \
+  --label "net.unraid.docker.managed=dockerman" \
+  --label "net.unraid.docker.webui=http://[IP]:[PORT:${CONTAINER_PORT}]/" \
+  --label "net.unraid.docker.icon=${RAW}/icon.png" \
+  "${IMAGE}:${TAG}" >/dev/null
 
-echo ""
-echo "==> Klaar. Open http://<unraid-ip>:$HOST_PORT"
-echo "    Standaard login: admin / admin — wijzig dit meteen via de Account-pagina."
-if [ -n "$WHISPER_SERVICE_URL" ]; then
-  echo "    Voice-notities: WHISPER_SERVICE_URL=$WHISPER_SERVICE_URL, WHISPER_MODEL=${WHISPER_MODEL:-(app-default)}"
+# 6. Gebruikerstemplate schrijven zodat Edit in de Docker-tab de juiste waarden toont
+if [ -d "${TEMPLATE_DIR}" ]; then
+  log "Template opslaan in ${TEMPLATE_DIR}/my-${NAME}.xml"
+  TMP="$(mktemp)"
+  if command -v curl >/dev/null 2>&1 && curl -fsSL "${RAW}/productivity-suite.xml" -o "${TMP}"; then
+    # Waarden veilig maken voor gebruik in sed (& \ | / escapen) en in XML (& < >)
+    esc() { printf '%s' "$1" | sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g' -e 's/[\\&|]/\\&/g'; }
+    setcfg() { sed -i -E "s|(Target=\"$1\"[^>]*>)[^<]*(</Config>)|\1$(esc "$2")\2|" "${TMP}"; }
+    sed -i -E "s|<Name>[^<]*</Name>|<Name>$(esc "${NAME}")</Name>|" "${TMP}"
+    setcfg "8000" "${HOST_PORT}"
+    setcfg "/app/data" "${APPDATA}/data"
+    [ -n "${WHISPER_SERVICE_URL}" ] && setcfg "WHISPER_SERVICE_URL" "${WHISPER_SERVICE_URL}"
+    [ -n "${WHISPER_MODEL}" ] && setcfg "WHISPER_MODEL" "${WHISPER_MODEL}"
+    install -m 600 "${TMP}" "${TEMPLATE_DIR}/my-${NAME}.xml"
+  else
+    echo "Waarschuwing: template kon niet worden gedownload; sla ik over (de container werkt wel)." >&2
+  fi
+  rm -f "${TMP}"
 else
-  echo "    Voice-notities: nog niet geconfigureerd (WHISPER_SERVICE_URL leeg) — zie README → Configuratie."
+  log "Geen dockerMan-map gevonden (geen Unraid?); template overgeslagen"
 fi
+
+# 7. Wachten tot de healthcheck groen is
+log "Wachten tot de app gezond is..."
+STATUS="starting"
+for _ in $(seq 1 60); do
+  STATUS="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "${NAME}" 2>/dev/null || echo missing)"
+  case "${STATUS}" in healthy|running) break ;; unhealthy|exited|dead|missing) break ;; esac
+  sleep 2
+done
+if [ "${STATUS}" != "healthy" ] && [ "${STATUS}" != "running" ]; then
+  echo "Container is niet gezond (status: ${STATUS}). Laatste logregels:" >&2
+  docker logs --tail 30 "${NAME}" >&2 || true
+  exit 1
+fi
+
+IP="$(hostname -I 2>/dev/null | awk '{print $1}' || true)"
+log "Klaar! Open http://${IP:-<unraid-ip>}:${HOST_PORT}/"
+echo "    Eerste login: admin / admin (wijzig dit direct via Account)."
+echo "    Beheer vanaf nu ook via de Docker-tab (Edit, logs, autostart, updaten)."

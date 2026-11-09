@@ -31,7 +31,7 @@ def _load_or_create_secret_key() -> str:
 class Settings(BaseSettings):
     # Geen env_file: alle configuratie werkt met ingebouwde defaults zodat de app
     # zonder .env of extra omgevingsvariabelen draait (handig voor bv. Unraid).
-    model_config = SettingsConfigDict()
+    model_config = SettingsConfigDict(env_ignore_empty=True)
 
     app_name: str = "Productivity Suite"
     database_url: str = f"sqlite:///{DATA_DIR / 'app.db'}"
