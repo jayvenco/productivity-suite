@@ -50,6 +50,10 @@ class Settings(BaseSettings):
     backup_enabled: bool = True
     backup_keep: int = 14  # aantal dagelijkse database-backups dat bewaard blijft
 
+    # Maandelijkse volledige backup (zie app/services/backup.py). Leeg = DATA_DIR/backup.
+    monthly_backup_dir: str = ""
+    monthly_backup_keep: int = 12  # aantal maandbackups dat bewaard blijft
+
     pomodoro_work_minutes: int = 25
     pomodoro_break_minutes: int = 5
 

@@ -665,6 +665,17 @@ duidelijke foutmelding zodra je een voice-notitie probeert op te nemen.
 Na de eerste login toont de app een waarschuwing zolang je het standaardwachtwoord
 gebruikt. Wijzig gebruikersnaam/wachtwoord via de **Account**-pagina in de sidebar.
 
+## Maandelijkse back-ups en terugzetten
+
+Elke maand maakt de app automatisch een volledige back-up (de hele database: taken, kanban,
+notities, snippets, kalender, instellingen, enz.) in de map `data/backup/`
+(in Docker/Unraid: `/mnt/user/appdata/productivity-suite/data/backup`). De laatste 12 blijven
+bewaard (`MONTHLY_BACKUP_KEEP`); andere map via `MONTHLY_BACKUP_DIR`. Onder **Account → Backup**
+kun je een back-up direct maken, downloaden of **terugzetten** (er wordt eerst een
+veiligheidskopie `app.db.before-restore-<tijd>` naast de database gezet; daarna log je opnieuw in).
+De bestaande dagelijkse back-up (`data/backups/`) en de export/import van losse `.db`-bestanden
+blijven werken.
+
 ## Lokaal draaien
 
 Met Docker (aanbevolen):

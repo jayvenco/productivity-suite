@@ -1,4 +1,5 @@
 import json
+import time
 from datetime import datetime
 
 from app.database import SessionLocal
@@ -50,3 +51,24 @@ def test_snippet_backup_only_writes_new_or_changed_and_keeps_deleted(client, tmp
         db.commit()
         backup.backup_snippets(db)
         assert (tmp_path / "snippets" / f"{snippet_id}.json").exists()
+
+
+def test_monthly_backup_once_per_month_list_and_restore(logged_in_client, tmp_path, monkeypatch):
+    monkeypatch.setattr(backup, "MONTHLY_DIR", tmp_path / "backup")
+    first = backup.backup_monthly()
+    assert first is not None and first.exists()
+    assert backup.backup_monthly() is None  # deze maand staat er al een
+    manual = backup.backup_monthly(force=True)
+    assert manual is not None
+    assert len(backup.list_monthly_backups()) == 2
+    assert backup.resolve_monthly_backup("../x.db") is None
+
+    page = logged_in_client.get("/account")
+    assert first.name in page.text and "Nu een back-up maken" in page.text
+    time.sleep(1.1)  # handmatige back-ups heten op de seconde nauwkeurig
+    assert logged_in_client.post("/account/backup/monthly/run", follow_redirects=False).status_code == 303
+    assert len(backup.list_monthly_backups()) == 3
+    assert logged_in_client.get(f"/account/backup/monthly/{first.name}/download").status_code == 200
+    assert logged_in_client.post("/account/backup/monthly/nietbestaand.db/restore").status_code == 400
+    r = logged_in_client.post(f"/account/backup/monthly/{first.name}/restore", follow_redirects=False)
+    assert r.status_code == 303 and r.headers["location"] == "/login"

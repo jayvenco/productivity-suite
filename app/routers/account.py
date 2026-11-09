@@ -19,6 +19,7 @@ from app.config import settings
 from app.database import Base, engine, get_db
 from app.models.user import User
 from app.routers.settings import AVAILABLE_BACKGROUNDS, AVAILABLE_DENSITIES, AVAILABLE_FONT_SIZES, AVAILABLE_FONTS
+from app.services import backup as backup_service
 from app.services.api_tokens import generate_api_token, hash_api_token
 from app.services.navigation import NAV_MODULES
 from app.services.migrate import run_lightweight_migrations
@@ -65,6 +66,11 @@ def _account_context(
         "error": error,
         "success": success,
         "new_api_token": new_api_token,
+        "monthly_backups": [
+            {"name": p.name, "size_kb": max(1, p.stat().st_size // 1024), "modified": datetime.fromtimestamp(p.stat().st_mtime)}
+            for p in backup_service.list_monthly_backups()
+        ],
+        "monthly_backup_dir": str(backup_service.MONTHLY_DIR),
         **_appearance_context(),
     }
 
@@ -305,4 +311,59 @@ async def import_backup(
     Base.metadata.create_all(bind=engine)
     run_lightweight_migrations(engine)
 
+    return RedirectResponse("/login", status_code=303)
+
+
+# ---- Maandelijkse backups in de map "backup": nu maken, downloaden, terugzetten ----
+
+
+@router.post("/backup/monthly/run")
+def run_monthly_backup(user: User = Depends(require_user)):
+    backup_service.backup_monthly(force=True)
+    return RedirectResponse("/account#backup", status_code=303)
+
+
+@router.get("/backup/monthly/{name}/download")
+def download_monthly_backup(name: str, user: User = Depends(require_user)):
+    path = backup_service.resolve_monthly_backup(name)
+    if path is None:
+        return RedirectResponse("/account#backup", status_code=303)
+    return FileResponse(path, filename=path.name, media_type="application/octet-stream")
+
+
+@router.post("/backup/monthly/{name}/restore")
+def restore_monthly_backup(
+    name: str,
+    request: Request,
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    path = backup_service.resolve_monthly_backup(name)
+    error = None
+    if path is None:
+        error = "Backup niet gevonden."
+    else:
+        try:
+            check = sqlite3.connect(path)
+            try:
+                tables = {r[0] for r in check.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+            finally:
+                check.close()
+            if not _REQUIRED_TABLES.issubset(tables):
+                error = "Dit lijkt geen Productivity Suite-back-up te zijn."
+        except sqlite3.DatabaseError:
+            error = "Bestand kon niet als database gelezen worden."
+    if error:
+        return templates.TemplateResponse(
+            request, "account/form.html", {"user": user, **_account_context(db, user.id, error=error)}, status_code=400
+        )
+
+    db.close()
+    engine.dispose()
+    timestamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    if DB_PATH.exists():  # vangnet: de huidige stand blijft bewaard naast de database
+        shutil.copy2(DB_PATH, DB_PATH.parent / f"{DB_PATH.name}.before-restore-{timestamp}")
+    shutil.copy2(path, DB_PATH)
+    Base.metadata.create_all(bind=engine)
+    run_lightweight_migrations(engine)
     return RedirectResponse("/login", status_code=303)

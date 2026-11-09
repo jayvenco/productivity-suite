@@ -171,7 +171,7 @@
 </form>
 {% endif %}
 
-<h2 style="margin-top:28px">Backup</h2>
+<h2 style="margin-top:28px" id="backup">Backup</h2>
 <p style="color:var(--text-muted);font-size:12px;max-width:480px">
   Exporteert/importeert de hele database (taken, kanban, notities, snippets, kalender,
   mindmap, instellingen) in één bestand.
@@ -187,6 +187,38 @@
   </div>
   <button type="submit" class="btn btn-danger">Importeren</button>
 </form>
+
+<h3 style="margin-top:24px;font-size:14px">Maandelijkse back-ups</h3>
+<p style="color:var(--text-muted);font-size:12px;max-width:520px">
+  Elke maand wordt automatisch een volledige back-up van alles gemaakt in de map
+  <code>{{ monthly_backup_dir }}</code> (de laatste 12 blijven bewaard).
+</p>
+<form method="post" action="/account/backup/monthly/run" style="margin:8px 0">
+  <button type="submit" class="btn">Nu een back-up maken</button>
+</form>
+{% if monthly_backups %}
+<table style="font-size:13px;border-collapse:collapse;max-width:620px;width:100%">
+  <thead><tr style="text-align:left;color:var(--text-muted)"><th>Back-up</th><th>Gemaakt</th><th>Grootte</th><th></th></tr></thead>
+  <tbody>
+  {% for b in monthly_backups %}
+    <tr>
+      <td>{{ b.name }}</td>
+      <td>{{ b.modified.strftime('%d-%m-%Y %H:%M') }}</td>
+      <td>{{ b.size_kb }} KB</td>
+      <td style="white-space:nowrap">
+        <a href="/account/backup/monthly/{{ b.name }}/download" class="btn btn-sm">Download</a>
+        <form method="post" action="/account/backup/monthly/{{ b.name }}/restore" style="display:inline"
+              onsubmit="return confirm('Dit zet ALLE data terug naar de stand van {{ b.modified.strftime('%d-%m-%Y') }}. Er wordt eerst een veiligheidskopie van de huidige database gemaakt. Doorgaan?')">
+          <button type="submit" class="btn btn-sm btn-danger">Terugzetten</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p style="color:var(--text-muted);font-size:12px">Nog geen maandelijkse back-ups.</p>
+{% endif %}
 
 <script src="{{ static_url('js/account.js') }}"></script>
 {% endblock %}

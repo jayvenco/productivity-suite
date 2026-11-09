@@ -17,6 +17,9 @@ log = logging.getLogger(__name__)
 
 BACKUP_DIR = DATA_DIR / "backups"
 SNIPPET_BACKUP_DIR = BACKUP_DIR / "snippets"
+# Maandelijkse volledige backups (hele database = alles) in een eigen map "backup".
+MONTHLY_DIR = Path(settings.monthly_backup_dir) if settings.monthly_backup_dir else DATA_DIR / "backup"
+_MONTHLY_PREFIX = "productivity-suite-"
 _DB_BACKUP_PREFIX = "app-"
 
 
@@ -44,6 +47,47 @@ def backup_database(keep: int | None = None) -> Path | None:
     for path in old:
         path.unlink(missing_ok=True)
     return created
+
+
+def _snapshot(target: Path) -> None:
+    conn = sqlite3.connect(_db_path())
+    try:
+        conn.execute("VACUUM INTO ?", (str(target),))
+    finally:
+        conn.close()
+
+
+def backup_monthly(force: bool = False, keep: int | None = None) -> Path | None:
+    """Volledige backup (database-snapshot) naar MONTHLY_DIR. Automatisch hooguit één per
+    kalendermaand; met force=True (handmatig) altijd een nieuw bestand met tijdstempel."""
+    keep = keep if keep is not None else settings.monthly_backup_keep
+    MONTHLY_DIR.mkdir(parents=True, exist_ok=True)
+    now = datetime.now()
+    name = f"{_MONTHLY_PREFIX}{now:%Y%m%d-%H%M%S}.db" if force else f"{_MONTHLY_PREFIX}{now:%Y%m}.db"
+    target = MONTHLY_DIR / name
+    created = None
+    if not target.exists():
+        _snapshot(target)
+        created = target
+    if keep > 0:
+        for path in list_monthly_backups()[keep:]:
+            path.unlink(missing_ok=True)
+    return created
+
+
+def list_monthly_backups() -> list[Path]:
+    """Nieuwste eerst."""
+    if not MONTHLY_DIR.exists():
+        return []
+    return sorted(MONTHLY_DIR.glob(f"{_MONTHLY_PREFIX}*.db"), reverse=True)
+
+
+def resolve_monthly_backup(name: str) -> Path | None:
+    """Zoekt een backup op naam, alleen binnen MONTHLY_DIR (geen padtrucs)."""
+    for path in list_monthly_backups():
+        if path.name == name:
+            return path
+    return None
 
 
 def _snippet_payload(snippet: Snippet) -> str:
@@ -86,6 +130,7 @@ def backup_snippets(db: Session) -> int:
 def run_backup() -> None:
     try:
         backup_database()
+        backup_monthly()
         with SessionLocal() as db:
             backup_snippets(db)
     except Exception:  # een mislukte backup mag de app nooit onderuit halen
