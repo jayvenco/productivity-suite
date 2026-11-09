@@ -3,7 +3,7 @@
 {% block content_anon %}
 <div class="login-page">
   <div class="login-box">
-    <h1>Productivity Suite</h1>
+    <img src="{{ static_url('images/logo.png') }}" alt="Productivity Suite" class="login-logo" width="220" height="220">
     {% if error %}<div class="error">{{ error }}</div>{% endif %}
     <form method="post" action="/login">
       <div class="field">

@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/logo.png" alt="Productivity Suite" width="200"></p>
+
 # Productivity Suite
 
 Persoonlijke, self-hosted productivity-app (Taken, Kanban, Notities, Kalender, Snippets, Pomodoro).

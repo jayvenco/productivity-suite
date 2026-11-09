@@ -703,6 +703,7 @@ textarea {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
+.login-logo { display: block; margin: 0 auto 12px; max-width: 100%; height: auto; border-radius: 16px; }
 .login-box h1 {
   font-size: 16px;
   margin-top: 0;
