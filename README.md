@@ -3,6 +3,20 @@
 Persoonlijke, self-hosted productivity-app (Taken, Kanban, Notities, Kalender, Snippets, Pomodoro).
 Single-container Docker-deployment met SQLite.
 
+## Screenshots
+
+*Alle screenshots zijn gemaakt met demodata.*
+
+| | |
+|---|---|
+| **Taken** — dagtaken en overig per tag, met tag-ribbons en bewegende linten voor dagtaak/prioriteit<br>![Taken](docs/screenshots/02-taken.png) | **Kanban (lijstweergave)** — alle kaarten per swimlane met voortgangscirkeltjes<br>![Kanban lijst](docs/screenshots/03-kanban-lijst.png) |
+| **Kanban (swimlanes)** — het klassieke bord met kolommen, kaarten en voortgang<br>![Kanban swimlanes](docs/screenshots/04-kanban-swimlanes.png) | **Notities** — rustige kaarten met tag-banner<br>![Notities](docs/screenshots/05-notities.png) |
+| **Notitiesjablonen** — herbruikbare modules, 13 ingebouwde sjablonen<br>![Sjablonen](docs/screenshots/06-notitiesjablonen.png) | **Inbox** — snel typen (Alt+I) en later omzetten naar notitie, taak of kaart<br>![Inbox](docs/screenshots/07-inbox.png) |
+| **Scratchpad** — schermvullend kladblok met rich text, eigen lettertype en grootte<br>![Scratchpad](docs/screenshots/08-scratchpad.png) | **Snippets** — gegroepeerd op tag, kaarten even hoog<br>![Snippets](docs/screenshots/09-snippets.png) |
+| **Stickies** — kleurrijke plakbriefjes met tags<br>![Stickies](docs/screenshots/10-stickies.png) | **Kalender** — maand/week, herhalende afspraken en overzicht<br>![Kalender](docs/screenshots/01-kalender.png) |
+| **Pomodoro-timer** — oranje boog, streepjesring, reset/overslaan<br>![Pomodoro](docs/screenshots/11-pomodoro.png) | **Snelmenu** — wiel met zes sectoren<br>![Snelmenu](docs/screenshots/12-snelmenu.png) |
+| **Thema "Bubbles"** — één van de 10 thema's<br>![Bubbles](docs/screenshots/15-thema-bubbles.png) | **Op je telefoon (PWA)** — installeerbaar op Android<br><img src="docs/screenshots/13-mobiel-taken.png" width="240"> <img src="docs/screenshots/14-mobiel-inbox.png" width="240"> |
+
 ## Status: Fase 1 + Fase 2 (kalender toegevoegd)
 
 Gebouwd:
