@@ -242,3 +242,13 @@ def test_set_new_google_fonts(logged_in_client):
         "/settings/appearance",
         data={"font_family": "system", "font_size": "14", "density": "comfortable", "redirect_to": "/tasks"},
     )
+
+
+def test_extra_compact_density_can_be_selected(logged_in_client):
+    logged_in_client.post(
+        "/settings/appearance",
+        data={"font_family": "inter", "font_size": "16", "density": "xcompact", "redirect_to": "/tasks"},
+        follow_redirects=False,
+    )
+    assert 'data-density="xcompact"' in logged_in_client.get("/tasks").text
+    assert "Extra compact" in logged_in_client.get("/account").text

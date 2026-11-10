@@ -118,7 +118,7 @@ Gebouwd:
   (16 opties — systeemstandaard, de leesletters Inter/Roboto/Open Sans/Lato/Poppins/Nunito/
   Source Sans 3/Merriweather/Fira Sans/DM Sans, het sierlijke schreefletter Playfair Display,
   en de monospace/code-letters Hack/JetBrains Mono/Fira Code/Consolas), **lettergrootte**
-  (11–18px) en **compactheid** (comfortabel/compact,
+  (11–18px) en **compactheid** (comfortabel/compact/extra compact,
   verkleint de ruimte tussen tekst en elementen door de sidebar, tabellen, kaarten en formulieren).
   Ook een **achtergrondafbeelding** (Geen/Natuur/Bergen/Heelal, self-hosted foto's, geen
   externe API) met een **sterkte-schuifje** (10–70%) — de sidebar en het hoofdvlak worden dan

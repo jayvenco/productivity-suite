@@ -49,6 +49,7 @@ AVAILABLE_FONT_SIZES = [11, 12, 13, 14, 15, 16, 17, 18]
 AVAILABLE_DENSITIES = [
     ("comfortable", "Comfortabel"),
     ("compact", "Compact"),
+    ("xcompact", "Extra compact"),
 ]
 
 # (id, label). id is ook de data-background-waarde die app.css afvangt om de
