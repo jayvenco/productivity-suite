@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Snippet bewerken' if snippet else 'Nieuwe snippet' }} - Productivity Suite{% endblock %}
 
-{% set languages = ["plaintext","python","javascript","typescript","bash","html","css","json","yaml","sql","markdown","go","rust","java","csharp","php","ruby","c","cpp"] %}
+{% set languages = ["plaintext","python","javascript","typescript","bash","powershell","html","css","json","yaml","sql","markdown","go","rust","java","csharp","php","ruby","c","cpp"] %}
 
 {% macro file_block(filename, language, content) %}
 <div class="snippet-file-block">

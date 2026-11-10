@@ -420,3 +420,16 @@ def test_snippets_view_toggle_and_group_by_tag(logged_in_client):
 
     ids = re.findall(r'name="snippet_ids" value="(\d+)"', grouped)
     logged_in_client.post("/snippets/bulk-delete", data={"snippet_ids": ids})
+
+
+def test_powershell_language_is_offered_and_highlighted(logged_in_client):
+    form = logged_in_client.get("/snippets/new")
+    assert 'value="powershell"' in form.text or ">powershell<" in form.text
+    assert 'ps1: "powershell"' in logged_in_client.get("/static/js/snippets.js").text
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "PS", "tags": "", "filename": ["a.ps1"], "language": ["powershell"], "content": ["Get-Process"]},
+        follow_redirects=True,
+    )
+    page = logged_in_client.get("/snippets")
+    assert "language-powershell" in page.text and "languages/powershell.min.js" in page.text
