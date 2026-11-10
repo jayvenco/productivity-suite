@@ -16,6 +16,7 @@ ALLOWED_TAGS = [
     "ul", "ol", "li",
     "a", "code", "pre", "blockquote",
     "img", "s", "del", "hr",
+    "table", "thead", "tbody", "tr", "th", "td",
 ]
 # ul[class] + li[data-checked]: afvinkbare checklists van de rich-text-editor (static/js/rich-editor.js)
 ALLOWED_ATTRIBUTES = {
@@ -48,7 +49,7 @@ def sanitize_note_html(raw_html: str) -> str:
 # Deze velden bevatten voortaan HTML van de rich-text-editor; bestaande rijen met platte tekst of
 # markdown blijven werken (zie looks_like_html / de filters in app/templating.py).
 
-_HTML_HINT = re.compile(r"<(p|div|br|ul|ol|li|h[1-6]|blockquote|pre|strong|b|em|i|u|s|a|img|hr)\b", re.I)
+_HTML_HINT = re.compile(r"<(p|div|br|ul|ol|li|h[1-6]|blockquote|pre|strong|b|em|i|u|s|a|img|hr|table)\b", re.I)
 _CHECK_LI = re.compile(r'<li\b[^>]*\bdata-checked="([01])"[^>]*>', re.I)
 _FIRST_BLOCK = re.compile(r"</(p|div|h[1-6]|li|blockquote|pre)>", re.I)
 

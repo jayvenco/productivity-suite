@@ -145,3 +145,12 @@ def test_split_rich_handles_bare_first_line_followed_by_block():
     assert title == "Idee voor de website" and rest == "<div>met een tweede regel</div>"
     assert split_rich("Alleen een titel")[0] == "Alleen een titel"
     assert split_rich("Tekst met <b>vet</b> erin")[0] == "Tekst met vet erin"
+
+
+def test_tables_survive_sanitizing_but_scripts_do_not():
+    from app.services.richtext import sanitize_note_html
+
+    html = '<table onclick="x()"><tbody><tr><th>A</th></tr><tr><td>1<script>x</script></td></tr></tbody></table>'
+    out = sanitize_note_html(html)
+    assert "<table>" in out and "<th>A</th>" in out and "<td>1" in out
+    assert "onclick" not in out and "<script" not in out

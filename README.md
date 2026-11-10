@@ -665,6 +665,13 @@ duidelijke foutmelding zodra je een voice-notitie probeert op te nemen.
 Na de eerste login toont de app een waarschuwing zolang je het standaardwachtwoord
 gebruikt. Wijzig gebruikersnaam/wachtwoord via de **Account**-pagina in de sidebar.
 
+## Tabellen
+
+In de rich-text-editor (notities, scratchpad, taken, kanban-kaarten, inbox) voegt de knop
+**▦ Tabel** een tabel in (bv. `3x4` = 3 kolommen, 4 rijen; eerste rij is de kop). Staat de cursor
+in een tabel, dan verschijnen **+ rij / + kolom / − rij / − kolom / ✕ tabel**; **Tab** springt naar
+de volgende cel en voegt in de laatste cel een rij toe. Tabellen blijven behouden door de HTML-opschoning.
+
 ## Maandelijkse back-ups en terugzetten
 
 Elke maand maakt de app automatisch een volledige back-up (de hele database: taken, kanban,

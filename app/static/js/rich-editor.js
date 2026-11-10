@@ -8,7 +8,7 @@
 // API per editor: textarea.richEditor = { editor, getHTML, setHTML, isEmpty, focus, clear }.
 (function () {
   const MAX_IMAGE_WIDTH = 1600;
-  const HTML_HINT = /<(p|div|br|ul|ol|li|h[1-6]|blockquote|pre|strong|b|em|i|u|s|a|img|hr)\b/i;
+  const HTML_HINT = /<(p|div|br|ul|ol|li|h[1-6]|blockquote|pre|strong|b|em|i|u|s|a|img|hr|table)\b/i;
 
   const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -99,6 +99,14 @@
     <button type="button" data-cmd="blockquote" title="Citaat">❝</button>
     <button type="button" data-cmd="createLink" title="Link invoegen">Link</button>
     <button type="button" data-cmd="code" title="Code">&lt;/&gt;</button>
+    <button type="button" data-cmd="table" title="Tabel invoegen">▦ Tabel</button>
+    <span class="rt-table-tools" hidden>
+      <button type="button" data-cmd="tbl-row-add" title="Rij eronder toevoegen">+ rij</button>
+      <button type="button" data-cmd="tbl-col-add" title="Kolom rechts toevoegen">+ kolom</button>
+      <button type="button" data-cmd="tbl-row-del" title="Rij verwijderen">− rij</button>
+      <button type="button" data-cmd="tbl-col-del" title="Kolom verwijderen">− kolom</button>
+      <button type="button" data-cmd="tbl-del" title="Tabel verwijderen">✕ tabel</button>
+    </span>
     <button type="button" data-cmd="insertImage" title="Afbeelding invoegen (of plak/sleep er een)">🖼</button>
     <button type="button" data-cmd="undo" title="Ongedaan maken">↶</button>
     <button type="button" data-cmd="redo" title="Opnieuw">↷</button>
@@ -214,6 +222,82 @@
 
     const imageFiles = (list) => Array.from(list || []).filter((f) => f.type.startsWith("image/"));
 
+    // ---- Tabellen ----
+    const tableTools = toolbar.querySelector(".rt-table-tools");
+    const cellFromSelection = () => closestFromSelection("td, th");
+
+    function insertTable() {
+      const answer = window.prompt("Tabel: kolommen x rijen (bv. 3x4)", "3x3");
+      const m = answer && answer.toLowerCase().match(/^\s*(\d{1,2})\s*[x×*,]\s*(\d{1,3})\s*$/);
+      if (!m) return;
+      const cols = Math.min(+m[1], 20), rows = Math.min(+m[2], 100);
+      let html = "<table><tbody>";
+      for (let r = 0; r < rows; r++) {
+        html += "<tr>" + (r === 0 ? "<th><br></th>" : "<td><br></td>").repeat(cols) + "</tr>";
+      }
+      html += "</tbody></table><p><br></p>";
+      document.execCommand("insertHTML", false, html);
+      updateTableTools();
+    }
+
+    function tableAction(cmd) {
+      const cell = cellFromSelection();
+      if (!cell) return;
+      const row = cell.parentElement, table = cell.closest("table");
+      const index = Array.from(row.children).indexOf(cell);
+      const blank = (tag) => { const c = document.createElement(tag); c.innerHTML = "<br>"; return c; };
+      if (cmd === "tbl-row-add") {
+        const r = document.createElement("tr");
+        Array.from(row.children).forEach(() => r.appendChild(blank("td")));
+        row.after(r);
+      } else if (cmd === "tbl-col-add") {
+        table.querySelectorAll("tr").forEach((tr) => {
+          const ref = tr.children[index];
+          const c = blank(ref && ref.tagName === "TH" ? "th" : "td");
+          if (ref) ref.after(c); else tr.appendChild(c);
+        });
+      } else if (cmd === "tbl-row-del") {
+        if (table.querySelectorAll("tr").length <= 1) table.remove(); else row.remove();
+      } else if (cmd === "tbl-col-del") {
+        if (row.children.length <= 1) table.remove();
+        else table.querySelectorAll("tr").forEach((tr) => tr.children[index] && tr.children[index].remove());
+      } else if (cmd === "tbl-del") {
+        table.remove();
+      }
+      if (!editor.querySelector("p, h2, h3, ul, ol, blockquote, pre")) editor.insertAdjacentHTML("beforeend", "<p><br></p>");
+      updateTableTools();
+    }
+
+    function updateTableTools() {
+      tableTools.hidden = !cellFromSelection();
+    }
+    document.addEventListener("selectionchange", () => {
+      if (document.activeElement === editor) updateTableTools();
+    });
+
+    // Tab / Shift+Tab springt naar de volgende/vorige cel; Tab in de laatste cel voegt een rij toe.
+    editor.addEventListener("keydown", (event) => {
+      if (event.key !== "Tab") return;
+      const cell = cellFromSelection();
+      if (!cell) return;
+      event.preventDefault();
+      const cells = Array.from(cell.closest("table").querySelectorAll("th, td"));
+      let i = cells.indexOf(cell) + (event.shiftKey ? -1 : 1);
+      if (i >= cells.length) { tableAction("tbl-row-add"); i = cells.indexOf(cell) + 1; return focusCell(cell.closest("table"), i); }
+      if (i >= 0) focusCell(cell.closest("table"), i);
+    });
+    function focusCell(table, i) {
+      const c = table.querySelectorAll("th, td")[i];
+      if (!c) return;
+      const range = document.createRange();
+      range.selectNodeContents(c);
+      range.collapse(true);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      sync();
+    }
+
     // Werkbalk: mousedown niet laten stelen van de selectie in de editor.
     toolbar.addEventListener("mousedown", (event) => {
       if (event.target.closest("button")) event.preventDefault();
@@ -232,6 +316,10 @@
         wrapSelectionInCode();
       } else if (cmd === "checklist") {
         toggleChecklist();
+      } else if (cmd === "table") {
+        insertTable();
+      } else if (cmd.startsWith("tbl-")) {
+        tableAction(cmd);
       } else if (cmd === "blockquote") {
         document.execCommand("formatBlock", false, closestFromSelection("blockquote") ? "p" : "blockquote");
       } else if (cmd === "insertImage") {

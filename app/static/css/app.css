@@ -4552,3 +4552,14 @@ body:has(#task-ticker:not([hidden])) .scratchpad-page { height: calc(100vh - 112
 .scratchpad-page .rich-editor { flex: 1; font-size: 16px; line-height: 1.6; padding: 18px 22px; }
 .scratchpad-opt { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
 .scratchpad-opt select { padding: 4px 8px; font-size: 12px; max-width: 190px; }
+
+/* Tabellen in notities/scratchpad/taken (rich editor + weergave) */
+.rich-editor table, .note-card-preview table, .card-description table, .inbox-item-text table, .rich-editor-preview table, .note-content table, .rich-content table, table.rt-table {
+  border-collapse: collapse; margin: 8px 0; max-width: 100%;
+}
+.rich-editor th, .rich-editor td, .note-card-preview th, .note-card-preview td, .card-description th, .card-description td, .inbox-item-text th, .inbox-item-text td, .rich-editor-preview th, .rich-editor-preview td, .note-content th, .note-content td, .rich-content th, .rich-content td {
+  border: 1px solid var(--border, #444); padding: 6px 10px; min-width: 60px; vertical-align: top;
+}
+.rich-editor th, .note-card-preview th, .card-description th, .inbox-item-text th, .rich-editor-preview th, .note-content th, .rich-content th { background: color-mix(in srgb, var(--accent) 16%, transparent); text-align: left; }
+.rt-table-tools { display: inline-flex; gap: 4px; margin-left: 4px; padding-left: 6px; border-left: 1px solid var(--border, #444); }
+.rt-table-tools[hidden] { display: none; }
