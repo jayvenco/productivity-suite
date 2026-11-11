@@ -27,5 +27,6 @@
   <Config Name="BACKUP_KEEP" Target="BACKUP_KEEP" Default="" Mode="" Description="Optioneel: aantal back-ups dat bewaard wordt. Leeg = standaard van de app." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
   <Config Name="SNIPPETS_GIT_REPO" Target="SNIPPETS_GIT_REPO" Default="" Mode="" Description="Optioneel: https-URL van een PRIVÉ git-repo waar je snippets naartoe gepusht worden, bv. https://github.com/jij/snippets.git" Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
   <Config Name="SNIPPETS_GIT_TOKEN" Target="SNIPPETS_GIT_TOKEN" Default="" Mode="" Description="Optioneel: fine-grained GitHub-token met schrijfrechten (Contents) op alleen die ene repo." Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="SNIPPETS_GIT_BRANCH" Target="SNIPPETS_GIT_BRANCH" Default="main" Mode="" Description="Optioneel: branch voor de snippet-push (standaard main)." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
   <Config Name="SNIPPETS_GIT_AUTO" Target="SNIPPETS_GIT_AUTO" Default="" Mode="" Description="Optioneel: true = snippets dagelijks automatisch pushen." Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
 </Container>

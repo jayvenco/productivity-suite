@@ -16,8 +16,9 @@ CONTAINER_PORT=8000
 APPDATA="${APPDATA:-/mnt/user/appdata/${NAME}}"
 RAW="${RAW_URL:-https://raw.githubusercontent.com/jayvenco/productivity-suite/main/unraid}"
 TEMPLATE_DIR="${TEMPLATE_DIR:-/boot/config/plugins/dockerMan/templates-user}"
-WHISPER_SERVICE_URL="${WHISPER_SERVICE_URL:-}"
-WHISPER_MODEL="${WHISPER_MODEL:-}"
+# Optionele app-instellingen. Staan ze al op de bestaande container (bv. via de Docker-tab), dan
+# worden ze bij een update overgenomen; een waarde die je hier meegeeft wint.
+OPTIONAL_VARS="WHISPER_SERVICE_URL WHISPER_MODEL SNIPPETS_GIT_REPO SNIPPETS_GIT_TOKEN SNIPPETS_GIT_BRANCH SNIPPETS_GIT_AUTO MONTHLY_BACKUP_KEEP BACKUP_ENABLED BACKUP_KEEP DEFAULT_THEME"
 
 log() { printf '==> %s\n' "$*"; }
 
@@ -44,14 +45,22 @@ fi
 
 # 4. Bestaande container vervangen (data staat op het volume en blijft behouden)
 if docker inspect "${NAME}" >/dev/null 2>&1; then
+  OLD_ENV="$(docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "${NAME}" 2>/dev/null || true)"
+  for v in ${OPTIONAL_VARS}; do
+    if [ -z "${!v:-}" ]; then
+      old="$(printf '%s\n' "${OLD_ENV}" | sed -n "s/^${v}=//p" | head -n 1)"
+      [ -n "${old}" ] && printf -v "${v}" '%s' "${old}" && log "Bestaande instelling ${v} overgenomen"
+    fi
+  done
   log "Bestaande container '${NAME}' stoppen en verwijderen (data blijft staan)"
   docker stop "${NAME}" >/dev/null 2>&1 || true
   docker rm "${NAME}" >/dev/null
 fi
 
 ENV_ARGS=()
-[ -n "${WHISPER_SERVICE_URL}" ] && ENV_ARGS+=(-e "WHISPER_SERVICE_URL=${WHISPER_SERVICE_URL}")
-[ -n "${WHISPER_MODEL}" ] && ENV_ARGS+=(-e "WHISPER_MODEL=${WHISPER_MODEL}")
+for v in ${OPTIONAL_VARS}; do
+  [ -n "${!v:-}" ] && ENV_ARGS+=(-e "${v}=${!v}")
+done
 
 # 5. Container starten, met labels zodat Unraid 'm als eigen container toont
 log "Container '${NAME}' starten op poort ${HOST_PORT}"
@@ -77,8 +86,9 @@ if [ -d "${TEMPLATE_DIR}" ]; then
     sed -i -E "s|<Name>[^<]*</Name>|<Name>$(esc "${NAME}")</Name>|" "${TMP}"
     setcfg "8000" "${HOST_PORT}"
     setcfg "/app/data" "${APPDATA}/data"
-    [ -n "${WHISPER_SERVICE_URL}" ] && setcfg "WHISPER_SERVICE_URL" "${WHISPER_SERVICE_URL}"
-    [ -n "${WHISPER_MODEL}" ] && setcfg "WHISPER_MODEL" "${WHISPER_MODEL}"
+    for v in ${OPTIONAL_VARS}; do
+      [ -n "${!v:-}" ] && setcfg "${v}" "${!v}"
+    done
     install -m 600 "${TMP}" "${TEMPLATE_DIR}/my-${NAME}.xml"
   else
     echo "Waarschuwing: template kon niet worden gedownload; sla ik over (de container werkt wel)." >&2

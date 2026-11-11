@@ -735,7 +735,8 @@ container `productivity-suite` op poort **8887** met Unraid-labels (icoon, WebUI
 schrijft een template naar `/boot/config/plugins/dockerMan/templates-user/`, zodat de
 container in de **Docker-tab** staat en daar te bewerken is. Updaten: script opnieuw draaien
 of in de Docker-tab op "force update" klikken; data blijft behouden.
-Instelbaar via omgevingsvariabelen: `HOST_PORT`, `APPDATA`, `IMAGE_TAG`, `GHCR_USER`/`GHCR_TOKEN`,
+Variabelen die je op de container hebt gezet (bv. `SNIPPETS_GIT_REPO`, `SNIPPETS_GIT_TOKEN`) worden bij
+opnieuw draaien van het script overgenomen. Instelbaar via omgevingsvariabelen: `HOST_PORT`, `APPDATA`, `IMAGE_TAG`, `GHCR_USER`/`GHCR_TOKEN`,
 `WHISPER_SERVICE_URL`, `WHISPER_MODEL`.
 
 Alternatief: template `unraid/productivity-suite.xml` handmatig in de templates-user-map zetten.
