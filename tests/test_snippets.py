@@ -500,3 +500,38 @@ def test_git_export_flat_folder_handles_duplicate_filenames(logged_in_client, tm
     names = sorted(p.name for p in (tmp_path / "work" / "snippets").iterdir() if p.name.startswith("run"))
     assert len(names) == 2 and all(n.startswith("run-") and n.endswith(".sh") for n in names)
     assert not any(p.is_dir() for p in (tmp_path / "work" / "snippets").iterdir())
+
+
+def test_git_push_also_sends_earlier_unpushed_commit(logged_in_client, tmp_path, monkeypatch):
+    import subprocess
+
+    from app.config import settings
+    from app.services import snippet_git
+
+    bare = tmp_path / "remote.git"
+    subprocess.run(["git", "init", "--bare", "-b", "main", str(bare)], check=True, capture_output=True)
+    monkeypatch.setattr(snippet_git, "REPO_DIR", tmp_path / "work")
+    monkeypatch.setattr(snippet_git, "STATUS_FILE", tmp_path / "status.json")
+    monkeypatch.setattr(settings, "snippets_git_repo", str(bare))
+    monkeypatch.setattr(settings, "snippets_git_token", "")
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "X", "tags": "", "filename": ["x.sh"], "language": ["bash"], "content": ["echo"]},
+        follow_redirects=True,
+    )
+    assert logged_in_client.post("/account/snippets-git/push").status_code == 200  # eerste push
+    work = tmp_path / "work"
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "Y", "tags": "", "filename": ["y.sh"], "language": ["bash"], "content": ["echo y"]},
+        follow_redirects=True,
+    )
+    # Simuleer een eerdere mislukte push: wel gecommit, niet gepusht (remote tijdelijk kapot).
+    subprocess.run(["git", "remote", "set-url", "origin", str(tmp_path / "bestaat-niet.git")], cwd=work, check=True)
+    assert logged_in_client.post("/account/snippets-git/push").status_code == 400
+    subprocess.run(["git", "remote", "set-url", "origin", str(bare)], cwd=work, check=True)
+    r = logged_in_client.post("/account/snippets-git/push")  # werkmap is nu schoon, commit staat klaar
+    assert r.status_code == 200 and "gepusht" in r.text
+    check = tmp_path / "check"
+    subprocess.run(["git", "clone", str(bare), str(check)], check=True, capture_output=True)
+    assert (check / "snippets" / "y.sh").exists()

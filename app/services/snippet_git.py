@@ -141,13 +141,17 @@ def push_snippets(db: Session) -> str:
             _ensure_repo()
             count = _write_tree(db)
             _git(["add", "-A"], cwd=REPO_DIR)
-            if not _git(["status", "--porcelain"], cwd=REPO_DIR).strip():
-                msg = f"Geen wijzigingen ({count} snippets staan al in de repo)."
-            else:
+            committed = bool(_git(["status", "--porcelain"], cwd=REPO_DIR).strip())
+            if committed:
                 _git(["-c", "user.name=Productivity Suite", "-c", "user.email=productivity-suite@localhost",
                       "commit", "-m", f"Snippets bijgewerkt ({count} snippets, {datetime.now():%Y-%m-%d %H:%M})"],
                      cwd=REPO_DIR)
-                _git(["push", "origin", "HEAD"], cwd=REPO_DIR, auth=True)
+            # Altijd pushen: een eerdere poging kan wel gecommit maar niet gepusht zijn (bv. door
+            # een fout met het token); dan staat de commit lokaal klaar zonder dat er "wijzigingen" zijn.
+            out = _git(["push", "--porcelain", "origin", "HEAD"], cwd=REPO_DIR, auth=True)
+            if not committed and "[up to date]" in out:
+                msg = f"Geen wijzigingen ({count} snippets staan al in de repo)."
+            else:
                 msg = f"{count} snippets gepusht naar git."
         except GitPushError as exc:
             _save_status(False, str(exc))
