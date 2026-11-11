@@ -31,6 +31,7 @@ from app.routers import (
     voice,
 )
 from app.services.backup import start_backup_scheduler
+from app.services.snippet_git import start_auto_push
 from app.services.note_templates import seed_builtin_templates
 from app.services.migrate import run_lightweight_migrations
 from app.services.seed import seed_default_user_and_board
@@ -45,6 +46,7 @@ with SessionLocal() as db:
     seed_builtin_templates(db)
 
 start_backup_scheduler()
+start_auto_push()
 
 app = FastAPI(title=settings.app_name)
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "app" / "static")), name="static")

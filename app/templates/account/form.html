@@ -220,5 +220,26 @@
 <p style="color:var(--text-muted);font-size:12px">Nog geen maandelijkse back-ups.</p>
 {% endif %}
 
+<h2 style="margin-top:28px" id="snippets-git">Snippets naar git</h2>
+{% if git_configured %}
+<p style="color:var(--text-muted);font-size:12px;max-width:520px">
+  Alle snippets worden als echte bestanden (per snippet een map met README) gepusht naar
+  <code>{{ git_repo }}</code>{% if git_auto %} — dagelijks automatisch{% endif %}.
+</p>
+<form method="post" action="/account/snippets-git/push" style="margin:8px 0">
+  <button type="submit" class="btn">Nu pushen naar git</button>
+</form>
+{% if git_status %}
+<p style="font-size:12px;color:var(--text-muted)">Laatste poging ({{ git_status.at.replace('T', ' ') }}): {{ 'gelukt' if git_status.ok else 'mislukt' }} — {{ git_status.message }}</p>
+{% endif %}
+{% else %}
+<p style="color:var(--text-muted);font-size:12px;max-width:520px">
+  Niet ingesteld. Zet de omgevingsvariabelen <code>SNIPPETS_GIT_REPO</code> (https-URL van een
+  <b>privé</b> repo) en <code>SNIPPETS_GIT_TOKEN</code> (fine-grained token met schrijfrechten op
+  alleen die repo) op de container; optioneel <code>SNIPPETS_GIT_AUTO=true</code> voor een
+  dagelijkse push.
+</p>
+{% endif %}
+
 <script src="{{ static_url('js/account.js') }}"></script>
 {% endblock %}

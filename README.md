@@ -665,6 +665,25 @@ duidelijke foutmelding zodra je een voice-notitie probeert op te nemen.
 Na de eerste login toont de app een waarschuwing zolang je het standaardwachtwoord
 gebruikt. Wijzig gebruikersnaam/wachtwoord via de **Account**-pagina in de sidebar.
 
+## Snippets naar git pushen
+
+Onder **Account → Snippets naar git** pusht de knop *Nu pushen naar git* alle snippets als
+leesbare bestanden naar een git-repo: per snippet een map `snippets/<titel>-<id>/` met de echte
+bestanden (bv. `script.ps1`) en een `README.md` (titel, beschrijving, tags), plus een
+index-`README.md` in de root. De repo spiegelt de app; verwijderde snippets verdwijnen uit de
+werkmap maar blijven in de git-historie. Instellen via omgevingsvariabelen op de container
+(Unraid: Docker-tab → Edit → geavanceerde weergave):
+
+| Variabele | Betekenis |
+|---|---|
+| `SNIPPETS_GIT_REPO` | https-URL van een **privé** repo, bv. `https://github.com/jij/snippets.git` |
+| `SNIPPETS_GIT_TOKEN` | fine-grained GitHub-token met *Contents: Read and write* op alleen die repo |
+| `SNIPPETS_GIT_BRANCH` | branch (standaard `main`) |
+| `SNIPPETS_GIT_AUTO` | `true` = dagelijks automatisch pushen |
+
+Het token wordt per commando als HTTP-header meegegeven en staat nergens in `.git/config` of in
+de repo-URL. Gebruik een privérepo: snippets kunnen gevoelige data bevatten.
+
 ## Tabellen
 
 In de rich-text-editor (notities, scratchpad, taken, kanban-kaarten, inbox) voegt de knop

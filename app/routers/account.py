@@ -20,6 +20,7 @@ from app.database import Base, engine, get_db
 from app.models.user import User
 from app.routers.settings import AVAILABLE_BACKGROUNDS, AVAILABLE_DENSITIES, AVAILABLE_FONT_SIZES, AVAILABLE_FONTS
 from app.services import backup as backup_service
+from app.services import snippet_git
 from app.services.api_tokens import generate_api_token, hash_api_token
 from app.services.navigation import NAV_MODULES
 from app.services.migrate import run_lightweight_migrations
@@ -70,6 +71,10 @@ def _account_context(
             {"name": p.name, "size_kb": max(1, p.stat().st_size // 1024), "modified": datetime.fromtimestamp(p.stat().st_mtime)}
             for p in backup_service.list_monthly_backups()
         ],
+        "git_configured": snippet_git.is_configured(),
+        "git_repo": settings.snippets_git_repo,
+        "git_auto": settings.snippets_git_auto,
+        "git_status": snippet_git.last_status(),
         "monthly_backup_dir": str(backup_service.MONTHLY_DIR),
         **_appearance_context(),
     }
@@ -367,3 +372,18 @@ def restore_monthly_backup(
     Base.metadata.create_all(bind=engine)
     run_lightweight_migrations(engine)
     return RedirectResponse("/login", status_code=303)
+
+
+# ---- Snippets naar git pushen ----
+
+
+@router.post("/snippets-git/push")
+def push_snippets_to_git(request: Request, user: User = Depends(require_user), db: Session = Depends(get_db)):
+    try:
+        message = snippet_git.push_snippets(db)
+        ctx = _account_context(db, user.id, success=message)
+        status = 200
+    except snippet_git.GitPushError as exc:
+        ctx = _account_context(db, user.id, error=f"Pushen naar git mislukt: {exc}")
+        status = 400
+    return templates.TemplateResponse(request, "account/form.html", {"user": user, **ctx}, status_code=status)

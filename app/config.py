@@ -54,6 +54,12 @@ class Settings(BaseSettings):
     monthly_backup_dir: str = ""
     monthly_backup_keep: int = 12  # aantal maandbackups dat bewaard blijft
 
+    # Snippets als bestanden naar een git-repo pushen (app/services/snippet_git.py).
+    snippets_git_repo: str = ""  # bv. https://github.com/jij/snippets.git (privé repo!)
+    snippets_git_token: str = ""  # fine-grained token met schrijfrechten op alleen die repo
+    snippets_git_branch: str = "main"
+    snippets_git_auto: bool = False  # dagelijks automatisch pushen
+
     pomodoro_work_minutes: int = 25
     pomodoro_break_minutes: int = 5
 

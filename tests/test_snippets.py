@@ -433,3 +433,48 @@ def test_powershell_language_is_offered_and_highlighted(logged_in_client):
     )
     page = logged_in_client.get("/snippets")
     assert "language-powershell" in page.text and "languages/powershell.min.js" in page.text
+
+
+def test_snippets_are_pushed_as_readable_files_to_git(logged_in_client, tmp_path, monkeypatch):
+    import subprocess
+
+    from app.config import settings
+    from app.services import snippet_git
+
+    bare = tmp_path / "remote.git"
+    subprocess.run(["git", "init", "--bare", "-b", "main", str(bare)], check=True, capture_output=True)
+    monkeypatch.setattr(snippet_git, "REPO_DIR", tmp_path / "work")
+    monkeypatch.setattr(snippet_git, "STATUS_FILE", tmp_path / "status.json")
+    monkeypatch.setattr(settings, "snippets_git_repo", str(bare))
+    monkeypatch.setattr(settings, "snippets_git_token", "")
+
+    logged_in_client.post(
+        "/snippets",
+        data={"title": "Proces lijst", "description": "alle processen", "tags": "ps, windows",
+              "filename": ["../lijst.ps1"], "language": ["powershell"], "content": ["Get-Process"]},
+        follow_redirects=True,
+    )
+    page = logged_in_client.get("/account")
+    assert "Nu pushen naar git" in page.text
+
+    r = logged_in_client.post("/account/snippets-git/push")
+    assert r.status_code == 200 and "gepusht" in r.text
+
+    check = tmp_path / "check"
+    subprocess.run(["git", "clone", str(bare), str(check)], check=True, capture_output=True)
+    files = {str(p.relative_to(check)) for p in check.rglob("*") if p.is_file() and ".git" not in p.parts}
+    folder = next(f for f in files if f.endswith("lijst.ps1")).rsplit("/", 1)[0]
+    assert f"{folder}/README.md" in files and "README.md" in files
+    assert (check / folder / "lijst.ps1").read_text() == "Get-Process"
+    assert "ps, windows" in (check / folder / "README.md").read_text()
+
+    again = logged_in_client.post("/account/snippets-git/push")
+    assert "Geen wijzigingen" in again.text
+
+
+def test_git_push_without_configuration_gives_error(logged_in_client, monkeypatch):
+    from app.config import settings
+
+    monkeypatch.setattr(settings, "snippets_git_repo", "")
+    assert "Niet ingesteld" in logged_in_client.get("/account").text
+    assert logged_in_client.post("/account/snippets-git/push").status_code == 400
