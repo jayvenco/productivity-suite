@@ -463,10 +463,11 @@ def test_snippets_are_pushed_as_readable_files_to_git(logged_in_client, tmp_path
     check = tmp_path / "check"
     subprocess.run(["git", "clone", str(bare), str(check)], check=True, capture_output=True)
     files = {str(p.relative_to(check)) for p in check.rglob("*") if p.is_file() and ".git" not in p.parts}
-    folder = next(f for f in files if f.endswith("lijst.ps1")).rsplit("/", 1)[0]
-    assert f"{folder}/README.md" in files and "README.md" in files
-    assert (check / folder / "lijst.ps1").read_text() == "Get-Process"
-    assert "ps, windows" in (check / folder / "README.md").read_text()
+    assert "README.md" in files and "snippets/lijst.ps1" in files
+    assert all(f == "README.md" or f.count("/") == 1 for f in files)  # één platte map, geen submappen
+    assert (check / "snippets/lijst.ps1").read_text() == "Get-Process"
+    index = (check / "README.md").read_text()
+    assert "Proces lijst" in index and "ps, windows" in index and "alle processen" in index
 
     again = logged_in_client.post("/account/snippets-git/push")
     assert "Geen wijzigingen" in again.text
@@ -478,3 +479,24 @@ def test_git_push_without_configuration_gives_error(logged_in_client, monkeypatc
     monkeypatch.setattr(settings, "snippets_git_repo", "")
     assert "Niet ingesteld" in logged_in_client.get("/account").text
     assert logged_in_client.post("/account/snippets-git/push").status_code == 400
+
+
+def test_git_export_flat_folder_handles_duplicate_filenames(logged_in_client, tmp_path, monkeypatch):
+    from app.config import settings
+    from app.database import SessionLocal
+    from app.services import snippet_git
+
+    monkeypatch.setattr(snippet_git, "REPO_DIR", tmp_path / "work")
+    monkeypatch.setattr(settings, "snippets_git_repo", "x")
+    for title in ("A", "B"):
+        logged_in_client.post(
+            "/snippets",
+            data={"title": title, "tags": "", "filename": ["run.sh"], "language": ["bash"], "content": [title]},
+            follow_redirects=True,
+        )
+    (tmp_path / "work").mkdir()
+    with SessionLocal() as db:
+        snippet_git._write_tree(db)
+    names = sorted(p.name for p in (tmp_path / "work" / "snippets").iterdir() if p.name.startswith("run"))
+    assert len(names) == 2 and all(n.startswith("run-") and n.endswith(".sh") for n in names)
+    assert not any(p.is_dir() for p in (tmp_path / "work" / "snippets").iterdir())

@@ -16,6 +16,7 @@ import subprocess
 import threading
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import quote
 
 from sqlalchemy.orm import Session, selectinload
 
@@ -38,20 +39,13 @@ def is_configured() -> bool:
     return bool(settings.snippets_git_repo)
 
 
-def _slug(text: str) -> str:
-    s = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
-    return s[:50] or "snippet"
+def _safe_filename(name: str) -> str:
+    return re.sub(r"[^\w.\- ]+", "_", Path(name.replace("\\", "/")).name).strip(". ") or "bestand.txt"
 
 
-def _safe_filename(name: str, used: set[str]) -> str:
-    base = re.sub(r"[^\w.\- ]+", "_", Path(name.replace("\\", "/")).name).strip(". ") or "bestand.txt"
-    candidate, n = base, 1
-    while candidate.lower() in used or candidate.lower() == "readme.md":
-        stem, dot, ext = base.rpartition(".")
-        candidate = f"{stem or base}-{n}{dot}{ext}" if dot and stem else f"{base}-{n}"
-        n += 1
-    used.add(candidate.lower())
-    return candidate
+def _with_id(name: str, snippet_id: int) -> str:
+    stem, dot, ext = name.rpartition(".")
+    return f"{stem}-{snippet_id}.{ext}" if dot and stem else f"{name}-{snippet_id}"
 
 
 def _git(args: list[str], cwd: Path | None = None, auth: bool = False) -> str:
@@ -88,6 +82,9 @@ def _ensure_repo() -> None:
 
 
 def _write_tree(db: Session) -> int:
+    """Alle snippetbestanden platgeslagen in één map `snippets/`, zonder submappen. Een
+    bestandsnaam die vaker voorkomt krijgt het snippet-id erachter (`naam-12.ps1`), zodat niets
+    overschreven wordt. Titel/tags/beschrijving staan in de index-README in de root."""
     root = REPO_DIR / "snippets"
     if root.exists():
         shutil.rmtree(root)
@@ -95,27 +92,27 @@ def _write_tree(db: Session) -> int:
     snippets = (
         db.query(Snippet).options(selectinload(Snippet.files), selectinload(Snippet.tags)).order_by(Snippet.title).all()
     )
-    index = ["# Snippets", "", f"{len(snippets)} snippets, automatisch geëxporteerd uit Productivity Suite.", "",
-             "| Snippet | Tags | Bestanden |", "|---|---|---|"]
+    counts: dict[str, int] = {}
     for sn in snippets:
-        folder = f"{_slug(sn.title)}-{sn.id}"
-        d = root / folder
-        d.mkdir()
-        used: set[str] = set()
-        names = []
         for f in sn.files:
-            fname = _safe_filename(f.filename, used)
-            (d / fname).write_text(f.content or "", encoding="utf-8")
-            names.append(fname)
+            key = _safe_filename(f.filename).lower()
+            counts[key] = counts.get(key, 0) + 1
+    index = ["# Snippets", "", f"{len(snippets)} snippets, automatisch geëxporteerd uit Productivity Suite.", "",
+             "| Snippet | Tags | Bestanden | Beschrijving |", "|---|---|---|---|"]
+    for sn in snippets:
+        links = []
+        used_here: set[str] = set()
+        for f in sn.files:
+            fname = _safe_filename(f.filename)
+            if counts[fname.lower()] > 1 or fname.lower() in used_here:
+                fname = _with_id(fname, sn.id)
+            used_here.add(fname.lower())
+            (root / fname).write_text(f.content or "", encoding="utf-8")
+            links.append(f"[{fname}](snippets/{quote(fname)})")
         tags = ", ".join(sorted(t.name for t in sn.tags))
-        readme = [f"# {sn.title}", ""]
-        if sn.description:
-            readme += [sn.description, ""]
-        if tags:
-            readme += [f"**Tags:** {tags}", ""]
-        readme += ["**Bestanden:**", ""] + [f"- [{n}]({n})" for n in names]
-        (d / "README.md").write_text("\n".join(readme) + "\n", encoding="utf-8")
-        index.append(f"| [{sn.title}](snippets/{folder}/README.md) | {tags} | {len(names)} |")
+        desc = (sn.description or "").replace("\n", " ").replace("|", "\\|")
+        title = sn.title.replace("|", "\\|")
+        index.append(f"| {title} | {tags} | {', '.join(links)} | {desc} |")
     (REPO_DIR / "README.md").write_text("\n".join(index) + "\n", encoding="utf-8")
     return len(snippets)
 

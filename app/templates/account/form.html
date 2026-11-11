@@ -223,7 +223,7 @@
 <h2 style="margin-top:28px" id="snippets-git">Snippets naar git</h2>
 {% if git_configured %}
 <p style="color:var(--text-muted);font-size:12px;max-width:520px">
-  Alle snippets worden als echte bestanden (per snippet een map met README) gepusht naar
+  Alle snippets worden als echte bestanden in één map <code>snippets/</code> gepusht naar
   <code>{{ git_repo }}</code>{% if git_auto %} — dagelijks automatisch{% endif %}.
 </p>
 <form method="post" action="/account/snippets-git/push" style="margin:8px 0">

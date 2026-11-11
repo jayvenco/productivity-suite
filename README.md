@@ -668,10 +668,11 @@ gebruikt. Wijzig gebruikersnaam/wachtwoord via de **Account**-pagina in de sideb
 ## Snippets naar git pushen
 
 Onder **Account → Snippets naar git** pusht de knop *Nu pushen naar git* alle snippets als
-leesbare bestanden naar een git-repo: per snippet een map `snippets/<titel>-<id>/` met de echte
-bestanden (bv. `script.ps1`) en een `README.md` (titel, beschrijving, tags), plus een
-index-`README.md` in de root. De repo spiegelt de app; verwijderde snippets verdwijnen uit de
-werkmap maar blijven in de git-historie. Instellen via omgevingsvariabelen op de container
+leesbare bestanden naar een git-repo: alle snippetbestanden staan in één map `snippets/`
+(zonder submappen; een bestandsnaam die vaker voorkomt krijgt het snippet-id erachter, bv.
+`run-12.sh`), plus een index-`README.md` in de root met titel, tags, beschrijving en links per
+snippet. De repo spiegelt de app; verwijderde snippets verdwijnen uit de werkmap maar blijven
+in de git-historie. Instellen via omgevingsvariabelen op de container
 (Unraid: Docker-tab → Edit → geavanceerde weergave):
 
 | Variabele | Betekenis |
