@@ -49,7 +49,9 @@ def _with_id(name: str, snippet_id: int) -> str:
 
 
 def _git(args: list[str], cwd: Path | None = None, auth: bool = False) -> str:
-    cmd = ["git", "-c", "core.quotepath=off"]
+    # safe.directory: op Unraid is het data-volume van 99:100 terwijl de container als root draait;
+    # git weigert dan ("dubious ownership"). Dit is onze eigen werkmap, dus vertrouwen we die.
+    cmd = ["git", "-c", "core.quotepath=off", "-c", f"safe.directory={REPO_DIR}"]
     if auth and settings.snippets_git_token:
         raw = base64.b64encode(f"x-access-token:{settings.snippets_git_token}".encode()).decode()
         cmd += ["-c", f"http.extraHeader=Authorization: Basic {raw}"]
