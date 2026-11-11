@@ -72,8 +72,10 @@ def _account_context(
             for p in backup_service.list_monthly_backups()
         ],
         "git_configured": snippet_git.is_configured(),
-        "git_repo": settings.snippets_git_repo,
-        "git_auto": settings.snippets_git_auto,
+        "git_repo": snippet_git.get_config()["repo"],
+        "git_branch": snippet_git.get_config()["branch"],
+        "git_has_token": bool(snippet_git.get_config()["token"]),
+        "git_auto": snippet_git.get_config()["auto"],
         "git_status": snippet_git.last_status(),
         "monthly_backup_dir": str(backup_service.MONTHLY_DIR),
         **_appearance_context(),
@@ -387,3 +389,28 @@ def push_snippets_to_git(request: Request, user: User = Depends(require_user), d
         ctx = _account_context(db, user.id, error=f"Pushen naar git mislukt: {exc}")
         status = 400
     return templates.TemplateResponse(request, "account/form.html", {"user": user, **ctx}, status_code=status)
+
+
+@router.post("/snippets-git/settings")
+def save_snippets_git_settings(
+    request: Request,
+    repo: str = Form(""),
+    token: str = Form(""),
+    branch: str = Form("main"),
+    auto: str = Form(""),
+    user: User = Depends(require_user),
+    db: Session = Depends(get_db),
+):
+    repo = repo.strip()
+    if repo and not repo.startswith("https://"):
+        ctx = _account_context(db, user.id, error="Gebruik de https-URL van de repo (https://github.com/jij/snippets.git).")
+        return templates.TemplateResponse(request, "account/form.html", {"user": user, **ctx}, status_code=400)
+    snippet_git.save_config(repo, token, branch, bool(auto))
+    ctx = _account_context(db, user.id, success="Git-instellingen opgeslagen.")
+    return templates.TemplateResponse(request, "account/form.html", {"user": user, **ctx})
+
+
+@router.post("/snippets-git/clear")
+def clear_snippets_git_settings(user: User = Depends(require_user)):
+    snippet_git.clear_config()
+    return RedirectResponse("/account#snippets-git", status_code=303)

@@ -477,7 +477,7 @@ def test_git_push_without_configuration_gives_error(logged_in_client, monkeypatc
     from app.config import settings
 
     monkeypatch.setattr(settings, "snippets_git_repo", "")
-    assert "Niet ingesteld" in logged_in_client.get("/account").text
+    assert "Nu pushen naar git" not in logged_in_client.get("/account").text
     assert logged_in_client.post("/account/snippets-git/push").status_code == 400
 
 
@@ -535,3 +535,29 @@ def test_git_push_also_sends_earlier_unpushed_commit(logged_in_client, tmp_path,
     check = tmp_path / "check"
     subprocess.run(["git", "clone", str(bare), str(check)], check=True, capture_output=True)
     assert (check / "snippets" / "y.sh").exists()
+
+
+def test_git_settings_saved_in_app_survive_without_env(logged_in_client, tmp_path, monkeypatch):
+    from app.config import settings
+    from app.services import snippet_git
+
+    monkeypatch.setattr(snippet_git, "CONFIG_FILE", tmp_path / "cfg.json")
+    monkeypatch.setattr(settings, "snippets_git_repo", "")
+    monkeypatch.setattr(settings, "snippets_git_token", "")
+    bad = logged_in_client.post("/account/snippets-git/settings", data={"repo": "git@github.com:a/b.git"})
+    assert bad.status_code == 400
+    ok = logged_in_client.post(
+        "/account/snippets-git/settings",
+        data={"repo": "https://github.com/jij/snippets.git", "token": "geheim", "branch": "main", "auto": "1"},
+    )
+    assert ok.status_code == 200 and "opgeslagen" in ok.text
+    page = logged_in_client.get("/account").text
+    assert "https://github.com/jij/snippets.git" in page and "Nu pushen naar git" in page
+    assert "geheim" not in page  # token komt nooit terug in de pagina
+    cfg = snippet_git.get_config()
+    assert cfg["token"] == "geheim" and cfg["auto"] is True
+    # leeg tokenveld laat het opgeslagen token staan
+    logged_in_client.post("/account/snippets-git/settings", data={"repo": "https://github.com/jij/snippets.git", "token": "", "branch": "dev"})
+    assert snippet_git.get_config()["token"] == "geheim" and snippet_git.get_config()["branch"] == "dev"
+    logged_in_client.post("/account/snippets-git/clear")
+    assert snippet_git.get_config()["repo"] == ""

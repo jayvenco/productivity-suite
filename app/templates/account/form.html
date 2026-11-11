@@ -221,24 +221,39 @@
 {% endif %}
 
 <h2 style="margin-top:28px" id="snippets-git">Snippets naar git</h2>
-{% if git_configured %}
 <p style="color:var(--text-muted);font-size:12px;max-width:520px">
-  Alle snippets worden als echte bestanden in één map <code>snippets/</code> gepusht naar
-  <code>{{ git_repo }}</code>{% if git_auto %} — dagelijks automatisch{% endif %}.
+  Pusht alle snippets als echte bestanden in één map <code>snippets/</code> naar een
+  <b>privé</b> git-repo. De instellingen hieronder worden in je data-volume bewaard en overleven
+  dus updates van de container.
 </p>
-<form method="post" action="/account/snippets-git/push" style="margin:8px 0">
+<form method="post" action="/account/snippets-git/settings" style="max-width:420px">
+  <div class="field">
+    <label for="git_repo">Repo-URL (https)</label>
+    <input type="text" id="git_repo" name="repo" value="{{ git_repo }}" placeholder="https://github.com/jij/snippets.git">
+  </div>
+  <div class="field">
+    <label for="git_token">Token (fine-grained, Contents: Read and write){% if git_has_token %} — opgeslagen, leeg laten om te behouden{% endif %}</label>
+    <input type="password" id="git_token" name="token" autocomplete="off" placeholder="{{ '••••••••' if git_has_token else 'github_pat_…' }}">
+  </div>
+  <div class="field">
+    <label for="git_branch">Branch</label>
+    <input type="text" id="git_branch" name="branch" value="{{ git_branch }}">
+  </div>
+  <div class="field">
+    <label><input type="checkbox" name="auto" value="1" {{ 'checked' if git_auto }}> Dagelijks automatisch pushen</label>
+  </div>
+  <button type="submit" class="btn">Opslaan</button>
+</form>
+{% if git_configured %}
+<form method="post" action="/account/snippets-git/push" style="margin:12px 0 4px">
   <button type="submit" class="btn">Nu pushen naar git</button>
+</form>
+<form method="post" action="/account/snippets-git/clear" style="margin:4px 0" onsubmit="return confirm('Git-instellingen uit de app wissen?')">
+  <button type="submit" class="btn btn-danger">Instellingen wissen</button>
 </form>
 {% if git_status %}
 <p style="font-size:12px;color:var(--text-muted)">Laatste poging ({{ git_status.at.replace('T', ' ') }}): {{ 'gelukt' if git_status.ok else 'mislukt' }} — {{ git_status.message }}</p>
 {% endif %}
-{% else %}
-<p style="color:var(--text-muted);font-size:12px;max-width:520px">
-  Niet ingesteld. Zet de omgevingsvariabelen <code>SNIPPETS_GIT_REPO</code> (https-URL van een
-  <b>privé</b> repo) en <code>SNIPPETS_GIT_TOKEN</code> (fine-grained token met schrijfrechten op
-  alleen die repo) op de container; optioneel <code>SNIPPETS_GIT_AUTO=true</code> voor een
-  dagelijkse push.
-</p>
 {% endif %}
 
 <script src="{{ static_url('js/account.js') }}"></script>
