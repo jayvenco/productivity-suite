@@ -520,7 +520,6 @@ def test_git_push_also_sends_earlier_unpushed_commit(logged_in_client, tmp_path,
         follow_redirects=True,
     )
     assert logged_in_client.post("/account/snippets-git/push").status_code == 200  # eerste push
-    work = tmp_path / "work"
     logged_in_client.post(
         "/snippets",
         data={"title": "Y", "tags": "", "filename": ["y.sh"], "language": ["bash"], "content": ["echo y"]},
