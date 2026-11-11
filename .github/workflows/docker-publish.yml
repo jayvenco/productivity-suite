@@ -25,6 +25,10 @@ jobs:
         with:
           context: .
           push: true
+          # Eén gewoon image-manifest (geen attestatie-index): dat is wat Unraid vergelijkt om te
+          # zien of er een update is.
+          provenance: false
+          sbom: false
           tags: |
             ghcr.io/jayvenco/productivity-suite:latest
             ghcr.io/jayvenco/productivity-suite:${{ github.sha }}

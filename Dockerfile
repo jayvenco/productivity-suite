@@ -1,5 +1,9 @@
 FROM python:3.12-slim
 
+LABEL org.opencontainers.image.source="https://github.com/jayvenco/productivity-suite" \
+      org.opencontainers.image.title="Productivity Suite" \
+      org.opencontainers.image.description="Zelfgehoste productiviteitssuite (taken, notities, snippets, kanban)"
+
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
