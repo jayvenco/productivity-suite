@@ -526,10 +526,12 @@ def test_git_push_also_sends_earlier_unpushed_commit(logged_in_client, tmp_path,
         data={"title": "Y", "tags": "", "filename": ["y.sh"], "language": ["bash"], "content": ["echo y"]},
         follow_redirects=True,
     )
-    # Simuleer een eerdere mislukte push: wel gecommit, niet gepusht (remote tijdelijk kapot).
-    subprocess.run(["git", "remote", "set-url", "origin", str(tmp_path / "bestaat-niet.git")], cwd=work, check=True)
+    # Simuleer een eerdere mislukte push: wel gecommit, niet gepusht (remote weigert tijdelijk).
+    hook = bare / "hooks" / "pre-receive"
+    hook.write_text("#!/bin/sh\nexit 1\n")
+    hook.chmod(0o755)
     assert logged_in_client.post("/account/snippets-git/push").status_code == 400
-    subprocess.run(["git", "remote", "set-url", "origin", str(bare)], cwd=work, check=True)
+    hook.unlink()
     r = logged_in_client.post("/account/snippets-git/push")  # werkmap is nu schoon, commit staat klaar
     assert r.status_code == 200 and "gepusht" in r.text
     check = tmp_path / "check"
@@ -561,3 +563,31 @@ def test_git_settings_saved_in_app_survive_without_env(logged_in_client, tmp_pat
     assert snippet_git.get_config()["token"] == "geheim" and snippet_git.get_config()["branch"] == "dev"
     logged_in_client.post("/account/snippets-git/clear")
     assert snippet_git.get_config()["repo"] == ""
+
+
+def test_git_push_refuses_app_repo_and_recovers_after_url_change(logged_in_client, tmp_path, monkeypatch):
+    import subprocess
+
+    from app.config import settings
+    from app.services import snippet_git
+
+    monkeypatch.setattr(snippet_git, "REPO_DIR", tmp_path / "work")
+    monkeypatch.setattr(snippet_git, "STATUS_FILE", tmp_path / "status.json")
+    monkeypatch.setattr(snippet_git, "CONFIG_FILE", tmp_path / "cfg.json")
+    monkeypatch.setattr(settings, "snippets_git_token", "")
+    monkeypatch.setattr(settings, "snippets_git_repo", "https://github.com/jij/productivity-suite.git")
+    r = logged_in_client.post("/account/snippets-git/push")
+    assert r.status_code == 400 and "repo van de app zelf" in r.text
+
+    # werkmap met een oude/verkeerde origin wordt vervangen zodra de URL verandert
+    old = tmp_path / "oud.git"
+    new = tmp_path / "nieuw.git"
+    for b in (old, new):
+        subprocess.run(["git", "init", "--bare", "-b", "main", str(b)], check=True, capture_output=True)
+    monkeypatch.setattr(settings, "snippets_git_repo", str(old))
+    assert logged_in_client.post("/account/snippets-git/push").status_code == 200
+    monkeypatch.setattr(settings, "snippets_git_repo", str(new))
+    assert logged_in_client.post("/account/snippets-git/push").status_code == 200
+    check = tmp_path / "check"
+    subprocess.run(["git", "clone", str(new), str(check)], check=True, capture_output=True)
+    assert (check / "README.md").exists()

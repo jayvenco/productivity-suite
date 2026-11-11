@@ -110,8 +110,15 @@ def _git(args: list[str], cwd: Path | None = None, auth: bool = False) -> str:
 
 
 def _ensure_repo() -> None:
+    cfg_repo = get_config()["repo"]
     if (REPO_DIR / ".git").exists():
-        return
+        try:
+            origin = _git(["remote", "get-url", "origin"], cwd=REPO_DIR).strip()
+        except GitPushError:
+            origin = ""
+        if origin == cfg_repo:
+            return
+        shutil.rmtree(REPO_DIR)  # repo-URL gewijzigd: schoon opnieuw beginnen i.p.v. de oude te blijven gebruiken
     REPO_DIR.mkdir(parents=True, exist_ok=True)
     if any(REPO_DIR.iterdir()):
         shutil.rmtree(REPO_DIR)
@@ -172,6 +179,10 @@ def push_snippets(db: Session) -> str:
     """Exporteert alle snippets, commit en pusht. Geeft een melding terug of gooit GitPushError."""
     if not is_configured():
         raise GitPushError("Geen git-repo ingesteld (SNIPPETS_GIT_REPO).")
+    if re.search(r"/productivity-suite(\.git)?/?$", get_config()["repo"]):
+        raise GitPushError(
+            "Deze URL is de repo van de app zelf (productivity-suite). Gebruik een aparte repo, bv. .../snippets.git."
+        )
     if get_config()["token"] and not get_config()["repo"].startswith("https://"):
         raise GitPushError("Met een token moet de repo-URL met https:// beginnen.")
     with _lock:
