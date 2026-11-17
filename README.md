@@ -120,6 +120,8 @@ Gebouwd:
   en de monospace/code-letters Hack/JetBrains Mono/Fira Code/Consolas), **lettergrootte**
   (11–18px) en **compactheid** (comfortabel/compact/extra compact,
   verkleint de ruimte tussen tekst en elementen door de sidebar, tabellen, kaarten en formulieren).
+  Op mobiel (≤768px) toont het takenoverzicht automatisch compact: alleen de tag-banner, de titel
+  (zonder tags/datum) en de Pomodoro-startknop.
   Ook een **achtergrondafbeelding** (Geen/Natuur/Bergen/Heelal, self-hosted foto's, geen
   externe API) met een **sterkte-schuifje** (10–70%) — de sidebar en het hoofdvlak worden dan
   semi-transparant zodat de foto erdoorheen schijnt, terwijl kaarten/tabellen zelf gewoon

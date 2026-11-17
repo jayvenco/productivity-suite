@@ -4637,3 +4637,17 @@ body:has(#task-ticker:not([hidden])) .scratchpad-page { height: calc(100vh - 112
 :root[data-density="xcompact"] .btn { padding: 2px 7px; }
 :root[data-density="xcompact"] p, :root[data-density="xcompact"] ul, :root[data-density="xcompact"] ol { margin-block: 0.4em; }
 :root[data-density="xcompact"] h1, :root[data-density="xcompact"] h2, :root[data-density="xcompact"] h3 { margin-block: 0.4em; }
+
+/* Mobiel: compact takenoverzicht. Alleen de tag-banner, de titel (zonder tags/datum/status) en
+   de Pomodoro-startknop; afvinkrondje, meta en verwijderknop zijn op smalle schermen verborgen
+   (alles blijft bereikbaar via de taak zelf). */
+@media (max-width: 768px) {
+  .task-card .task-check-form,
+  .task-card .task-card-meta,
+  .task-card .task-card-meta-end,
+  .task-card .task-card-delete,
+  .task-card .task-card-actions form { display: none; }
+  .task-card { padding-top: 4px; padding-bottom: 4px; gap: 8px; }
+  .task-card-main-row { flex-wrap: nowrap; }
+  .task-card-title-link { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+}
