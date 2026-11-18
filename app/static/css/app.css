@@ -4651,3 +4651,9 @@ body:has(#task-ticker:not([hidden])) .scratchpad-page { height: calc(100vh - 112
   .task-card-main-row { flex-wrap: nowrap; }
   .task-card-title-link { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 }
+
+/* Kanban: lange woorden en URL's breken af i.p.v. uit de kaart te lopen. */
+.kanban-card { min-width: 0; overflow: hidden; }
+.kanban-card .card-title,
+.kanban-card .card-description,
+.kanban-card .card-description * { overflow-wrap: anywhere; word-break: break-word; min-width: 0; max-width: 100%; }
