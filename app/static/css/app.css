@@ -3847,8 +3847,9 @@ body:has(#task-ticker:not([hidden])) .main {
 
 /* Lintvarianten (strepen a/b): dagtaak = geel-zwart (standaard); prioriteit zonder dagtaak = alleen
    gele strepen (de zwarte vallen weg); dagtaak én prioriteit = rood afgewisseld met geel. */
-.task-card-priority:not(.task-card-daily)::after { --tape-b: transparent; }
-.task-card-priority.task-card-daily::after { --tape-a: #e8212b; --tape-b: #ffdd00; }
+/* Alle linten: alleen gele, onderbroken strepen (geen zwart, geen rood). */
+.task-card-daily::after,
+.task-card-priority::after { --tape-a: #ffdd00; --tape-b: transparent; }
 
 @keyframes daily-tape-move {
   from { background-position-x: 0; }

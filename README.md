@@ -263,11 +263,11 @@ Gebouwd:
 - **Rustige kaarten**: notitie- (en mindmap-)kaarten zijn eenvoudig: geen rand, een zachte
   schaduw, titel links en datum rechts. Taak- en notitiekaarten hebben geen ribbon of gradient meer (zie
   "Tag-streepjes" hieronder); stickies gebruiken dezelfde kaartvorm met hun gekozen kleur als ribbon.
-  **Dagtaken** hebben een geel-zwart **afzetlint** (schuine strepen) dat halverwege de taakbalk
+  **Dagtaken** hebben een geel **afzetlint** (schuine strepen) dat halverwege de taakbalk
   begint, oploopt tot 50% dekking en weer **vervaagt vóór de pomodoro-knop**, en horizontaal
   beweegt (naadloze lus van één tegelbreedte; stilstaand bij `prefers-reduced-motion`).
-  **Lintvarianten**: dagtaak = geel-zwart; **prioriteit zonder dagtaak** = alleen gele strepen (geen
-  zwart); **dagtaak én prioriteit** = rood afgewisseld met geel (de ★ blijft bij prioriteit staan).
+  Alle linten (dagtaak, prioriteit, beide) zijn **alleen gele, onderbroken strepen**: geen zwart en
+  geen rood (de ★ blijft bij prioriteit staan).
   Snippetkaarten krijgen de tag-banner (zie hieronder), geen gradient-rand meer.
 - **Tag-streepjes**: een getagde kaart krijgt twee schuine banen (een lichte en een donkere
   tint, afgeleid van de kleur van de eerste tag via `--tag-hue`). **Taken**: een smalle ribbon
@@ -1132,7 +1132,7 @@ Alternatief: template `unraid/productivity-suite.xml` handmatig in de templates-
     Dupliceren → bewerken: module toevoegen, ↑/↓, Voorbeeld, Opslaan; de eerder gemaakte
     notitie blijft ongewijzigd.
 67. Account → Navigatie: vink "Statistieken" aan → verschijnt in het menu; vink "Stickies" uit →
-    verdwijnt; blijft zo na verversen. Taken: een dagtaak heeft rechts een bewegend geel-zwart afzetlint.
+    verdwijnt; blijft zo na verversen. Taken: een dagtaak heeft rechts een bewegend geel afzetlint.
 68. Druk Alt+I (of klik het +-knopje naast Inbox), typ "Bel de tandarts" + Enter + een tweede regel,
     druk Cmd/Ctrl+Enter → de teller bij Inbox springt op 1. Open Inbox → "→ Taak" → de taak staat onder
     Taken met "Bel de tandarts" als titel en de tweede regel als beschrijving.
