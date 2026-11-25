@@ -128,10 +128,14 @@ def list_tasks(
     # Twee kolommen: dagtaken links, de rest rechts. Binnen elke kolom staan taken (bij
     # group_by=tag, de standaard) automatisch onder elkaar per tag -- onder de eerste tag
     # (alfabetisch) van de taak, zodat een taak met meerdere tags niet dubbel voorkomt.
+    # Afgevinkte taken (die later automatisch naar het archief gaan) staan apart, onderaan de
+    # pagina onder een scheidingslijn, zodat de openstaande taken overzichtelijk blijven.
+    done_tasks = [t for t in tasks if t.status == TaskStatus.DONE]
+    open_tasks = [t for t in tasks if t.status != TaskStatus.DONE]
     columns = []
     for key, title, column_tasks in (
-        ("daily", "Dagtaken", [t for t in tasks if t.daily_task]),
-        ("rest", "Overig", [t for t in tasks if not t.daily_task]),
+        ("daily", "Dagtaken", [t for t in open_tasks if t.daily_task]),
+        ("rest", "Overig", [t for t in open_tasks if not t.daily_task]),
     ):
         groups: list[tuple[str, list[Task]]] | None = None
         if group_by == "tag":
@@ -154,6 +158,7 @@ def list_tasks(
             "user": user,
             "tasks": tasks,
             "columns": columns,
+            "done_tasks": done_tasks,
             "statuses": list(TaskStatus),
             "all_tags": all_tags,
             "active_tags": tags,

@@ -4701,3 +4701,13 @@ ul.rt-checklist > li[data-checked="1"]::before {
 .tag-checkbox {
   background: color-mix(in srgb, var(--bg-hover) 50%, transparent);
 }
+
+/* Afgevinkte taken: apart onderaan de takenpagina, onder een scheidingslijn. */
+.task-done-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 28px 0 10px; color: var(--text-muted);
+  font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.task-done-divider::before, .task-done-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.task-done-divider::before { flex: 0 0 24px; }
+.task-done-list { opacity: 0.85; }

@@ -519,3 +519,15 @@ def test_priority_task_gets_priority_card_class(logged_in_client):
         idx = page.index(title)
         task_id = re.findall(r'href="/tasks/(\d+)/edit"', page[:idx])[-1]
         logged_in_client.post(f"/tasks/{task_id}/delete")
+
+
+def test_done_tasks_are_grouped_below_divider(logged_in_client):
+    logged_in_client.post("/tasks", data={"title": "Nog open XYZ", "description": "", "deadline": "", "tags": ""})
+    logged_in_client.post("/tasks", data={"title": "Klaar ABC", "description": "", "deadline": "", "tags": ""})
+    task_id = _task_id_for_title(logged_in_client.get("/tasks").text, "Klaar ABC")
+    logged_in_client.post(f"/tasks/{task_id}/toggle-done")
+
+    page = logged_in_client.get("/tasks").text
+    assert "task-done-divider" in page
+    divider = page.index("task-done-divider")
+    assert page.index("Nog open XYZ") < divider < page.index("Klaar ABC")

@@ -118,5 +118,12 @@
   </section>
   {% endfor %}
 </div>
+
+{% if done_tasks %}
+<div class="task-done-divider"><span>Afgevinkte taken <span class="task-group-count">({{ done_tasks | length }})</span></span></div>
+<div class="task-card-list task-done-list">
+  {% for task in done_tasks %}{{ task_card(task, sort, group_by, active_tags, active_status) }}{% endfor %}
+</div>
+{% endif %}
 <script src="{{ static_url('js/tasks-list.js') }}"></script>
 {% endblock %}
