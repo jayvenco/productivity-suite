@@ -3,7 +3,7 @@ import re
 
 def _nav_labels(client) -> list[str]:
     html = client.get("/tasks").text
-    sidebar = html[html.index('class="sidebar"'): html.index('class="theme-switcher"')]
+    sidebar = html[html.index('class="sidebar"'): html.index('class="spacer"')]
     return re.findall(r'class="nav-item[^"]*"[^>]*><span class="nav-icon">[^<]*</span>([^<]+)<', sidebar)
 
 

@@ -32,6 +32,18 @@
 </form>
 
 <h2 style="margin-top:28px">Weergave</h2>
+<div class="field">
+  <label>Thema</label>
+  <div class="theme-switcher" style="padding-left:0">
+    {% for theme in available_themes %}
+    <form method="post" action="/settings/theme">
+      <input type="hidden" name="theme" value="{{ theme }}">
+      <input type="hidden" name="redirect_to" value="/account">
+      <button type="submit" class="theme-swatch-{{ theme }}" title="{{ theme }}" {% if user.theme == theme %}style="outline:2px solid var(--accent);outline-offset:2px"{% endif %}></button>
+    </form>
+    {% endfor %}
+  </div>
+</div>
 <form method="post" action="/settings/appearance" style="max-width:360px">
   <input type="hidden" name="redirect_to" value="/account">
   <div class="field">

@@ -252,3 +252,11 @@ def test_extra_compact_density_can_be_selected(logged_in_client):
     )
     assert 'data-density="xcompact"' in logged_in_client.get("/tasks").text
     assert "Extra compact" in logged_in_client.get("/account").text
+
+
+def test_theme_picker_lives_in_settings_not_in_nav(logged_in_client):
+    nav_page = logged_in_client.get("/tasks").text
+    assert "theme-switcher" not in nav_page
+    account = logged_in_client.get("/account").text
+    assert "theme-switcher" in account
+    assert 'name="theme" value="nord"' in account

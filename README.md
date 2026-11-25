@@ -122,6 +122,7 @@ Gebouwd:
   verkleint de ruimte tussen tekst en elementen door de sidebar, tabellen, kaarten en formulieren).
   Afgevinkte taken staan gegroepeerd onderaan de takenpagina onder een scheidingslijn
   "Afgevinkte taken", los van de openstaande taken.
+  De themakleuren staan niet meer in het navigatiemenu maar bij Settings → Weergave → Thema.
   Tags hebben een 50% transparante vulling.
   Geselecteerde/afgevinkte rondjes (selectievakjes, taken, checklists) knipperen lichtgroen.
   Op mobiel (≤768px) toont het takenoverzicht automatisch compact: alleen de tag-banner, de titel

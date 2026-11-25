@@ -18,7 +18,13 @@ from app.auth.security import hash_password, verify_password
 from app.config import settings
 from app.database import Base, engine, get_db
 from app.models.user import User
-from app.routers.settings import AVAILABLE_BACKGROUNDS, AVAILABLE_DENSITIES, AVAILABLE_FONT_SIZES, AVAILABLE_FONTS
+from app.routers.settings import (
+    AVAILABLE_BACKGROUNDS,
+    AVAILABLE_DENSITIES,
+    AVAILABLE_FONT_SIZES,
+    AVAILABLE_FONTS,
+    AVAILABLE_THEMES,
+)
 from app.services import backup as backup_service
 from app.services import snippet_git
 from app.services.api_tokens import generate_api_token, hash_api_token
@@ -50,6 +56,7 @@ def _appearance_context() -> dict:
         "available_fonts": AVAILABLE_FONTS,
         "available_font_sizes": AVAILABLE_FONT_SIZES,
         "available_densities": AVAILABLE_DENSITIES,
+        "available_themes": AVAILABLE_THEMES,
         "available_backgrounds": AVAILABLE_BACKGROUNDS,
         "nav_modules": NAV_MODULES,
     }
