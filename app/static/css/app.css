@@ -4692,3 +4692,12 @@ ul.rt-checklist > li[data-checked="1"]::before {
   .task-check:checked,
   ul.rt-checklist > li[data-checked="1"]::before { animation: none; }
 }
+
+/* Alle tags 50% transparant (vulling; tekst blijft leesbaar). Wint van --tag-alpha uit thema's. */
+.tag[style*="--tag-hue"] {
+  background-color: hsla(var(--tag-hue), 65%, var(--tag-lightness, 42%), 0.5);
+}
+.tag:not([style*="--tag-hue"]),
+.tag-checkbox {
+  background: color-mix(in srgb, var(--bg-hover) 50%, transparent);
+}

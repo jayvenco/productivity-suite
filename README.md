@@ -120,6 +120,7 @@ Gebouwd:
   en de monospace/code-letters Hack/JetBrains Mono/Fira Code/Consolas), **lettergrootte**
   (11–18px) en **compactheid** (comfortabel/compact/extra compact,
   verkleint de ruimte tussen tekst en elementen door de sidebar, tabellen, kaarten en formulieren).
+  Tags hebben een 50% transparante vulling.
   Geselecteerde/afgevinkte rondjes (selectievakjes, taken, checklists) knipperen lichtgroen.
   Op mobiel (≤768px) toont het takenoverzicht automatisch compact: alleen de tag-banner, de titel
   (zonder tags/datum) en de Pomodoro-startknop.
