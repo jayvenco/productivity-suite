@@ -123,6 +123,7 @@ Gebouwd:
   Afgevinkte taken staan gegroepeerd onderaan de takenpagina onder een scheidingslijn
   "Afgevinkte taken", los van de openstaande taken.
   De themakleuren staan niet meer in het navigatiemenu maar bij Settings → Weergave → Thema.
+  Preview-kaarten (notities, mindmaps, snippets) zijn compact: kleine, niet-vette titel en kleinere previewtekst.
   Tags hebben een 50% transparante vulling.
   Geselecteerde/afgevinkte rondjes (selectievakjes, taken, checklists) knipperen lichtgroen.
   Op mobiel (≤768px) toont het takenoverzicht automatisch compact: alleen de tag-banner, de titel
