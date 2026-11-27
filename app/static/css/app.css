@@ -4771,3 +4771,25 @@ ul.rt-checklist > li[data-checked="1"]::before {
 .snippet-card-description { font-size: 11.5px; line-height: 1.35; }
 .snippet-card-tags { gap: 3px; }
 .note-card .tag, .snippet-card .tag { font-size: 10.5px; padding: 0 6px; }
+
+/* Previewtekst in notitie-/mindmapkaarten: ook koppen, lijsten en opgemaakte tekst in de rich-text
+   zijn klein en niet vet; titels in de overzichten (raster en lijst) nog kleiner. */
+.note-card-preview h1, .note-card-preview h2, .note-card-preview h3,
+.note-card-preview h4, .note-card-preview h5, .note-card-preview h6 {
+  font-size: 11.5px; font-weight: 600; margin: 0 0 2px; line-height: 1.35;
+}
+.note-card-preview p, .note-card-preview li, .note-card-preview td, .note-card-preview th,
+.note-card-preview blockquote, .note-card-preview pre, .note-card-preview code {
+  font-size: 11.5px; line-height: 1.35;
+}
+.note-card-preview ul, .note-card-preview ol { margin: 0 0 2px; padding-left: 16px; }
+.note-card-preview p { margin: 0 0 2px; }
+.note-card .note-card-title,
+.notes-grid.view-list .note-card-title,
+.snippet-card .snippet-card-title-text { font-size: 12px; font-weight: 500; }
+.notes-grid.view-list .note-card { padding: 5px 10px; gap: 8px; }
+
+/* Tag-ribbon op notitie-, mindmap- en snippetkaarten: 50% smaller (8px -> 4px). */
+.note-card[style*="--tag-hue"]::after,
+.snippet-card[style*="--tag-hue"]::after { width: 4px; }
+.note-card[style*="--tag-hue"] .note-card-header { padding-right: 8px; }

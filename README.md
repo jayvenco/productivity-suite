@@ -273,7 +273,7 @@ Gebouwd:
   Snippetkaarten krijgen de tag-banner (zie hieronder), geen gradient-rand meer.
 - **Tag-ribbon**: een getagde kaart krijgt één **verticaal blok** in de kleur van de eerste tag
   (`--tag-hue`). **Taken**: een smal blok (8px, over de volle hoogte) **tussen het afvinkrondje en
-  de tekst** (flex-item `::before`); **notitie-, mindmap- en snippetkaarten**: een blok langs de
+  de tekst** (flex-item `::before`); **notitie-, mindmap- en snippetkaarten**: een smal blok (4px) langs de
   rechterrand. Bij **hover** op de kaart krijgt het blok een **gloed** in dezelfde kleur (zonder
   animatie bij `prefers-reduced-motion`). Pure CSS, zonder extra markup.
 - **Snippets: weergave en groeperen**: een **Raster/Lijst**-schakelaar (onthouden in `localStorage`;
