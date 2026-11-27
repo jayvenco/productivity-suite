@@ -270,17 +270,11 @@ Gebouwd:
   Alle linten (dagtaak, prioriteit, beide) zijn **alleen gele, onderbroken strepen**: geen zwart en
   geen rood (de ★ blijft bij prioriteit staan).
   Snippetkaarten krijgen de tag-banner (zie hieronder), geen gradient-rand meer.
-- **Tag-streepjes**: een getagde kaart krijgt twee schuine banen (een lichte en een donkere
-  tint, afgeleid van de kleur van de eerste tag via `--tag-hue`). **Taken**: een smalle ribbon
-  (50px, over de volle hoogte) **tussen het afvinkrondje en de tekst** (flex-item `::before`, de
-  tekst begint dus ná de ribbon). **Notities** een kleine banner (32×23px) rechtsboven met een
-  dekking die van onder (weinig) naar boven (volledig) loopt; **mindmap- en snippetkaarten** dezelfde
-  banner in de onderste hoek rechts. Pure CSS, zonder extra markup.
-  Bij **hover** op een getagde taak-, notitie-, mindmap- of snippetkaart wisselen de lichte en de donkere baan vloeiend van
-  plek (twee gradient-lagen met geregistreerde `@property`-startposities `--stripe-light`/
-  `--stripe-dark` die transitionen; uit bij `prefers-reduced-motion`). Het kleurverschil tussen
-  de lichte en de donkere baan is groot en de kleuren zijn fel (L 76% vs 46%, verzadiging 95-100%),
-  met een lichte `drop-shadow` onder de banen.
+- **Tag-ribbon**: een getagde kaart krijgt één **verticaal blok** in de kleur van de eerste tag
+  (`--tag-hue`). **Taken**: een smal blok (8px, over de volle hoogte) **tussen het afvinkrondje en
+  de tekst** (flex-item `::before`); **notitie-, mindmap- en snippetkaarten**: een blok langs de
+  rechterrand. Bij **hover** op de kaart krijgt het blok een **gloed** in dezelfde kleur (zonder
+  animatie bij `prefers-reduced-motion`). Pure CSS, zonder extra markup.
 - **Snippets: weergave en groeperen**: een **Raster/Lijst**-schakelaar (onthouden in `localStorage`;
   lijst = compacte rijen zonder codepreview) en **Groeperen op: Tag** (`?group_by=tag`, onder de
   eerste tag alfabetisch, "Zonder tag" onderaan, blijft bewaard bij bulk-verwijderen). In de

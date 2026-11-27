@@ -4712,3 +4712,46 @@ ul.rt-checklist > li[data-checked="1"]::before {
 .task-done-divider::before, .task-done-divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 .task-done-divider::before { flex: 0 0 24px; }
 .task-done-list { opacity: 0.85; }
+
+/* Tag-ribbon = één verticaal blok in de tagkleur (i.p.v. twee schuine banen). Bij hover op de
+   kaart krijgt het blok een gloed in dezelfde kleur. Taak: tussen afvinkrondje en tekst; notitie,
+   mindmap en snippet: langs de rechterrand. Wint van de eerdere schuine-baan-regels. */
+.task-card[style*="--tag-hue"]::before,
+.note-card[style*="--tag-hue"]::after,
+.snippet-card[style*="--tag-hue"]::after {
+  background: hsl(var(--tag-hue), 80%, 55%);
+  -webkit-mask-image: none;
+  mask-image: none;
+  filter: none;
+  border-radius: 4px;
+  box-shadow: 0 0 0 0 hsla(var(--tag-hue), 100%, 60%, 0);
+  transition: box-shadow 0.25s ease, filter 0.25s ease;
+}
+
+.task-card[style*="--tag-hue"]::before {
+  flex: 0 0 8px;
+  margin: -6px 2px;
+}
+
+.note-card[style*="--tag-hue"]::after,
+.snippet-card[style*="--tag-hue"]::after {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  height: auto;
+  border-radius: 0;
+}
+
+.task-card[style*="--tag-hue"]:hover::before,
+.note-card[style*="--tag-hue"]:hover::after,
+.snippet-card[style*="--tag-hue"]:hover::after {
+  box-shadow: 0 0 10px 3px hsla(var(--tag-hue), 100%, 60%, 0.85), 0 0 22px 6px hsla(var(--tag-hue), 100%, 60%, 0.45);
+  filter: brightness(1.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-card[style*="--tag-hue"]::before,
+  .note-card[style*="--tag-hue"]::after,
+  .snippet-card[style*="--tag-hue"]::after { transition: none; }
+}
